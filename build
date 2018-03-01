@@ -8,4 +8,4 @@ BUILDROOT="$HERE/../BUILDROOT"
 sudo yum install --assumeyes rpm-build
 sudo yum-builddep --assumeyes SPECS/*.spec
 mkdir --parents "$BUILDROOT"
-rpmbuild --define "_topdir $ESCAPED_HERE" --buildroot="$BUILDROOT" -ba SPECS/*.spec
+rpmbuild --define "_topdir $ESCAPED_HERE" --buildroot="$BUILDROOT" -ba SPECS/sprout.spec

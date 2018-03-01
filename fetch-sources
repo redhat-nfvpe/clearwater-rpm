@@ -9,11 +9,16 @@ function fetch()
 	local VERSION=$2
 	local ARCHIVE="$HERE/SOURCES/$NAME.tar.gz"
 	if [ ! -f "$ARCHIVE" ]; then
-		wget -O "$ARCHIVE" "https://github.com/Metaswitch/$NAME/archive/$VERSION.tar.gz"
+		curl --location --output "$ARCHIVE" "https://github.com/Metaswitch/$NAME/archive/$VERSION.tar.gz"
 	fi
 }
 
-fetch ellis release-129
+# Note: The tagged releases rely on specific commits of its dependencies. Trying to build
+# with the tagged releases of those dependencies will fail.
+
+fetch clearwater-build-infra be86c77a06d72a4d7aa29c0db2b52bcf8cb0cc57
 fetch python-common 50ceb3e3ec34d677f2e1a2179ca647e7586baea0
 fetch cpp-common d6b2b3a29fdf9154cd5ae45a3e4549ad5a4de1c9
-fetch clearwater-build-infra be86c77a06d72a4d7aa29c0db2b52bcf8cb0cc57
+ 
+fetch ellis release-129
+fetch sprout release-129

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# See: https://blog.packagecloud.io/eng/2015/05/11/building-rpm-packages-with-mock/
+
 HERE=$(dirname "$(readlink -f "$0")")
 ESCAPED_HERE=$(printf %q "$HERE")
 
