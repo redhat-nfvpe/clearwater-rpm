@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+HERE=$(dirname "$(readlink -f "$0")")
+ESCAPED_HERE=$(printf %q "$HERE")
+
+sudo dnf install --assumeyes mock dnf-utils rpm-build
+rpmbuild --define "_topdir $ESCAPED_HERE" -bs SPECS/*.spec
+mock -r epel-7-x86_64 rebuild SRPMS/* --resultdir=RPMS/
