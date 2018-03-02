@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+SPEC=${1:-*}
+
+HERE=$(dirname "$(readlink -f "$0")")
+TOPDIR="$HERE/.."
+ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
+
+sudo yum install --assumeyes rpm-build epel-release
+sudo yum-builddep --assumeyes "$TOPDIR/SPECS/"$SPEC.spec
+
+# Note: Only the SPECS, RPMS, and SRPMS folders are shared with the host machine. That's on purpose:
+# the build process makes heavy use of BUILD and BUILDROOT, and it really hurts performances to have
+# them shared.  
+
+rpmbuild --define "_topdir $ESCAPED_TOPDIR" -ba "$TOPDIR/SPECS/"$SPEC.spec \
+	2>&1 | tee "$HERE/build.log"

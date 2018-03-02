@@ -1,43 +1,44 @@
-Name:          sprout
+Name:          clearwater-sprout
 Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
-BuildRequires: git, rsync, make, cmake, libtool, gcc-c++, byacc, flex, rubygems
+BuildRequires: git, rsync, make, cmake, libtool, gcc-c++, bison, flex, rubygems
 BuildRequires: libevent-devel, boost-devel, boost-static, ncurses-devel, c-ares-devel
-BuildRequires: net-snmp-devel
-BuildRequires: epel-release, zeromq-devel
+BuildRequires: net-snmp-devel, zeromq-devel
+
+# Note: zeromq-devel requires epel-release
 
 Summary: Clearwater - Sprout
 
-%package scscf
+%package plugin-scscf
 Summary: Clearwater - Sprout S-CSCF Plugin
 
-%package icscf
+%package plugin-icscf
 Summary: Clearwater - Sprout I-CSCF Plugin
 
-%package bgcf
+%package plugin-bgcf
 Summary: Clearwater - Sprout BGCF Plugin
 
-%package mmtel-as
+%package as-plugin-mmtel
 Summary: Clearwater - Sprout MMTEL Application Server Plugin
 
-%package gemini-as
+%package as-plugin-gemini
 Summary: Clearwater - Sprout Gemini Application Server Plugin
 
-%package memento-as
+%package as-plugin-memento
 Summary: Clearwater - Sprout Memento Application Server Plugin
 
-%package call-diversion-as
+%package as-plugin-call-diversion
 Summary: Clearwater - Sprout Call Diversion Application Server Plugin
 
-%package mangelwurzel-as
+%package as-plugin-mangelwurzel
 Summary: Clearwater - Sprout Mangelwurzel Application Server Plugin
 
-%package -n bono
+%package -n clearwater-bono
 Summary: Clearwater - Bono 
 
-%package -n restund
+%package -n clearwater-restund
 Summary: Clearwater - restund
 
 %package -n clearwater-sipp
@@ -55,34 +56,34 @@ Summary: Clearwater - SIP Performance Tests
 %description
 SIP router
 
-%description scscf
+%description plugin-scscf
 SIP router S-CSCF plugin
 
-%description icscf
+%description plugin-icscf
 SIP router I-CSCF plugin
 
-%description bgcf
+%description plugin-bgcf
 SIP router BGCF plugin
 
-%description mmtel-as
+%description as-plugin-mmtel
 SIP router MMTEL application server plugin
 
-%description gemini-as
+%description as-plugin-gemini
 Mobile twinning application server plugin
 
-%description memento-as
+%description as-plugin-memento
 Call list application server plugin
 
-%description call-diversion-as
+%description as-plugin-call-diversion
 Call diversion application server plugin
 
-%description mangelwurzel-as
+%description as-plugin-mangelwurzel
 B2BUA and SCC-AS emulator application server plugin
 
-%description -n bono
+%description -n clearwater-bono
 SIP edge proxy
 
-%description -n restund
+%description -n clearwater-restund
 STUN/TURN server
 
 %description -n clearwater-sipp
@@ -100,14 +101,14 @@ Runs SIP performance tests against Clearwater
 %prep
 if [ ! -d sprout ]; then
   git config --global url."https://github.com/".insteadOf git@github.com:
-  git clone --recursive --branch release-%{version} git@github.com:Metaswitch/sprout.git
+  git clone --depth 1 --recursive --branch release-%{version} git@github.com:Metaswitch/sprout.git
 fi
 
 %install
 cd %{_builddir}/sprout
 
 # Note: the modules must be built in order, so unfortunately we can't use --jobs/-J
-#make
+make
 
 # See: debian/sprout-base.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
@@ -190,6 +191,30 @@ rsync scripts/sipp-stats/clearwater-sipp-stats-*.gem %{buildroot}/usr/share/clea
 # See: debian/clearwater-sip-perf.install
 rsync --recursive clearwater-sip-perf.root/* %{buildroot}/
 
+%files plugin-scscf
+# See: debian/scsf-bgcf.links
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/validate_shared_ifcs_xml /usr/bin/cw-validate_shared_ifcs_xml
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/validate_fallback_ifcs_xml /usr/bin/cw-validate_fallback_ifcs_xml
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/display_shared_ifcs /usr/bin/cw-display_shared_ifcs
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/display_fallback_ifcs /usr/bin/cw-display_fallback_ifcs
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/remove_shared_ifcs_xml /usr/sbin/cw-remove_shared_ifcs_xml
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/remove_fallback_ifcs_xml /usr/sbin/cw-remove_fallback_ifcs_xml
+
+%preun plugin-scscf
+rm --force /usr/bin/cw-validate_shared_ifcs_xml
+rm --force /usr/bin/cw-validate_fallback_ifcs_xml
+rm --force /usr/bin/cw-display_shared_ifcs
+rm --force /usr/bin/cw-display_fallback_ifcs
+rm --force /usr/sbin/cw-remove_shared_ifcs_xml
+rm --force /usr/sbin/cw-remove_fallback_ifcs_xml
+
+%post plugin-bgcf
+# See: debian/sprout-bgcf.links
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_bgcf_json /usr/bin/cw-upload_bgcf_json
+
+%preun plugin-bgcf
+rm --force /usr/bin/cw-upload_bgcf_json
+
 %files
 /usr/share/clearwater/bin/sprout
 /etc/clearwater/logging/sprout
@@ -223,7 +248,7 @@ rsync --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/clearwater-config-access/plugins/enum_json_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/rph_json_config_plugin.py*
 
-%files scscf
+%files plugin-scscf
 /usr/share/clearwater/sprout/plugins/sprout_scscf.so
 /usr/share/clearwater/clearwater-config-manager/plugins/shared_ifcs_xml_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/fallback_ifcs_xml_plugin.py*
@@ -237,10 +262,10 @@ rsync --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/clearwater-config-access/plugins/shared_ifcs_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/fallback_ifcs_config_plugin.py*
 
-%files icscf
+%files plugin-icscf
 /usr/share/clearwater/sprout/plugins/sprout_icscf.so
 
-%files bgcf
+%files plugin-bgcf
 /usr/share/clearwater/sprout/plugins/sprout_bgcf.so
 /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/bgcf_schema.json
 /usr/share/clearwater/clearwater-config-manager/scripts/print-bgcf-configuration
@@ -248,24 +273,24 @@ rsync --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_bgcf_json_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/bgcf_json_config_plugin.py*
 
-%files mmtel-as
+%files as-plugin-mmtel
 /usr/share/clearwater/sprout/plugins/sprout_mmtel_as.so
 /usr/share/clearwater/clearwater-diags-monitor/scripts/sprout_mmtel_as_diags
 
-%files gemini-as
+%files as-plugin-gemini
 /usr/share/clearwater/sprout/plugins/gemini-as.so
 
-%files memento-as
+%files as-plugin-memento
 /usr/share/clearwater/sprout/plugins/memento-as.so
 /usr/share/clearwater/infrastructure/alarms/memento_as_alarms.json
 
-%files call-diversion-as
+%files as-plugin-call-diversion
 /usr/share/clearwater/sprout/plugins/call-diversion-as.so
 
-%files mangelwurzel-as
+%files as-plugin-mangelwurzel
 /usr/share/clearwater/sprout/plugins/mangelwurzel-as.so
 
-%files -n bono
+%files -n clearwater-bono
 /usr/share/clearwater/bin/bono
 /etc/clearwater/logging/bono
 /etc/security/limits.conf.bono
@@ -276,7 +301,7 @@ rsync --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/node_type.d/20_bono
 /etc/cron.hourly/bono-log-cleanup
 
-%files -n restund
+%files -n clearwater-restund
 /usr/share/clearwater/bin/restund
 /usr/share/clearwater/restund/lib/
 /etc/security/limits.conf.restund

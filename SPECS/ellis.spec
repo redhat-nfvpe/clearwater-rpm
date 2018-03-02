@@ -1,4 +1,4 @@
-Name:          ellis
+Name:          clearwater-ellis
 Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
@@ -21,7 +21,7 @@ provisioning tools
 %prep
 if [ ! -d ellis ]; then
   git config --global url."https://github.com/".insteadOf git@github.com:
-  git clone --recursive --branch release-%{version} git@github.com:Metaswitch/ellis.git
+  git clone --depth 1 --recursive --branch release-%{version} git@github.com:Metaswitch/ellis.git
 fi
 
 %install
@@ -78,11 +78,11 @@ ln --symbolic /usr/share/clearwater/bin/update_user /usr/bin/cw-update_user
 ln --symbolic /usr/share/clearwater/bin/list_users /usr/bin/cw-list_users
 
 %preun -n clearwater-prov-tools
-rm /usr/bin/cw-create_user
-rm /usr/bin/cw-delete_user
-rm /usr/bin/cw-display_user
-rm /usr/bin/cw-update_user
-rm /usr/bin/cw-list_users
+rm --force /usr/bin/cw-create_user
+rm --force /usr/bin/cw-delete_user
+rm --force /usr/bin/cw-display_user
+rm --force /usr/bin/cw-update_user
+rm --force /usr/bin/cw-list_users
 
 %files
 /etc/cron.hourly/ellis-log-cleanup

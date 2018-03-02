@@ -14,7 +14,10 @@ this requirement:
 
 1. Install CentOS yourself.
 2. Use our included [Vagrant](https://www.vagrantup.com/) configuration to quickly bring up a CentOS
-   virtual machine. Just change to this directory and run `vagrant up`, and then `vagrant ssh` to login.
+   virtual machine. Just change to the `vagrant` directory and run `vagrant up`, and then `vagrant ssh` to
+   login. The build script is in the `build` directory within the virtual machine. Note that you will
+   need the VirtualBox Guest Additions. Install them automatically via a plugin:
+   `vagrant plugin install vagrant-vbguest`.
 3. On any Linux, use [mock](https://github.com/rpm-software-management/mock) to emulate CentOS in a
    chroot environment. For this, use `build-via-mock` instead of `build`.
 
@@ -24,3 +27,5 @@ release tag, installing the build dependencies, building the code, and finally p
 into RPMs.
 
 When finished (phew!) your RPMs will be available under `RPMS/x86_64`.
+
+You can also build individual specs by providing the name as an argument, for example: `build sprout`.

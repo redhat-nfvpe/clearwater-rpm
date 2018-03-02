@@ -4,8 +4,11 @@ set -e
 # See: https://blog.packagecloud.io/eng/2015/05/11/building-rpm-packages-with-mock/
 
 HERE=$(dirname "$(readlink -f "$0")")
-ESCAPED_HERE=$(printf %q "$HERE")
+ESCAPED_TOPDIR=$(printf %q "$HERE")
 
 sudo dnf install --assumeyes mock dnf-utils rpm-build
-rpmbuild --define "_topdir $ESCAPED_HERE" -bs SPECS/*.spec
-mock -r epel-7-x86_64 rebuild SRPMS/* --resultdir=RPMS/
+
+rpmbuild --define "_topdir $ESCAPED_TOPDIR" -bs SPECS/*.spec
+
+mock -r epel-7-x86_64 rebuild SRPMS/* --resultdir=RPMS/ \
+	2>&1 | tee "$HERE/build.log"

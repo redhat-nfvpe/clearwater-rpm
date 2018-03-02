@@ -1,11 +1,13 @@
 #!/bin/bash
 set -e
 
-HERE=$(dirname "$(readlink -f "$0")")
-ESCAPED_HERE=$(printf %q "$HERE")
-BUILDROOT="$HERE/../BUILDROOT"
+SPEC=${1:-*}
 
-sudo yum install --assumeyes rpm-build
+HERE=$(dirname "$(readlink -f "$0")")
+ESCAPED_TOPDIR=$(printf %q "$HERE")
+
+sudo yum install --assumeyes rpm-build epel-release
 sudo yum-builddep --assumeyes SPECS/*.spec
-mkdir --parents "$BUILDROOT"
-rpmbuild --define "_topdir $ESCAPED_HERE" --buildroot="$BUILDROOT" -ba SPECS/sprout.spec
+
+rpmbuild --define "_topdir $ESCAPED_TOPDIR" -ba SPECS/$SPEC.spec \
+	2>&1 | tee "$HERE/build.log"
