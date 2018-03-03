@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+
+VERSION=129
+WORK=/tmp/clearwater-rpm
+
+HERE=$(dirname "$(readlink -f "$0")")
+
+function fetch()
+{
+	local NAME=$1
+	local REPO_NAME=${2:-$NAME}
+	local ARCHIVE="$HERE/SOURCES/$NAME-$VERSION.tar.bz2"
+	if [ ! -f  "$ARCHIVE" ]; then
+		local REPO="$NAME-$VERSION"
+		if [ ! -d "$REPO" ]; then
+			mkdir --parents "$WORK"
+			git config --global 'url.https://github.com/.insteadOf' 'git@github.com:'
+			git clone --depth 1 --recursive --branch "release-$VERSION" "git@github.com:Metaswitch/$REPO_NAME.git" "$WORK/$REPO"
+			git config --global --unset 'url.https://github.com/.insteadOf'
+		fi
+		mkdir --parents "$HERE/SOURCES"
+		tar --create --bzip2 --file="$ARCHIVE" --directory="$WORK" "$REPO"
+		rm --recursive "$WORK" 
+	fi
+}
+
+fetch clearwater-infrastructure
+fetch clearwater-logging
+fetch clearwater-crest crest
+fetch clearwater-ellis ellis
+fetch clearwater-homestead homestead
+fetch clearwater-ralf ralf
+fetch clearwater-sprout sprout

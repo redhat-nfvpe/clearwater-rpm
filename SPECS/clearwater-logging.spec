@@ -3,7 +3,10 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/clearwater-logging
-BuildRequires: git, rsync
+BuildRequires: rsync
+Source0:       %{name}-%{version}.tar.bz2
+
+%global debug_package %{nil}
 
 Summary: Clearwater - Logging
 
@@ -11,16 +14,14 @@ Summary: Clearwater - Logging
 Common logging infrastructure
 
 %prep
-if [ ! -d clearwater-logging ]; then
-  git config --global url."https://github.com/".insteadOf git@github.com:
-  git clone --depth 1 --recursive --branch release-%{version} git@github.com:Metaswitch/clearwater-logging.git
-fi
+%setup
 
 %install
-cd %{_builddir}/clearwater-logging
-
 # See: debian/clearwater-logging.install
 rsync --recursive clearwater-logging/* %{buildroot}/
 
 %files
-/
+/opt/
+/usr/
+%config /etc/nagios3/clearwater/commands.cfg
+%config /etc/nagios3/clearwater/nagios.cfg

@@ -4,8 +4,11 @@ Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/ellis
 Requires:      python-virtualenv
-BuildRequires: git, rsync, make, python-virtualenv, gcc-c++
+BuildRequires: rsync, make, python-virtualenv, gcc-c++
 BuildRequires: python-devel, mysql-devel, curl-devel, libffi-devel
+Source0:       %{name}-%{version}.tar.bz2
+
+%global debug_package %{nil}
 
 Summary: Clearwater - Ellis
 
@@ -19,21 +22,12 @@ user/number management interface
 provisioning tools
 
 %prep
-if [ ! -d ellis ]; then
-  git config --global url."https://github.com/".insteadOf git@github.com:
-  git clone --depth 1 --recursive --branch release-%{version} git@github.com:Metaswitch/ellis.git
-fi
+%setup
 
-%install
-cd %{_builddir}/ellis
-
-# The build for some reason requires us to be in a git repository 
-if [ ! -d .git ]; then
-  git init
-fi
-
+%build
 make env
 
+%install
 # See: debian/ellis.install
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
@@ -92,16 +86,60 @@ rm --force /usr/bin/cw-list_users
 /usr/share/clearwater/infrastructure/scripts/restart/ellis_restart
 /usr/share/clearwater/infrastructure/scripts/create-ellis-nginx-config
 /usr/share/clearwater/node_type.d/20_ellis
-/usr/share/clearwater/ellis/
+/usr/share/clearwater/ellis/.wheelhouse
+/usr/share/clearwater/ellis/apply_db_updates.sql
+/usr/share/clearwater/ellis/backup/do_backup.sh
+/usr/share/clearwater/ellis/backup/list_backups.sh
+/usr/share/clearwater/ellis/backup/restore_backup.sh
+/usr/share/clearwater/ellis/ellis.monit
+/usr/share/clearwater/ellis/mysql.monit
+/usr/share/clearwater/ellis/schema.sql
+/usr/share/clearwater/ellis/src/metaswitch/ellis/tools/
+/usr/share/clearwater/ellis/web-content/addressbook.html
+/usr/share/clearwater/ellis/web-content/blank.html
+/usr/share/clearwater/ellis/web-content/forgotpassword.html
+/usr/share/clearwater/ellis/web-content/index.html
+/usr/share/clearwater/ellis/web-content/login.html
+/usr/share/clearwater/ellis/web-content/resetpassword.html
+/usr/share/clearwater/ellis/web-content/signup.html
+/usr/share/clearwater/ellis/web-content/css/
+/usr/share/clearwater/ellis/web-content/img/
+/usr/share/clearwater/ellis/web-content/js/addressbook.js
+/usr/share/clearwater/ellis/web-content/js/app.js
+/usr/share/clearwater/ellis/web-content/js/backbone-min.js
+/usr/share/clearwater/ellis/web-content/js/backbone.js
+/usr/share/clearwater/ellis/web-content/js/bootstrap.js
+/usr/share/clearwater/ellis/web-content/js/bootstrap.min.js
+/usr/share/clearwater/ellis/web-content/js/common.js
+/usr/share/clearwater/ellis/web-content/js/fileuploader.js
+/usr/share/clearwater/ellis/web-content/js/forgotpassword.js
+/usr/share/clearwater/ellis/web-content/js/jquery.ba-bbq.min.js
+/usr/share/clearwater/ellis/web-content/js/jquery.cookie.js
+/usr/share/clearwater/ellis/web-content/js/jquery.js
+/usr/share/clearwater/ellis/web-content/js/jquery.miniColors.js
+/usr/share/clearwater/ellis/web-content/js/jquery.miniColors.min.js
+/usr/share/clearwater/ellis/web-content/js/jquery.total-storage.js
+/usr/share/clearwater/ellis/web-content/js/jquery.total-storage.min.js
+/usr/share/clearwater/ellis/web-content/js/jquery.validate.js
+/usr/share/clearwater/ellis/web-content/js/jquery.validate.min.js
+/usr/share/clearwater/ellis/web-content/js/json2005.js
+/usr/share/clearwater/ellis/web-content/js/loggedout.js
+/usr/share/clearwater/ellis/web-content/js/login.js
+/usr/share/clearwater/ellis/web-content/js/pwstrength.js
+/usr/share/clearwater/ellis/web-content/js/resetpassword.js
+/usr/share/clearwater/ellis/web-content/js/signup.js
+/usr/share/clearwater/ellis/web-content/js/templates/addressbook-contacts.html
+/usr/share/clearwater/ellis/web-content/js/underscore-min.js
+/usr/share/clearwater/ellis/web-content/js/underscore.js
+/usr/share/clearwater/ellis/web-content/js/zxcvbn-async.js
+/usr/share/clearwater/ellis/web-content/js/zxcvbn.js
 /usr/share/clearwater/clearwater-diags-monitor/scripts/ellis_diags
+%config /usr/share/clearwater/ellis/local_settings.py
+%config /usr/share/clearwater/ellis/local_settings.pyo
+%config /usr/share/clearwater/ellis/local_settings.pyc
+%config /usr/share/clearwater/ellis/web-content/js/app-servers.json
 %ghost /usr/share/clearwater/ellis/env/
 %ghost /var/log/ellis/
-
-# TODO: These config files should be in /etc!
-#%config /usr/share/clearwater/ellis/local_settings.py
-#%config /usr/share/clearwater/ellis/local_settings.pyo
-#%config /usr/share/clearwater/ellis/local_settings.pyc
-#%config /usr/share/clearwater/ellis/web-content/js/app-servers.json
 
 %files -n clearwater-prov-tools
 /usr/share/clearwater/bin/update_user

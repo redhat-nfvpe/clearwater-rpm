@@ -3,7 +3,10 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/homestead
-BuildRequires: git, rsync, make, gcc-c++
+BuildRequires: rsync, make, gcc-c++
+Source0:       %{name}-%{version}.tar.bz2
+
+%global debug_package %{nil}
 
 Summary: Clearwater - Homestead
 
@@ -17,17 +20,13 @@ HSS cache/gateway
 Commission Cassandra for Homestead
 
 %prep
-if [ ! -d homestead ]; then
-  git config --global url."https://github.com/".insteadOf git@github.com:
-  git clone --depth 1 --recursive --branch release-%{version} git@github.com:Metaswitch/homestead.git
-fi
+%setup
 
-%install
-cd %{_builddir}/homestead
-
+%build
 # Note: the modules must be built in order, so unfortunately we can't use --jobs/-J
 make
 
+%install
 # See: debian/homestead.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 rsync build/bin/homestead %{buildroot}/usr/share/clearwater/bin/
@@ -38,11 +37,9 @@ rsync --recursive homestead-cassandra.root/* %{buildroot}/
 
 %files
 /usr/share/clearwater/bin/homestead
-/etc/cron.hourly/homestead-log-cleanup
-/etc/security/limits.conf.homestead
 /usr/share/clearwater/bin/check_cx_health
 /usr/share/clearwater/bin/check_cx_health.py*
-/usr/share/clearwater/bin/poll_homestead
+/usr/share/clearwater/bin/poll_homestead.sh
 /usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_diags
 /usr/share/clearwater/infrastructure/alarms/homestead_alarms.json
 /usr/share/clearwater/infrastructure/monit_stability/homestead-stability
@@ -51,7 +48,9 @@ rsync --recursive homestead-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/create-homestead-nginx-config
 /usr/share/clearwater/infrastructure/scripts/homestead
 /usr/share/clearwater/infrastructure/scripts/homestead.monit
-/usr/share/clearwater/infrastructure/node_type.d/20_homestead
+/usr/share/clearwater/node_type.d/20_homestead
+%config /etc/cron.hourly/homestead-log-cleanup
+%config /etc/security/limits.conf.homestead
 
 %files cassandra
 /usr/share/clearwater/cassandra-schemas/homestead_cache.sh

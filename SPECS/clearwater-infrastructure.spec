@@ -3,7 +3,10 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https:/github.com/Metaswitch/clearwater-infrastructure
-BuildRequires: git, rsync, make, python-virtualenv
+BuildRequires: rsync, make, python-virtualenv
+Source0:       %{name}-%{version}.tar.bz2
+
+%global debug_package %{nil}
 
 Summary: Clearwater - Infrastructure
 
@@ -43,10 +46,10 @@ Summary: Clearwater - Auto-upgrade
 %package -n clearwater-radius-auth
 Summary: Clearwater - RADIUS Authentication
 
-%package -n vellum
+%package -n clearwater-vellum
 Summary: Clearwater - Vellum
 
-%package -n dime
+%package -n clearwater-dime
 Summary: Clearwater - Dime
 
 %description
@@ -88,24 +91,20 @@ Automatic upgrade
 %description -n clearwater-radius-auth
 RADIUS authentication
 
-%description -n vellum
+%description -n clearwater-vellum
 Storage node
 
-%description -n dime
+%description -n clearwater-dime
 HTTP-to-Rf/Cx gateway node
 
 %prep
-if [ ! -d clearwater-infrastructure ]; then
-  git config --global url."https:/github.com/".insteadOf git@github.com:
-  git clone --depth 1 --recursive --branch release-%{version} git@github.com:Metaswitch/clearwater-infrastructure.git
-fi
+%setup
 
-%install
-cd %{_builddir}/clearwater-infrastructure
-
+%build
 # Note: the modules must be built in order, so unfortunately we can't use --jobs/-J
 make
 
+%install
 # See: debian/clearwater-infrastructure.install
 mkdir --parents %{buildroot}/etc/
 mkdir --parents %{buildroot}/usr/
@@ -219,18 +218,17 @@ rsync --recursive dime/* %{buildroot}/
 /usr/share/clearwater/utils/logging.bash
 /usr/share/clearwater/utils/check-root-permissions
 /usr/share/clearwater/utils/init-utils.bash
-/etc/dnsmasq.d/dnsmasq.clearwater.conf
-/etc/monit/run_logged
-/etc/monit/conf.d/node.monit
 /usr/share/clearwater/infrastructure/eggs/
 /usr/share/clearwater/bin/bracket-ipv6-address
 /usr/share/clearwater/bin/ipv6-to-hostname
 /usr/share/clearwater/bin/is-address-ipv6
 /usr/share/clearwater/bin/issue-alarm
 /usr/share/clearwater/infrastructure/wheelhouse/
+%config /etc/dnsmasq.d/dnsmasq.clearwater.conf
+%config /etc/monit/run_logged
+%config /etc/monit/conf.d/node.monit
 
 %files -n clearwater-memcached
-/etc/clearwater/secure-connections/memcached.conf
 /usr/share/clearwater/bin/poll_memcached.sh
 /usr/share/clearwater/bin/reload_memcached_users
 /usr/share/clearwater/infrastructure/alarms/memcached_alarms.json
@@ -242,31 +240,27 @@ rsync --recursive dime/* %{buildroot}/
 /usr/share/clearwater/node_type.d/90_memcached
 /usr/share/clearwater/clearwater-cluster-manager/plugins/memcached_plugin.py*
 /usr/share/clearwater/clearwater-cluster-manager/plugins/memcached_utils.py*
+%config /etc/clearwater/secure-connections/memcached.conf
 
 %files -n clearwater-tcp-scalability
-/etc/sysctl.conf.clearwater
 /usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.postinst
 /usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.prerm
+%config /etc/sysctl.conf.clearwater
 
 %files -n clearwater-secure-connections
-/etc/clearwater/secure-connections/plain-local.conf
-/etc/racoon/racoon.conf.clearwater-secure-connections
 /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.postinst
 /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.prerm
+%config /etc/clearwater/secure-connections/plain-local.conf
+%config /etc/racoon/racoon.conf.clearwater-secure-connections
 
 %files -n clearwater-snmpd
-/etc/snmp/snmpd.conf.clearwater-snmpd
 /usr/share/clearwater/conf/snmpd.monit
 /usr/share/clearwater/infrastructure/install/clearwater-snmpd.postinst
 /usr/share/clearwater/infrastructure/install/clearwater-snmpd.prerm
 /usr/share/clearwater/infrastructure/scripts/snmpd
+%config /etc/snmp/snmpd.conf.clearwater-snmpd
 
 %files -n clearwater-diags-monitor
-/etc/clearwater/diags-monitor/core_pattern
-/etc/cron.d/clearwater-iotop
-/etc/cron.d/clearwater-sysstat
-/etc/logrotate.d/clearwater-diags-monitor
-/etc/logrotate.d/clearwater-iotop
 /usr/share/clearwater/bin/clearwater_diags_monitor
 /usr/share/clearwater/bin/compress_core_file
 /usr/share/clearwater/bin/gather_diags
@@ -274,35 +268,40 @@ rsync --recursive dime/* %{buildroot}/
 /usr/share/clearwater/clearwater-diags-monitor/conf/clearwater-diags-monitor.monit
 /usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.postinst
 /usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.prerm
+%config /etc/clearwater/diags-monitor/core_pattern
+%config /etc/cron.d/clearwater-iotop
+%config /etc/cron.d/clearwater-sysstat
+%config /etc/logrotate.d/clearwater-diags-monitor
+%config /etc/logrotate.d/clearwater-iotop
 
 %files -n clearwater-socket-factory
 /usr/share/clearwater/bin/clearwater_socket_factory
 /usr/share/clearwater/bin/clearwater-socket-factory-common
 /usr/share/clearwater/bin/clearwater-socket-factory-mgmt-wrapper
 /usr/share/clearwater/bin/clearwater-socket-factory-sig-wrapper
-/etc/init/clearwater-socket-factory-mgmt.conf
-/etc/init/clearwater-socket-factory-sig.conf
+%config /etc/init/clearwater-socket-factory-mgmt.conf
+%config /etc/init/clearwater-socket-factory-sig.conf
 
 %files -n clearwater-auto-config-aws
-/etc/clearwater/local_config
-/etc/clearwater/shared_config
 /usr/share/clearwater-auto-config/bin/init-functions
 /usr/share/clearwater-auto-config/bin/common
+%config /etc/clearwater/local_config
+%config /etc/clearwater/shared_config
 
 %files -n clearwater-auto-config-docker
-/etc/clearwater/local_config
-/etc/clearwater/shared_config
 /usr/share/clearwater-auto-config/bin/init-functions
 /usr/share/clearwater/clearwater-auto-config-docker/bin/bracket-ipv6-address
 /usr/share/clearwater/clearwater-auto-config-docker/bin/is-address-ipv6
+%config /etc/clearwater/local_config
+%config /etc/clearwater/shared_config
 
 %files -n clearwater-auto-config-generic
-/etc/clearwater/local_config
-/etc/clearwater/shared_config
 /usr/share/clearwater-auto-config/bin/init-functions
 /usr/share/clearwater/clearwater-auto-config-generic/bin/bracket-ipv6-address
 /usr/share/clearwater/clearwater-auto-config-generic/bin/is-address-ipv6
 /usr/share/clearwater-auto-config/bin/common
+%config /etc/clearwater/local_config
+%config /etc/clearwater/shared_config
 
 %files -n clearwater-log-cleanup
 /usr/share/clearwater/bin/log_cleanup.py*
@@ -315,8 +314,8 @@ rsync --recursive dime/* %{buildroot}/
 /usr/share/clearwater-radius-auth/bin/disable-radius-authentication
 /usr/share/clearwater-radius-auth/bin/enable-radius-authentication
 
-%files -n vellum
+%files -n clearwater-vellum
 /usr/share/clearwater/node_type.d/10_vellum
 
-%files -n dime
+%files -n clearwater-dime
 /usr/share/clearwater/node_type.d/10_dime

@@ -4,8 +4,11 @@ Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/crest
 Requires:      python-virtualenv
-BuildRequires: git, rsync, make, python-virtualenv, gcc-c++
+BuildRequires: rsync, make, python-virtualenv, gcc-c++
 BuildRequires: python-devel, libffi-devel, libxslt-devel
+Source0:       %{name}-%{version}.tar.bz2
+
+%global debug_package %{nil}
 
 Summary: Clearwater - Crest
 
@@ -43,16 +46,12 @@ Provision Homestead
 Commission Cassandra for Homestead Provisioning
 
 %prep
-if [ ! -d crest ]; then
-  git config --global url."https://github.com/".insteadOf git@github.com:
-  git clone --depth 1 --recursive --branch release-%{version} git@github.com:Metaswitch/crest.git
-fi
+%setup
 
-%install
-cd %{_builddir}/crest
-
+%build
 make env
 
+%install
 # See: debian/crest.install
 mkdir --parents %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
 rsync --recursive crest_wheelhouse/* %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
@@ -96,14 +95,14 @@ rsync --recursive homestead-prov-cassandra.root/* %{buildroot}/
 
 %files -n clearwater-homer
 /usr/share/clearwater/homer/
-/etc/clearwater/secure-connections/homer.conf
-/etc/cron.hourly/homer-log-cleanup
 /usr/share/clearwater/bin/poll_homer.sh
 /usr/share/clearwater/clearwater-diags-monitor/scripts/homer_diags
 /usr/share/clearwater/infrastructure/scripts/restart/homer_restart
 /usr/share/clearwater/infrastructure/scripts/create-homer-nginx-config
 /usr/share/clearwater/infrastructure/scripts/homer
 /usr/share/clearwater/node_type.d/20_homer
+%config /etc/clearwater/secure-connections/homer.conf
+%config /etc/cron.hourly/homer-log-cleanup
 
 %files -n clearwater-homer-cassandra
 /usr/share/clearwater/cassandra/users/homer
@@ -111,14 +110,14 @@ rsync --recursive homestead-prov-cassandra.root/* %{buildroot}/
 
 %files -n clearwater-homestead-prov
 /usr/share/clearwater/homestead/
-/etc/clearwater/secure-connections/homestead.conf
-/etc/cron.hourly/homestead-prov-log-cleanup
 /usr/share/clearwater/bin/poll_homestead-prov.sh
 /usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_prov_diags
 /usr/share/clearwater/infrastructure/scripts/restart/homestead_prov_restart
 /usr/share/clearwater/infrastructure/scripts/create-homestead-prov-nginx-config
 /usr/share/clearwater/infrastructure/scripts/homestead-prov
 /usr/share/clearwater/infrastructure/scripts/homestead-prov.monit
+%config /etc/clearwater/secure-connections/homestead.conf
+%config /etc/cron.hourly/homestead-prov-log-cleanup
 
 %files -n clearwater-homestead-prov-cassandra
 /usr/share/clearwater/cassandra/users/homestead-prov

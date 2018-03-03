@@ -3,11 +3,14 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
-BuildRequires: git, rsync, make, cmake, libtool, gcc-c++, bison, flex, rubygems
+BuildRequires: rsync, make, cmake, libtool, gcc-c++, bison, flex, rubygems
 BuildRequires: libevent-devel, boost-devel, boost-static, ncurses-devel, c-ares-devel
 BuildRequires: net-snmp-devel, zeromq-devel
+Source0:       %{name}-%{version}.tar.bz2
 
 # Note: zeromq-devel requires epel-release
+
+%global debug_package %{nil}
 
 Summary: Clearwater - Sprout
 
@@ -83,6 +86,19 @@ B2BUA and SCC-AS emulator application server plugin
 %description -n clearwater-bono
 SIP edge proxy
 
+The Bono nodes form a horizontally scalable SIP edge proxy providing both a SIP IMS Gm
+compliant interface and a WebRTC interface to clients. Client connections are load balanced
+across the nodes. The Bono node provides the anchor point for the client's connection to the
+Clearwater system, including support for various NAT traversal mechanisms. A client is
+therefore anchored to a particular Bono node for the duration of its registration, but can
+move to another Bono node if the connection or client fails.
+
+Clients can connect to Bono using SIP/UDP or SIP/TCP. Bono supports any WebRTC client that
+performs call setup signaling using SIP over WebSocket.
+
+Alternatively, Clearwater can be deployed with a third party P-CSCF or Session Border
+Controller implementing P-CSCF. In this case Bono nodes are not required.
+
 %description -n clearwater-restund
 STUN/TURN server
 
@@ -99,17 +115,13 @@ Exposes SIP stress statistics over the Clearwater statistics interface.
 Runs SIP performance tests against Clearwater
 
 %prep
-if [ ! -d sprout ]; then
-  git config --global url."https://github.com/".insteadOf git@github.com:
-  git clone --depth 1 --recursive --branch release-%{version} git@github.com:Metaswitch/sprout.git
-fi
+%setup
 
-%install
-cd %{_builddir}/sprout
-
+%build
 # Note: the modules must be built in order, so unfortunately we can't use --jobs/-J
 make
 
+%install
 # See: debian/sprout-base.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
@@ -217,10 +229,6 @@ rm --force /usr/bin/cw-upload_bgcf_json
 
 %files
 /usr/share/clearwater/bin/sprout
-/etc/clearwater/logging/sprout
-/etc/init.d/sprout
-/etc/logrotate.d/sproutanalytics
-/etc/security/limits.conf.sprout
 /usr/share/clearwater/bin/poll_sprout_http.sh
 /usr/share/clearwater/bin/poll_sprout_sip.sh
 /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/enum_schema.json
@@ -239,7 +247,6 @@ rm --force /usr/bin/cw-upload_bgcf_json
 /usr/share/clearwater/infrastructure/scripts/create-sprout-nginx-config
 /usr/share/clearwater/infrastructure/scripts/sprout.monit
 /usr/share/clearwater/node_type.d/20_sprout
-/etc/cron.hourly/sprout-log-cleanup
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_json_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_scscf_json_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_enum_json_plugin.py*
@@ -247,6 +254,11 @@ rm --force /usr/bin/cw-upload_bgcf_json
 /usr/share/clearwater/clearwater-config-access/plugins/scscf_json_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/enum_json_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/rph_json_config_plugin.py*
+%config /etc/clearwater/logging/sprout
+%config /etc/init.d/sprout
+%config /etc/logrotate.d/sproutanalytics
+%config /etc/security/limits.conf.sprout
+%config /etc/cron.hourly/sprout-log-cleanup
 
 %files plugin-scscf
 /usr/share/clearwater/sprout/plugins/sprout_scscf.so
@@ -292,21 +304,21 @@ rm --force /usr/bin/cw-upload_bgcf_json
 
 %files -n clearwater-bono
 /usr/share/clearwater/bin/bono
-/etc/clearwater/logging/bono
-/etc/security/limits.conf.bono
 /usr/share/clearwater/bin/poll_bono.sh
 /usr/share/clearwater/clearwater-diags-monitor/scripts/bono_diags
 /usr/share/clearwater/infrastructure/scripts/restart/bono_restart
 /usr/share/clearwater/infrastructure/scripts/bono.monit
 /usr/share/clearwater/node_type.d/20_bono
-/etc/cron.hourly/bono-log-cleanup
+%config /etc/clearwater/logging/bono
+%config /etc/security/limits.conf.bono
+%config /etc/cron.hourly/bono-log-cleanup
 
 %files -n clearwater-restund
 /usr/share/clearwater/bin/restund
 /usr/share/clearwater/restund/lib/
-/etc/security/limits.conf.restund
 /usr/share/clearwater/bin/poll_restund.sh
 /usr/share/clearwater/infrastructure/scripts/restund
+%config /etc/security/limits.conf.restund
 
 %files -n clearwater-sipp
 /etc/sysctl.conf.clearwater-sipp
