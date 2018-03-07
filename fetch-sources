@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Requirements:
+#
+# sudo dnf install --assumeyes git
+
 VERSION=129
 WORK=/tmp/clearwater-rpm
 
@@ -21,7 +25,7 @@ function fetch()
 		fi
 		mkdir --parents "$HERE/SOURCES"
 		tar --create --bzip2 --file="$ARCHIVE" --directory="$WORK" "$REPO"
-		rm --recursive "$WORK" 
+		rm --recursive --force "$WORK" 
 	fi
 }
 

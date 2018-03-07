@@ -3,10 +3,10 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
+Source0:       %{name}-%{version}.tar.bz2
 BuildRequires: rsync, make, cmake, libtool, gcc-c++, bison, flex, rubygems
 BuildRequires: libevent-devel, boost-devel, boost-static, ncurses-devel, c-ares-devel
 BuildRequires: net-snmp-devel, zeromq-devel
-Source0:       %{name}-%{version}.tar.bz2
 
 # Note: zeromq-devel requires epel-release
 
@@ -85,19 +85,6 @@ B2BUA and SCC-AS emulator application server plugin
 
 %description -n clearwater-bono
 SIP edge proxy
-
-The Bono nodes form a horizontally scalable SIP edge proxy providing both a SIP IMS Gm
-compliant interface and a WebRTC interface to clients. Client connections are load balanced
-across the nodes. The Bono node provides the anchor point for the client's connection to the
-Clearwater system, including support for various NAT traversal mechanisms. A client is
-therefore anchored to a particular Bono node for the duration of its registration, but can
-move to another Bono node if the connection or client fails.
-
-Clients can connect to Bono using SIP/UDP or SIP/TCP. Bono supports any WebRTC client that
-performs call setup signaling using SIP over WebSocket.
-
-Alternatively, Clearwater can be deployed with a third party P-CSCF or Session Border
-Controller implementing P-CSCF. In this case Bono nodes are not required.
 
 %description -n clearwater-restund
 STUN/TURN server
@@ -179,12 +166,15 @@ rsync build/bin/call-diversion-as.so %{buildroot}/usr/share/clearwater/sprout/pl
 rsync build/bin/mangelwurzel-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
 
 # See: debian/bono.install
+mkdir --parents %{buildroot}%{_initrddir}/
 rsync build/bin/sprout %{buildroot}/usr/share/clearwater/bin/bono
+rsync debian/bono.init.d %{buildroot}%{_initrddir}/bono
 rsync --recursive bono.root/* %{buildroot}/
 rsync scripts/bono-log-cleanup %{buildroot}/etc/cron.hourly/
 
 # See: debian/restund.install
 mkdir --parents %{buildroot}/usr/share/clearwater/restund/lib/
+rsync debian/restund.init.d %{buildroot}%{_initrddir}/restund
 rsync usr/sbin/restund %{buildroot}/usr/share/clearwater/bin/
 rsync usr/lib/libre.* %{buildroot}/usr/share/clearwater/restund/lib/
 rsync usr/lib/restund/modules/* %{buildroot}/usr/share/clearwater/restund/lib/
@@ -195,15 +185,18 @@ rsync --recursive clearwater-sipp.root/* %{buildroot}/
 rsync modules/sipp/sipp %{buildroot}/usr/share/clearwater/bin/
 
 # See: debian/clearwater-sip-stress.install
+rsync debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
 rsync --recursive clearwater-sip-stress.root/* %{buildroot}/
 
 # See: debian/clearwater-sip-stress-stats.install
+rsync debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
 rsync scripts/sipp-stats/clearwater-sipp-stats-*.gem %{buildroot}/usr/share/clearwater/gems/
 
 # See: debian/clearwater-sip-perf.install
+rsync debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
 rsync --recursive clearwater-sip-perf.root/* %{buildroot}/
 
-%files plugin-scscf
+%post plugin-scscf
 # See: debian/scsf-bgcf.links
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/validate_shared_ifcs_xml /usr/bin/cw-validate_shared_ifcs_xml
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/validate_fallback_ifcs_xml /usr/bin/cw-validate_fallback_ifcs_xml
@@ -303,6 +296,7 @@ rm --force /usr/bin/cw-upload_bgcf_json
 /usr/share/clearwater/sprout/plugins/mangelwurzel-as.so
 
 %files -n clearwater-bono
+%{_initrddir}/bono
 /usr/share/clearwater/bin/bono
 /usr/share/clearwater/bin/poll_bono.sh
 /usr/share/clearwater/clearwater-diags-monitor/scripts/bono_diags
@@ -314,6 +308,7 @@ rm --force /usr/bin/cw-upload_bgcf_json
 %config /etc/cron.hourly/bono-log-cleanup
 
 %files -n clearwater-restund
+%{_initrddir}/restund
 /usr/share/clearwater/bin/restund
 /usr/share/clearwater/restund/lib/
 /usr/share/clearwater/bin/poll_restund.sh
@@ -325,15 +320,18 @@ rm --force /usr/bin/cw-upload_bgcf_json
 /usr/share/clearwater/bin/sipp
 
 %files -n clearwater-sip-stress
+%{_initrddir}/clearwater-sip-stress
 /etc/cron.hourly/clearwater-sip-stress-log-cleanup
 /usr/share/clearwater/bin/sip-stress
 /usr/share/clearwater/infrastructure/scripts/sip-stress
 /usr/share/clearwater/sip-stress/sip-stress.xml
 
 %files -n clearwater-sip-stress-stats
+%{_initrddir}/clearwater-sip-stress-stats
 /usr/share/clearwater/gems/clearwater-sipp-stats-*.gem
 
 %files -n clearwater-sip-perf
+%{_initrddir}/clearwater-sip-perf
 /usr/share/clearwater/bin/sip-perf
 /usr/share/clearwater/infrastructure/scripts/sip-perf
 /usr/share/clearwater/sip-perf/sip-perf.xml

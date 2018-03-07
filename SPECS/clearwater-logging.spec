@@ -3,8 +3,8 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/clearwater-logging
-BuildRequires: rsync
 Source0:       %{name}-%{version}.tar.bz2
+BuildRequires: rsync
 
 %global debug_package %{nil}
 
