@@ -3,6 +3,8 @@ BUILD/
 BUILDROOT/
 SRPMS/
 RPMS/
+.vagrant/
 *.log
+
 
 *.deb

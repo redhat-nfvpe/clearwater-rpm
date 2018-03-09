@@ -3,7 +3,7 @@ set -e
 
 # Requirements:
 #
-# sudo yum install --assumeyes rpm-build
+# sudo yum install --assumeyes rpm-build yum-utils epel-release
 
 if ! rpm --query centos-release > /dev/null && ! rpm --query redhat-release > /dev/null; then
 	echo 'Can only be run in CentOS or RHEL'
@@ -15,6 +15,9 @@ SPEC=${1:-*}
 HERE=$(dirname "$(readlink -f "$0")")
 TOPDIR="$HERE/.."
 ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
+LOGS="$TOPDIR/logs"
 
-rpmbuild -bi --short-circuit --define "_topdir $ESCAPED_TOPDIR" "$TOPDIR/SPECS/"$SPEC.spec \
-	2>&1 | tee "$HERE/validate-install.log" 
+sudo yum-builddep --assumeyes "$TOPDIR/SPECS/"$SPEC.spec
+
+rpmbuild -bb --define "_topdir $ESCAPED_TOPDIR" "$TOPDIR/SPECS/"$SPEC.spec --noclean \
+	2>&1 | tee "$LOGS/build-rpms.log"

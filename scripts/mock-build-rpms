@@ -13,12 +13,13 @@ VERSION=129
 MOCK=epel-7-x86_64
 
 HERE=$(dirname "$(readlink -f "$0")")
-TOPDIR="$HERE"
+TOPDIR="$HERE/.."
 ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
+LOGS="$TOPDIR/logs"
 
 rpmbuild -bs --define "_topdir $ESCAPED_TOPDIR" "$TOPDIR/SPECS/"$SPEC.spec \
-	2>&1 | tee "$HERE/mock-build-rpms.log"
+	2>&1 | tee "$LOGS/mock-build-rpms.log"
 
-mock --root="$MOCK" --resultdir="$TOPDIR/RPMS/x86_64" --enable-network \
+mock --root="$MOCK" --resultdir="$TOPDIR/RPMS/%(target_arch)s" --enable-network \
 rebuild "$TOPDIR/SRPMS/"$SPEC-$VERSION-* \
-	2>&1 | tee "$HERE/mock-build-rpms.log"
+	2>&1 | tee "$LOGS/mock-build-rpms.log"

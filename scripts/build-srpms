@@ -8,8 +8,9 @@ set -e
 SPEC=${1:-*}
 
 HERE=$(dirname "$(readlink -f "$0")")
-TOPDIR="$HERE"
+TOPDIR="$HERE/.."
 ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
+LOGS="$TOPDIR/logs"
 
 rpmbuild -bs --define "_topdir $ESCAPED_TOPDIR" "$TOPDIR/SPECS/"$SPEC.spec \
-	2>&1 | tee "$HERE/build-srpms.log"
+	2>&1 | tee "$LOGS/build-srpms.log"

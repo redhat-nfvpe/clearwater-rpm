@@ -13,8 +13,9 @@ fi
 SPEC=${1:-*}
 
 HERE=$(dirname "$(readlink -f "$0")")
-TOPDIR="$HERE"
-ESCAPED_TOPDIR=$(printf %q "$HERE")
+TOPDIR="$HERE/.."
+ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
+LOGS="$TOPDIR/logs"
 
 rpmbuild -bi --short-circuit --define "_topdir $ESCAPED_TOPDIR" "$TOPDIR/SPECS/"$SPEC.spec \
-	2>&1 | tee "$HERE/validate-install.log" 
+	2>&1 | tee "$LOGS/validate-install.log" 

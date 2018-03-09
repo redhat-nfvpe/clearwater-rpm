@@ -6,15 +6,17 @@ set -e
 # sudo dnf install --assumeyes git
 
 VERSION=129
-WORK=/tmp/clearwater-rpm
 
 HERE=$(dirname "$(readlink -f "$0")")
+TOPDIR="$HERE/.."
+SOURCES="$HERE/SOURCES"
+WORK=/tmp/clearwater-rpm
 
 function fetch()
 {
 	local NAME=$1
 	local REPO_NAME=${2:-$NAME}
-	local ARCHIVE="$HERE/SOURCES/$NAME-$VERSION.tar.bz2"
+	local ARCHIVE="$SOURCES/$NAME-$VERSION.tar.bz2"
 	if [ ! -f  "$ARCHIVE" ]; then
 		local REPO="$NAME-$VERSION"
 		if [ ! -d "$REPO" ]; then
@@ -23,7 +25,7 @@ function fetch()
 			git clone --depth 1 --recursive --branch "release-$VERSION" "git@github.com:Metaswitch/$REPO_NAME.git" "$WORK/$REPO"
 			git config --global --unset 'url.https://github.com/.insteadOf'
 		fi
-		mkdir --parents "$HERE/SOURCES"
+		mkdir --parents "$SOURCES"
 		tar --create --bzip2 --file="$ARCHIVE" --directory="$WORK" "$REPO"
 		rm --recursive --force "$WORK" 
 	fi
