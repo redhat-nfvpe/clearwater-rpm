@@ -3,6 +3,7 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/ellis
+
 Source0:       %{name}-%{version}.tar.bz2
 BuildRequires: rsync make python-virtualenv git gcc-c++
 BuildRequires: python-devel mysql-devel curl-devel libffi-devel
@@ -52,75 +53,6 @@ mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-prov-tools/.wheelho
 rsync prov_tools_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/clearwater-prov-tools/.wheelhouse/
 rsync local_settings.py %{buildroot}/usr/share/clearwater/clearwater-prov-tools/
 rsync --recursive clearwater-prov-tools.root/* %{buildroot}/
-
-%post
-# See: debian/ellis.postinst
-set -e
-if ! grep -q "^ellis:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /usr/share/clearwater/ellis/ --shell /bin/false ellis
-fi
-mkdir --parents --mode=755 /var/log/ellis/
-chown --recursive ellis:root /var/log/ellis/
-virtualenv /usr/share/clearwater/ellis/env/
-/usr/share/clearwater/ellis/env/bin/pip install --upgrade pip
-#/usr/share/clearwater/ellis/env/bin/pip install /usr/share/clearwater/ellis/.wheelhouse/pip-*.whl
-/usr/share/clearwater/ellis/env/bin/pip install --no-index --find-links /usr/share/clearwater/ellis/.wheelhouse/ wheel ellis
-chown --recursive ellis:root /usr/share/clearwater/ellis/
-mysql -u root --password= < /usr/share/clearwater/ellis/schema.sql
-mysql -u root --password= < /usr/share/clearwater/ellis/apply_db_updates.sql
-service clearwater-infrastructure restart
-cp /usr/share/clearwater/ellis/*.monit /etc/monit/conf.d/
-# reload clearwater-monit || /bin/true # TODO: is this a DEBHELPER specific command?
-service ellis stop || /bin/true
-
-%preun
-# See: debian/ellis.prerm
-set -e
-for F in /usr/share/clearwater/ellis/*.monit; do rm --force "/etc/monit/conf.d/$(basename "$F")"; done
-reload clearwater-monit &> /dev/null || /bin/true
-service ellis stop
-rm --recursive --force /usr/share/clearwater/ellis/env
-rm --recursive --force /var/run/ellis/
-if [ "$1" = 0 ]; then # Uninstall
-  rm --force /tmp/.ellis-sock*
-  if grep -q "^ellis:" /etc/passwd; then
-    userdel ellis
-  fi
-fi
-
-%post -n clearwater-prov-tools
-# See: debian/clearwater-prov-tools.links
-set -e
-ln --symbolic /usr/share/clearwater/bin/create_user /usr/bin/cw-create_user
-ln --symbolic /usr/share/clearwater/bin/delete_user /usr/bin/cw-delete_user
-ln --symbolic /usr/share/clearwater/bin/display_user /usr/bin/cw-display_user
-ln --symbolic /usr/share/clearwater/bin/update_user /usr/bin/cw-update_user
-ln --symbolic /usr/share/clearwater/bin/list_users /usr/bin/cw-list_users
-
-# See: debian/clearwater-prov-tools.postinst
-if ! grep -q "^clearwater-prov-tools:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /usr/share/clearwater/clearwater-prov-tools/ --shell /bin/false clearwater-prov-tools
-fi
-mkdir --parents --mode=755 /var/log/clearwater-prov-tools/
-chown --recursive clearwater-prov-tools:root /var/log/clearwater-prov-tools/
-virtualenv /usr/share/clearwater/clearwater-prov-tools/env/
-/usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --upgrade pip
-/usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-prov-tools/.wheelhouse/ wheel clearwater-prov-tools 
-chown --recursive clearwater-prov-tools:root /usr/share/clearwater/clearwater-prov-tools/
-mkdir --parents /var/log/clearwater-prov-tools/
-service clearwater-infrastructure restart
-
-%preun -n clearwater-prov-tools
-set -e
-rm --recursive --force /usr/share/clearwater/clearwater-prov-tools/env/
-if [ "$1" = 0 ]; then # Uninstall
-  rm --recursive --force /var/log/clearwater-prov-tools
-fi
-rm --force /usr/bin/cw-create_user
-rm --force /usr/bin/cw-delete_user
-rm --force /usr/bin/cw-display_user
-rm --force /usr/bin/cw-update_user
-rm --force /usr/bin/cw-list_users
 
 %files
 %{_initrddir}/ellis
@@ -197,3 +129,72 @@ rm --force /usr/bin/cw-list_users
 /usr/share/clearwater/clearwater-prov-tools/
 %ghost /usr/share/clearwater/clearwater-prov-tools/env/
 %ghost /var/log/clearwater-prov-tools/
+
+%post
+# See: debian/ellis.postinst
+set -e
+if ! grep -q "^ellis:" /etc/passwd; then
+  useradd --system --no-create-home --home-dir /usr/share/clearwater/ellis/ --shell /bin/false ellis
+fi
+mkdir --parents --mode=755 /var/log/ellis/
+chown --recursive ellis:root /var/log/ellis/
+virtualenv /usr/share/clearwater/ellis/env/
+/usr/share/clearwater/ellis/env/bin/pip install --upgrade pip
+#/usr/share/clearwater/ellis/env/bin/pip install /usr/share/clearwater/ellis/.wheelhouse/pip-*.whl
+/usr/share/clearwater/ellis/env/bin/pip install --no-index --find-links /usr/share/clearwater/ellis/.wheelhouse/ wheel ellis
+chown --recursive ellis:root /usr/share/clearwater/ellis/
+mysql -u root --password= < /usr/share/clearwater/ellis/schema.sql
+mysql -u root --password= < /usr/share/clearwater/ellis/apply_db_updates.sql
+service clearwater-infrastructure restart
+cp /usr/share/clearwater/ellis/*.monit /etc/monit/conf.d/
+service clearwater-monit reload || /bin/true
+service ellis stop || /bin/true
+
+%preun
+# See: debian/ellis.prerm
+set -e
+for F in /usr/share/clearwater/ellis/*.monit; do rm --force "/etc/monit/conf.d/$(basename "$F")"; done
+service clearwater-monit reload || /bin/true
+service ellis stop
+rm --recursive --force /usr/share/clearwater/ellis/env
+rm --recursive --force /var/run/ellis/
+if [ "$1" = 0 ]; then # Uninstall
+  rm --force /tmp/.ellis-sock*
+  if grep -q "^ellis:" /etc/passwd; then
+    userdel ellis
+  fi
+fi
+
+%post -n clearwater-prov-tools
+# See: debian/clearwater-prov-tools.links
+set -e
+ln --symbolic /usr/share/clearwater/bin/create_user /usr/bin/cw-create_user
+ln --symbolic /usr/share/clearwater/bin/delete_user /usr/bin/cw-delete_user
+ln --symbolic /usr/share/clearwater/bin/display_user /usr/bin/cw-display_user
+ln --symbolic /usr/share/clearwater/bin/update_user /usr/bin/cw-update_user
+ln --symbolic /usr/share/clearwater/bin/list_users /usr/bin/cw-list_users
+
+# See: debian/clearwater-prov-tools.postinst
+if ! grep -q "^clearwater-prov-tools:" /etc/passwd; then
+  useradd --system --no-create-home --home-dir /usr/share/clearwater/clearwater-prov-tools/ --shell /bin/false clearwater-prov-tools
+fi
+mkdir --parents --mode=755 /var/log/clearwater-prov-tools/
+chown --recursive clearwater-prov-tools:root /var/log/clearwater-prov-tools/
+virtualenv /usr/share/clearwater/clearwater-prov-tools/env/
+/usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --upgrade pip
+/usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-prov-tools/.wheelhouse/ wheel clearwater-prov-tools 
+chown --recursive clearwater-prov-tools:root /usr/share/clearwater/clearwater-prov-tools/
+mkdir --parents /var/log/clearwater-prov-tools/
+service clearwater-infrastructure restart
+
+%preun -n clearwater-prov-tools
+set -e
+rm --recursive --force /usr/share/clearwater/clearwater-prov-tools/env/
+if [ "$1" = 0 ]; then # Uninstall
+  rm --recursive --force /var/log/clearwater-prov-tools
+fi
+rm --force /usr/bin/cw-create_user
+rm --force /usr/bin/cw-delete_user
+rm --force /usr/bin/cw-display_user
+rm --force /usr/bin/cw-update_user
+rm --force /usr/bin/cw-list_users

@@ -8,7 +8,8 @@ BuildRequires: rsync
 
 %global debug_package %{nil}
 
-Summary: Clearwater - Logging
+Summary:       Clearwater - Logging
+Requires:      nagios nagios-plugins sysstat
 
 %description
 Common logging infrastructure

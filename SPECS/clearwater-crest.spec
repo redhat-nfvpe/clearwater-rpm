@@ -3,6 +3,7 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/crest
+
 Source0:       %{name}-%{version}.tar.bz2
 BuildRequires: rsync make python-virtualenv gcc-c++
 BuildRequires: python-devel libffi-devel libxslt-devel openssl-devel
@@ -95,93 +96,6 @@ rsync --recursive homestead.root/* %{buildroot}/
 # See: debian/homestead-prov-cassandra.install
 rsync --recursive homestead-prov-cassandra.root/* %{buildroot}/
 
-%post
-# See: debian/crest.postinst
-set -e
-rm --recursive --force /usr/share/clearwater/crest/build/ # TODO: why?
-virtualenv /usr/share/clearwater/crest/env/
-/usr/share/clearwater/crest/env/bin/pip install --upgrade pip
-/usr/share/clearwater/crest/env/bin/pip install --no-index --find-links /usr/share/clearwater/crest/.wheelhouse/ wheel crest
-if [ -x %{_initrddir}/clearwater-cluster-manager ]; then
-  service clearwater-cluster-manager stop || /bin/true
-fi
-[ ! -x %{_initrddir}/clearwater-secure-connections ] || %{_initrddir}/clearwater-secure-connections reload
-
-%preun
-# See: debian/crest.preun
-set -e
-rm --recursive --force /usr/share/clearwater/crest/env/
-
-%post prov
-# See: debian/crest-prov.postinst
-set -e
-virtualenv /usr/share/clearwater/crest-prov/env/
-/usr/share/clearwater/crest-prov/env/bin/pip install --upgrade pip
-/usr/share/clearwater/crest-prov/env/bin/pip install --no-index --find-links /usr/share/clearwater/crest-prov/.wheelhouse/ wheel crest
-
-%post -n clearwater-homer
-# See: debian/homer.postinst
-set -e
-. /etc/clearwater/config
-rm --recursive --force /usr/share/clearwater/homer/build/ # TODO: why?
-/usr/share/clearwater/crest/env/bin/pip install --no-index --find-links /usr/share/clearwater/crest/.wheelhouse/ --find-links /usr/share/clearwater/homer/.wheelhouse/ homer 
-service clearwater-infrastructure restart
-/usr/share/clearwater/cassandra-schemas/homer.sh || /bin/true
-cp /usr/share/clearwater/homer/templates/*.monit /etc/monit/conf.d/
-# reload clearwater-monit || /bin/true # TODO: is this a DEBHELPER specific command?
-if [ -x %{_initrddir}/clearwater-cluster-manager ]; then
-  service clearwater-cluster-manager stop || /bin/true
-fi
-service homer stop || /bin/true
-[ ! -x %{_initrddir}/clearwater-secure-connections ] || %{_initrddir}/clearwater-secure-connections reload
-
-%preun -n clearwater-homer
-# See: debian/homer.prerm
-set -e
-for F in /usr/share/clearwater/homer/templates/*.monit; do rm --force "/etc/monit/conf.d/$(basename "$F")"; done
-# reload clearwater-monit &> /dev/null || /bin/true # TODO: is this a DEBHELPER specific command?
-if ( nginx_dissite homer > /dev/null ); then
-  service nginx reload
-fi
-rm --force /usr/share/clearwater/clearwater-cluster-manager/plugins/homer*
-if [ -x /etc/init.d/clearwater-cluster-manager ]; then
-  service clearwater-cluster-manager stop || /bin/true
-fi
-service homer stop
-rm --recursive --force /usr/share/clearwater/homer/python/ # TODO: why?
-rm --force /usr/share/clearwater/homer/local_settings.py
-
-%post -n clearwater-homer-cassandra
-# See: debian/homer-cassandra.postinst
-set -e
-service clearwater-infrastructure restart
-
-%post -n clearwater-homestead-prov
-# See: debian/homestead-prov.postinst
-set -e
-rm --recursive --force /usr/share/clearwater/homestead/build/ # TODO: why?
-/usr/share/clearwater/crest/env/bin/pip install --no-index --find-links /usr/share/clearwater/crest/.wheelhouse/ --find-links /usr/share/clearwater/homestead/.wheelhouse/ homestead-prov 
-service clearwater-infrastructure restart
-service homestead-prov stop || /bin/true
-[ ! -x %{_initrddir}/clearwater-secure-connections ] || %{_initrddir}/clearwater-secure-connections reload
-
-%preun -n clearwater-homestead-prov
-# See: debian/homestead-prov.prerm
-set -e
-rm --force /etc/monit/conf.d/homestead-prov.monit
-# reload clearwater-monit &> /dev/null || /bin/true # TODO: is this a DEBHELPER specific command?
-if ( nginx_dissite homestead-prov > /dev/null ); then
-  service nginx reload
-fi
-service homestead-prov stop
-rm --recursive --force /usr/share/clearwater/homestead/python/ # TODO: why?
-rm --force /usr/share/clearwater/homestead/local_settings.py
-
-%post -n clearwater-homestead-prov-cassandra
-# See: debian/homestead-prov-cassandra.postinst
-set -e
-service clearwater-infrastructure restart
-
 %files
 /usr/share/clearwater/crest/.wheelhouse/
 
@@ -220,3 +134,90 @@ service clearwater-infrastructure restart
 %files -n clearwater-homestead-prov-cassandra
 /usr/share/clearwater/cassandra/users/homestead-prov
 /usr/share/clearwater/cassandra-schemas/homestead_provisioning.sh
+
+%post
+# See: debian/crest.postinst
+set -e
+rm --recursive --force /usr/share/clearwater/crest/build/ # TODO: why?
+virtualenv /usr/share/clearwater/crest/env/
+/usr/share/clearwater/crest/env/bin/pip install --upgrade pip
+/usr/share/clearwater/crest/env/bin/pip install --no-index --find-links /usr/share/clearwater/crest/.wheelhouse/ wheel crest
+if [ -x %{_initrddir}/clearwater-cluster-manager ]; then
+  service clearwater-cluster-manager stop || /bin/true
+fi
+[ ! -x %{_initrddir}/clearwater-secure-connections ] || %{_initrddir}/clearwater-secure-connections reload
+
+%preun
+# See: debian/crest.preun
+set -e
+rm --recursive --force /usr/share/clearwater/crest/env/
+
+%post prov
+# See: debian/crest-prov.postinst
+set -e
+virtualenv /usr/share/clearwater/crest-prov/env/
+/usr/share/clearwater/crest-prov/env/bin/pip install --upgrade pip
+/usr/share/clearwater/crest-prov/env/bin/pip install --no-index --find-links /usr/share/clearwater/crest-prov/.wheelhouse/ wheel crest
+
+%post -n clearwater-homer
+# See: debian/homer.postinst
+set -e
+. /etc/clearwater/config
+rm --recursive --force /usr/share/clearwater/homer/build/ # TODO: why?
+/usr/share/clearwater/crest/env/bin/pip install --no-index --find-links /usr/share/clearwater/crest/.wheelhouse/ --find-links /usr/share/clearwater/homer/.wheelhouse/ homer 
+service clearwater-infrastructure restart
+/usr/share/clearwater/cassandra-schemas/homer.sh || /bin/true
+cp /usr/share/clearwater/homer/templates/*.monit /etc/monit/conf.d/
+service clearwater-monit reload || /bin/true
+if [ -x %{_initrddir}/clearwater-cluster-manager ]; then
+  service clearwater-cluster-manager stop || /bin/true
+fi
+service homer stop || /bin/true
+[ ! -x %{_initrddir}/clearwater-secure-connections ] || %{_initrddir}/clearwater-secure-connections reload
+
+%preun -n clearwater-homer
+# See: debian/homer.prerm
+set -e
+for F in /usr/share/clearwater/homer/templates/*.monit; do rm --force "/etc/monit/conf.d/$(basename "$F")"; done
+service clearwater-monit reload || /bin/true
+if ( nginx_dissite homer > /dev/null ); then
+  service nginx reload
+fi
+rm --force /usr/share/clearwater/clearwater-cluster-manager/plugins/homer*
+if [ -x /etc/init.d/clearwater-cluster-manager ]; then
+  service clearwater-cluster-manager stop || /bin/true
+fi
+service homer stop
+rm --recursive --force /usr/share/clearwater/homer/python/ # TODO: why?
+rm --force /usr/share/clearwater/homer/local_settings.py
+
+%post -n clearwater-homer-cassandra
+# See: debian/homer-cassandra.postinst
+set -e
+service clearwater-infrastructure restart
+
+%post -n clearwater-homestead-prov
+# See: debian/homestead-prov.postinst
+set -e
+rm --recursive --force /usr/share/clearwater/homestead/build/ # TODO: why?
+/usr/share/clearwater/crest/env/bin/pip install --no-index --find-links /usr/share/clearwater/crest/.wheelhouse/ --find-links /usr/share/clearwater/homestead/.wheelhouse/ homestead-prov 
+service clearwater-infrastructure restart
+service homestead-prov stop || /bin/true
+[ ! -x %{_initrddir}/clearwater-secure-connections ] || %{_initrddir}/clearwater-secure-connections reload
+
+%preun -n clearwater-homestead-prov
+# See: debian/homestead-prov.prerm
+set -e
+rm --force /etc/monit/conf.d/homestead-prov.monit
+service clearwater-monit reload || /bin/true
+if ( nginx_dissite homestead-prov > /dev/null ); then
+  service nginx reload
+fi
+service homestead-prov stop
+rm --recursive --force /usr/share/clearwater/homestead/python/ # TODO: why?
+rm --force /usr/share/clearwater/homestead/local_settings.py
+
+%post -n clearwater-homestead-prov-cassandra
+# See: debian/homestead-prov-cassandra.postinst
+set -e
+service clearwater-infrastructure restart

@@ -3,9 +3,13 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https:/github.com/Metaswitch/clearwater-infrastructure
+
 Source0:       %{name}-%{version}.tar.bz2
 BuildRequires: rsync make python-virtualenv
 BuildRequires: zeromq-devel boost-devel
+BuildRequires: systemd
+
+%{?systemd_requires}
 
 # Note: zeromq-devel requires epel-release
 
@@ -157,6 +161,10 @@ rsync clearwater-socket-factory/clearwater-socket-factory-sig-wrapper %{buildroo
 rsync clearwater-socket-factory/clearwater-socket-factory-mgmt.conf %{buildroot}/etc/init/
 rsync clearwater-socket-factory/clearwater-socket-factory-sig.conf %{buildroot}/etc/init/
 
+mkdir --parents %{buildroot}%{_unitdir}/
+rsync debian/clearwater-socket-factory-mgmt.service %{buildroot}%{_unitdir}/
+rsync debian/clearwater-socket-factory-sig.service %{buildroot}%{_unitdir}/
+
 # See: debian/clearwater-auto-config-aws.install
 mkdir --parents %{buildroot}/usr/share/clearwater-auto-config/bin/
 rsync debian/clearwater-auto-config-aws.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-aws
@@ -192,41 +200,6 @@ rsync --recursive vellum/* %{buildroot}/
 
 # See: debian/dime.install
 rsync --recursive dime/* %{buildroot}/
-
-%post
-# See: debian/clearwater-infrastructure.postinst
-set -e
-/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
-
-# See: debian/clearwater-infrastructure.links
-ln --symbolic /usr/share/clearwater/bin/gather_diags /usr/bin/cw-gather_diags
-ln --symbolic /usr/share/clearwater/bin/gather_diags_and_report_location /usr/bin/cw-gather_diags_and_report_location
-ln --symbolic /usr/share/clearwater/bin/sync_alarms.py /usr/bin/cw-sync_alarms
-ln --symbolic /usr/share/clearwater/bin/restart_node_processes /usr/bin/cw-restart_node_processes
-ln --symbolic /usr/share/clearwater/bin/run-in-signaling-namespace /usr/sbin/cw-run_in_signaling_namespace
-ln --symbolic /usr/share/clearwater/infrastructure/bin/set_snmp_community /usr/sbin/cw-set_snmp_community
-ln --symbolic /usr/share/clearwater/infrastructure/bin/set_log_level /usr/sbin/cw-set_log_level
-ln --symbolic /usr/share/clearwater/bin/clearwater-check-config /usr/sbin/cw-check_config
-ln --symbolic /usr/share/clearwater/bin/clearwater-check-config /usr/sbin/clearwater-check-config
-ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/cw-show_config
-ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/clearwater-show-config
-
-%preun
-# See: debian/clearwater-infrastructure.prerm
-set -e
-/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.prerm
-
-rm --force /usr/bin/cw-gather_diags
-rm --force /usr/bin/cw-gather_diags_and_report_location
-rm --force /usr/bin/cw-sync_alarms
-rm --force /usr/bin/cw-restart_node_processes
-rm --force /usr/sbin/cw-run_in_signaling_namespace
-rm --force /usr/sbin/cw-set_snmp_community
-rm --force /usr/sbin/cw-set_log_level
-rm --force /usr/sbin/cw-check_config
-rm --force /usr/sbin/clearwater-check-config
-rm --force /usr/sbin/cw-show_config
-rm --force /usr/sbin/clearwater-show-config
 
 %files
 %{_initrddir}/clearwater-infrastructure
@@ -334,6 +307,8 @@ rm --force /usr/sbin/clearwater-show-config
 /usr/share/clearwater/bin/clearwater-socket-factory-common
 /usr/share/clearwater/bin/clearwater-socket-factory-mgmt-wrapper
 /usr/share/clearwater/bin/clearwater-socket-factory-sig-wrapper
+%{_unitdir}/clearwater-socket-factory-mgmt.service
+%{_unitdir}/clearwater-socket-factory-sig.service
 %config /etc/init/clearwater-socket-factory-mgmt.conf
 %config /etc/init/clearwater-socket-factory-sig.conf
 
@@ -378,3 +353,113 @@ rm --force /usr/sbin/clearwater-show-config
 
 %files -n clearwater-dime
 /usr/share/clearwater/node_type.d/10_dime
+
+%post
+# See: debian/clearwater-infrastructure.postinst
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
+
+# See: debian/clearwater-infrastructure.links
+ln --symbolic /usr/share/clearwater/bin/gather_diags /usr/bin/cw-gather_diags
+ln --symbolic /usr/share/clearwater/bin/gather_diags_and_report_location /usr/bin/cw-gather_diags_and_report_location
+ln --symbolic /usr/share/clearwater/bin/sync_alarms.py /usr/bin/cw-sync_alarms
+ln --symbolic /usr/share/clearwater/bin/restart_node_processes /usr/bin/cw-restart_node_processes
+ln --symbolic /usr/share/clearwater/bin/run-in-signaling-namespace /usr/sbin/cw-run_in_signaling_namespace
+ln --symbolic /usr/share/clearwater/infrastructure/bin/set_snmp_community /usr/sbin/cw-set_snmp_community
+ln --symbolic /usr/share/clearwater/infrastructure/bin/set_log_level /usr/sbin/cw-set_log_level
+ln --symbolic /usr/share/clearwater/bin/clearwater-check-config /usr/sbin/cw-check_config
+ln --symbolic /usr/share/clearwater/bin/clearwater-check-config /usr/sbin/clearwater-check-config
+ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/cw-show_config
+ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/clearwater-show-config
+
+%preun
+# See: debian/clearwater-infrastructure.prerm
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.prerm
+
+rm --force /usr/bin/cw-gather_diags
+rm --force /usr/bin/cw-gather_diags_and_report_location
+rm --force /usr/bin/cw-sync_alarms
+rm --force /usr/bin/cw-restart_node_processes
+rm --force /usr/sbin/cw-run_in_signaling_namespace
+rm --force /usr/sbin/cw-set_snmp_community
+rm --force /usr/sbin/cw-set_log_level
+rm --force /usr/sbin/cw-check_config
+rm --force /usr/sbin/clearwater-check-config
+rm --force /usr/sbin/cw-show_config
+rm --force /usr/sbin/clearwater-show-config
+
+%post -n clearwater-memcached
+# See: debian/clearwater-memached.postinst
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst
+
+%preun -n clearwater-memcached
+# See: debian/clearwater-memached.prerm
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-memcached.prerm
+
+%post -n clearwater-tcp-scalability
+# See: debian/clearwater-tcp-scalability.postinst
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.postinst
+
+%preun -n clearwater-tcp-scalability
+# See: debian/clearwater-tcp-scalability.prerm
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.prerm
+
+%post -n clearwater-secure-connections
+# See: debian/clearwater-secure-connections.postinst
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-secure-connections.postinst
+
+%preun -n clearwater-secure-connections
+# See: debian/clearwater-secure-connections.prerm
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-secure-connections.prerm
+
+%post -n clearwater-snmpd
+# See: debian/clearwater-snmpd.postinst
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-snmpd.postinst
+
+%preun -n clearwater-snmpd
+# See: debian/clearwater-snmpd.prerm
+set -e
+/usr/share/clearwater/infrastructure/install/clearwater-snmpd.prerm
+
+%post -n clearwater-diags-monitor
+# See: debian/clearwater-diags-monitor.postinst
+set -e
+cp --preserve /etc/default/sysstat /etc/clearwater/diags-monitor/sysstat.old
+sed --in-place 's/ENABLED=.*/ENABLED="true"/g' /etc/default/sysstat
+/usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.postinst
+
+%preun -n clearwater-diags-monitor
+# See: debian/clearwater-diags-monitor.prerm
+set -e
+[ ! -f /etc/clearwater/diags-monitor/sysstat.old ] || cp --preserve /etc/clearwater/diags-monitor/sysstat.old /etc/default/sysstat
+rm --force /etc/clearwater/diags-monitor/sysstat.old
+/usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.prerm
+
+%post -n clearwater-socket-factory
+# See: debian/clearwater-socket-factory.postinst
+set -e
+service clearwater-socket-factory-mgmt start || /bin/true
+service clearwater-socket-factory-sig start || /bin/true
+%systemd_post socket-factory-mgmt.service
+%systemd_post socket-factory-sig.service
+
+%preun -n clearwater-socket-factory
+# See: debian/clearwater-socket-factory.prerm
+set -e
+service clearwater-socket-factory-mgmt stop || /bin/true
+service clearwater-socket-factory-sig stop || /bin/true
+rm --force /tmp/clearwater_mgmt_namespace_socket
+%systemd_preun socket-factory-mgmt.service
+%systemd_preun socket-factory-sig.service
+
+%postun -n clearwater-socket-factory
+%systemd_postun_with_restart asocket-factory-mgmt.service
+%systemd_postun_with_restart asocket-factory-sig.service

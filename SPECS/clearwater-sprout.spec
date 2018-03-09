@@ -3,10 +3,12 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
+
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync, make, cmake, libtool, gcc-c++, bison, flex, rubygems
-BuildRequires: libevent-devel, boost-devel, boost-static, ncurses-devel, c-ares-devel
-BuildRequires: net-snmp-devel, zeromq-devel
+BuildRequires: rsync make cmake libtool gcc-c++ bison flex
+#rubygems
+#BuildRequires: libevent-devel, boost-devel, boost-static, ncurses-devel, c-ares-devel
+#BuildRequires: net-snmp-devel, zeromq-devel
 
 # Note: zeromq-devel requires epel-release
 
@@ -196,30 +198,6 @@ rsync scripts/sipp-stats/clearwater-sipp-stats-*.gem %{buildroot}/usr/share/clea
 rsync debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
 rsync --recursive clearwater-sip-perf.root/* %{buildroot}/
 
-%post plugin-scscf
-# See: debian/scsf-bgcf.links
-ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/validate_shared_ifcs_xml /usr/bin/cw-validate_shared_ifcs_xml
-ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/validate_fallback_ifcs_xml /usr/bin/cw-validate_fallback_ifcs_xml
-ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/display_shared_ifcs /usr/bin/cw-display_shared_ifcs
-ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/display_fallback_ifcs /usr/bin/cw-display_fallback_ifcs
-ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/remove_shared_ifcs_xml /usr/sbin/cw-remove_shared_ifcs_xml
-ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/remove_fallback_ifcs_xml /usr/sbin/cw-remove_fallback_ifcs_xml
-
-%preun plugin-scscf
-rm --force /usr/bin/cw-validate_shared_ifcs_xml
-rm --force /usr/bin/cw-validate_fallback_ifcs_xml
-rm --force /usr/bin/cw-display_shared_ifcs
-rm --force /usr/bin/cw-display_fallback_ifcs
-rm --force /usr/sbin/cw-remove_shared_ifcs_xml
-rm --force /usr/sbin/cw-remove_fallback_ifcs_xml
-
-%post plugin-bgcf
-# See: debian/sprout-bgcf.links
-ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_bgcf_json /usr/bin/cw-upload_bgcf_json
-
-%preun plugin-bgcf
-rm --force /usr/bin/cw-upload_bgcf_json
-
 %files
 /usr/share/clearwater/bin/sprout
 /usr/share/clearwater/bin/poll_sprout_http.sh
@@ -335,3 +313,27 @@ rm --force /usr/bin/cw-upload_bgcf_json
 /usr/share/clearwater/bin/sip-perf
 /usr/share/clearwater/infrastructure/scripts/sip-perf
 /usr/share/clearwater/sip-perf/sip-perf.xml
+
+%post plugin-scscf
+# See: debian/scsf-bgcf.links
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/validate_shared_ifcs_xml /usr/bin/cw-validate_shared_ifcs_xml
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/validate_fallback_ifcs_xml /usr/bin/cw-validate_fallback_ifcs_xml
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/display_shared_ifcs /usr/bin/cw-display_shared_ifcs
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/display_fallback_ifcs /usr/bin/cw-display_fallback_ifcs
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/remove_shared_ifcs_xml /usr/sbin/cw-remove_shared_ifcs_xml
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/remove_fallback_ifcs_xml /usr/sbin/cw-remove_fallback_ifcs_xml
+
+%preun plugin-scscf
+rm --force /usr/bin/cw-validate_shared_ifcs_xml
+rm --force /usr/bin/cw-validate_fallback_ifcs_xml
+rm --force /usr/bin/cw-display_shared_ifcs
+rm --force /usr/bin/cw-display_fallback_ifcs
+rm --force /usr/sbin/cw-remove_shared_ifcs_xml
+rm --force /usr/sbin/cw-remove_fallback_ifcs_xml
+
+%post plugin-bgcf
+# See: debian/sprout-bgcf.links
+ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_bgcf_json /usr/bin/cw-upload_bgcf_json
+
+%preun plugin-bgcf
+rm --force /usr/bin/cw-upload_bgcf_json

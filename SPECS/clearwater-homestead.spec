@@ -3,6 +3,7 @@ Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
 URL:           https://github.com/Metaswitch/homestead
+
 Source0:       %{name}-%{version}.tar.bz2
 BuildRequires: rsync make cmake libtool git gcc-c++ bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
@@ -59,6 +60,31 @@ rsync usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/homestead/lib
 # See: debian/homestead-cassandra.install
 rsync --recursive homestead-cassandra.root/* %{buildroot}/
 
+%files
+%{_initrddir}/homestead
+/usr/share/clearwater/bin/homestead
+/usr/share/clearwater/bin/check_cx_health
+/usr/share/clearwater/bin/check_cx_health.py*
+/usr/share/clearwater/bin/poll_homestead.sh
+/usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_diags
+/usr/share/clearwater/infrastructure/alarms/homestead_alarms.json
+/usr/share/clearwater/infrastructure/monit_stability/homestead-stability
+/usr/share/clearwater/infrastructure/monit_uptime/check-homestead-uptime
+/usr/share/clearwater/infrastructure/scripts/restart/homestead_restart
+/usr/share/clearwater/infrastructure/scripts/create-homestead-nginx-config
+/usr/share/clearwater/infrastructure/scripts/homestead
+/usr/share/clearwater/infrastructure/scripts/homestead.monit
+/usr/share/clearwater/node_type.d/20_homestead
+%config /etc/cron.hourly/homestead-log-cleanup
+%config /etc/security/limits.conf.homestead
+%ghost /var/log/homestead/
+
+%files libs
+/usr/share/clearwater/homestead/lib/
+
+%files cassandra
+/usr/share/clearwater/cassandra-schemas/homestead_cache.sh
+
 %post
 # See: debian/homestead.postinst
 set -e
@@ -92,7 +118,7 @@ function remove_section()
   mv "/tmp/$(basename "$FILE").$$" "$FILE"
 }
 rm --force /etc/monit/conf.d/homestead.monit
-reload clearwater-monit &> /dev/null || true
+service clearwater-monit reload || /bin/true
 rm --force /usr/share/clearwater/clearwater-cluster-manager/plugins/homestead*
 if [ -x /etc/init.d/clearwater-cluster-manager ]; then
   service clearwater-cluster-manager stop || /bin/true
@@ -102,10 +128,10 @@ if [ "$1" = 0 ]; then # Uninstall
   if grep -q "^homestead:" /etc/passwd; then
     userdel homestead
   fi
-  if [ -d /var/log/homestead ]; then
-    rm --recursive /var/log/homestead
+  if [ -d /var/log/homestead/ ]; then
+    rm --recursive /var/log/homestead/
   fi
-  rm --recursive --force /var/run/homestead
+  rm --recursive --force /var/run/homestead/
 fi
 remove_section /etc/security/limits.conf homestead
 rm --force /var/lib/homestead/homestead.conf
@@ -114,28 +140,3 @@ rm --force /var/lib/homestead/homestead.conf
 # See: debian/homestead-cassandra.postinst
 set -e
 service clearwater-infrastructure restart
-
-%files
-%{_initrddir}/homestead
-/usr/share/clearwater/bin/homestead
-/usr/share/clearwater/bin/check_cx_health
-/usr/share/clearwater/bin/check_cx_health.py*
-/usr/share/clearwater/bin/poll_homestead.sh
-/usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_diags
-/usr/share/clearwater/infrastructure/alarms/homestead_alarms.json
-/usr/share/clearwater/infrastructure/monit_stability/homestead-stability
-/usr/share/clearwater/infrastructure/monit_uptime/check-homestead-uptime
-/usr/share/clearwater/infrastructure/scripts/restart/homestead_restart
-/usr/share/clearwater/infrastructure/scripts/create-homestead-nginx-config
-/usr/share/clearwater/infrastructure/scripts/homestead
-/usr/share/clearwater/infrastructure/scripts/homestead.monit
-/usr/share/clearwater/node_type.d/20_homestead
-%config /etc/cron.hourly/homestead-log-cleanup
-%config /etc/security/limits.conf.homestead
-%ghost /var/log/homestead/
-
-%files libs
-/usr/share/clearwater/homestead/lib/
-
-%files cassandra
-/usr/share/clearwater/cassandra-schemas/homestead_cache.sh
