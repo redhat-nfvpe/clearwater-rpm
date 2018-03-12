@@ -5,16 +5,16 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make cmake libtool gcc-c++ bison flex
-#rubygems
-#BuildRequires: libevent-devel, boost-devel, boost-static, ncurses-devel, c-ares-devel
-#BuildRequires: net-snmp-devel, zeromq-devel
+BuildRequires: rsync make cmake libtool gcc-c++ bison flex rubygems
+BuildRequires: libevent-devel boost-devel boost-static openssl-devel ncurses-devel zeromq-devel
+BuildRequires: net-snmp-devel
 
 # Note: zeromq-devel requires epel-release
 
 %global debug_package %{nil}
 
-Summary: Clearwater - Sprout
+Summary:       Clearwater - Sprout
+Requires:      libevent openssl ncurses zeromq net-snmp-libs
 
 %package plugin-scscf
 Summary: Clearwater - Sprout S-CSCF Plugin

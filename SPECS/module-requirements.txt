@@ -1,0 +1,52 @@
+app-servers
+ required modules: pjsip, sasclient
+
+c-ares
+
+cassandra
+
+clearwater-etcd-plugins
+
+cpp-common
+
+curl
+ BuildRequires: openssl-devel
+
+freeDiameter
+ BuildRequires: cmake bison flex
+
+gcovr
+ Python
+ BuildRequires: gcc
+
+gemini
+ required modules: app-servers
+
+gmock
+
+libevhtp
+ BuildRequires: cmake libevent-devel openssl-devel 
+
++++
+
+libmemcached
+
+libre
+
+memento-as
+
+openssl
+
+pjsip
+
+rapidjson
+
+restund
+
+sas-client
+
+sipp
+
+thrift
+
+websocketpp

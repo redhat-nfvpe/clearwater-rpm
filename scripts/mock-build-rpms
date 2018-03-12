@@ -24,4 +24,4 @@ mock --root="$MOCK" --resultdir="$TOPDIR/RPMS/%(target_arch)s" --enable-network 
 rebuild "$TOPDIR/SRPMS/"$SPEC-$VERSION-* \
 	2>&1 | tee "$LOGS/mock-build-rpms.log"
 
-echo "Details in \"$TOPDIR/RPMS/x86_64/build.log\""
+echo "See: \"$TOPDIR/RPMS/x86_64/build.log\""
