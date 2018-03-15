@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+# Requirements:
+#
+# sudo yum install --assumeyes createrepo
+
+if ! rpm --query centos-release > /dev/null && ! rpm --query redhat-release > /dev/null; then
+	echo 'Can only be run in CentOS or RHEL'
+	exit 1
+fi
+
+HERE=$(dirname "$(readlink -f "$0")")
+TOPDIR=$(readlink -f "$HERE/..")
+RPMS="$TOPDIR/RPMS"
+URI_RPMS="file://$(python -c "import urllib; print urllib.quote(raw_input())" <<< "$RPMS")/"
+
+createrepo "$RPMS"
+
+echo "[clearwater-local]
+name=Clearwater Local
+baseurl=$URI_RPMS
+enabled=1
+gpgcheck=0
+" | sudo tee /etc/yum.repos.d/clearwater-local.repo > /dev/null

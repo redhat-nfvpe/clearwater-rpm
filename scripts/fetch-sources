@@ -8,7 +8,7 @@ set -e
 VERSION=129
 
 HERE=$(dirname "$(readlink -f "$0")")
-TOPDIR="$HERE/.."
+TOPDIR=$(readlink -f "$HERE/..")
 SOURCES="$TOPDIR/SOURCES"
 WORK=/tmp/clearwater-rpm
 
@@ -37,5 +37,6 @@ fetch clearwater-homestead homestead
 fetch clearwater-infrastructure
 fetch clearwater-logging
 fetch clearwater-monit
+fetch clearwater-nginx
 fetch clearwater-ralf ralf
 fetch clearwater-sprout sprout

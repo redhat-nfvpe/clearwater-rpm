@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/crest
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make python-virtualenv gcc-c++
+BuildRequires: make python-virtualenv gcc-c++
 BuildRequires: python-devel libffi-devel libxslt-devel openssl-devel
 
 %global debug_package %{nil}
@@ -60,41 +60,41 @@ make env
 %install
 # See: debian/crest.install
 mkdir --parents %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
-rsync --recursive crest_wheelhouse/* %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
+cp --recursive crest_wheelhouse/* %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
 
 # See: debian/crest-prov.install
 mkdir --parents %{buildroot}/usr/share/clearwater/crest-prov/src/metaswitch/crest/
 mkdir --parents %{buildroot}/usr/share/clearwater/crest-prov/tools/sstable_provisioning/
 mkdir --parents %{buildroot}/usr/share/clearwater/crest-prov/.wheelhouse/
-rsync src/metaswitch/crest/tools %{buildroot}/usr/share/clearwater/crest-prov/src/metaswitch/crest/
-rsync src/metaswitch/crest/tools/sstable_provisioning/* %{buildroot}/usr/share/clearwater/crest-prov/tools/sstable_provisioning/
-rsync crest_wheelhouse/* %{buildroot}/usr/share/clearwater/crest-prov/.wheelhouse/
+cp --recursive src/metaswitch/crest/tools %{buildroot}/usr/share/clearwater/crest-prov/src/metaswitch/crest/
+cp src/metaswitch/crest/tools/sstable_provisioning/* %{buildroot}/usr/share/clearwater/crest-prov/tools/sstable_provisioning/
+cp crest_wheelhouse/* %{buildroot}/usr/share/clearwater/crest-prov/.wheelhouse/
 
 # See: debian/homer.install
 mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/src/metaswitch/homer/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/templates/
-rsync debian/homer.init.d %{buildroot}%{_initrddir}/homer
-rsync homer_wheelhouse/* %{buildroot}/usr/share/clearwater/homer/.wheelhouse/
-rsync --recursive src/metaswitch/homer/tools %{buildroot}/usr/share/clearwater/homer/src/metaswitch/homer/
-rsync homer.local_settings/local_settings.py %{buildroot}/usr/share/clearwater/homer/templates/
-rsync homer.monit %{buildroot}/usr/share/clearwater/homer/templates/
-rsync --recursive homer.root/* %{buildroot}/
+cp debian/homer.init.d %{buildroot}%{_initrddir}/homer
+cp homer_wheelhouse/* %{buildroot}/usr/share/clearwater/homer/.wheelhouse/
+cp --recursive src/metaswitch/homer/tools %{buildroot}/usr/share/clearwater/homer/src/metaswitch/homer/
+cp homer.local_settings/local_settings.py %{buildroot}/usr/share/clearwater/homer/templates/
+cp homer.monit %{buildroot}/usr/share/clearwater/homer/templates/
+cp --recursive homer.root/* %{buildroot}/
 
 # See: debian/homer-cassandra.install
-rsync --recursive homer-cassandra.root/* %{buildroot}/
+cp --recursive homer-cassandra.root/* %{buildroot}/
 
 # See: debian/homestead-prov.install
-rsync debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
+cp debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
 mkdir --parents %{buildroot}/usr/share/clearwater/homestead/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/homestead/templates/
-rsync homestead_prov_wheelhouse/* %{buildroot}/usr/share/clearwater/homestead/.wheelhouse/
-rsync homestead.local_settings/local_settings.py %{buildroot}/usr/share/clearwater/homestead/templates/
-rsync --recursive homestead.root/* %{buildroot}/
+cp homestead_prov_wheelhouse/* %{buildroot}/usr/share/clearwater/homestead/.wheelhouse/
+cp homestead.local_settings/local_settings.py %{buildroot}/usr/share/clearwater/homestead/templates/
+cp --recursive homestead.root/* %{buildroot}/
 
 # See: debian/homestead-prov-cassandra.install
-rsync --recursive homestead-prov-cassandra.root/* %{buildroot}/
+cp --recursive homestead-prov-cassandra.root/* %{buildroot}/
 
 %files
 /usr/share/clearwater/crest/.wheelhouse/

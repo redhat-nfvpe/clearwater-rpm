@@ -5,7 +5,6 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/clearwater-logging
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync
 
 %global debug_package %{nil}
 
@@ -20,7 +19,7 @@ Common logging infrastructure
 
 %install
 # See: debian/clearwater-logging.install
-rsync --recursive clearwater-logging/* %{buildroot}/
+cp --recursive clearwater-logging/* %{buildroot}/
 
 %files
 /opt/

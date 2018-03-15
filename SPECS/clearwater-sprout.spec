@@ -5,12 +5,12 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make cmake libtool gcc-c++ byacc bison flex rubygems
+BuildRequires: make cmake libtool gcc-c++ byacc flex rubygems rsync
 BuildRequires: libevent-devel boost-devel boost-static openssl-devel ncurses-devel zeromq-devel
 BuildRequires: net-snmp-devel
 
-# Note: Why bison and byacc together? Because libmemached for some reason breaks with our version
-# of bison, but is OK with byacc. Why, then, do other specs (ralf, homestead) that have libmemcached
+# Note: Why byacc and not buson? Because libmemached for some reason breaks with our version of
+# bison, but is OK with byacc. Why, then, do other specs (ralf, homestead) that have libmemcached
 # build fine with bison?
 
 # Note: zeromq-devel requires epel-release
@@ -119,88 +119,90 @@ make
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
-rsync build/bin/sprout %{buildroot}/usr/share/clearwater/bin/
-rsync --recursive sprout-base.root/* %{buildroot}/
-rsync scripts/sprout-log-cleanup %{buildroot}/etc/cron.hourly/
-rsync modules/clearwater-etcd-plugins/sprout/sprout_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
-rsync modules/clearwater-etcd-plugins/sprout/sprout_scscf_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
-rsync modules/clearwater-etcd-plugins/sprout/sprout_enum_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
-rsync modules/clearwater-etcd-plugins/sprout/sprout_rph_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_config_access/scscf_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_config_access/enum_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_config_access/rph_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+mkdir --parents %{buildroot}/etc/cron.hourly/
+cp build/bin/sprout %{buildroot}/usr/share/clearwater/bin/
+cp --recursive sprout-base.root/* %{buildroot}/
+cp scripts/sprout-log-cleanup %{buildroot}/etc/cron.hourly/
+cp modules/clearwater-etcd-plugins/sprout/sprout_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
+cp modules/clearwater-etcd-plugins/sprout/sprout_scscf_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
+cp modules/clearwater-etcd-plugins/sprout/sprout_enum_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
+cp modules/clearwater-etcd-plugins/sprout/sprout_rph_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_config_access/scscf_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_config_access/enum_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_config_access/rph_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 
 # See: debian/sprout-scscf.install
 mkdir --parents %{buildroot}/usr/share/clearwater/sprout/plugins
-rsync build/bin/sprout_scscf.so %{buildroot}/usr/share/clearwater/sprout/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/shared_ifcs_xml_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/fallback_ifcs_xml_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/remove_shared_ifcs_xml %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/remove_fallback_ifcs_xml %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/validate_shared_ifcs_xml %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/validate_fallback_ifcs_xml %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/display_shared_ifcs %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/display_fallback_ifcs %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
-rsync modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/config_validation/* %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/config_validation/
-rsync modules/clearwater-etcd-plugins/clearwater_config_access/shared_ifcs_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_config_access/fallback_ifcs_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+cp build/bin/sprout_scscf.so %{buildroot}/usr/share/clearwater/sprout/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/shared_ifcs_xml_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/fallback_ifcs_xml_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/remove_shared_ifcs_xml %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/remove_fallback_ifcs_xml %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/validate_shared_ifcs_xml %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/validate_fallback_ifcs_xml %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/display_shared_ifcs %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/display_fallback_ifcs %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
+cp modules/clearwater-etcd-plugins/clearwater_config_manager/scripts/config_validation/* %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/config_validation/
+cp modules/clearwater-etcd-plugins/clearwater_config_access/shared_ifcs_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_config_access/fallback_ifcs_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 
 # See: debian/sprout-icscf.install
-rsync build/bin/sprout_icscf.so %{buildroot}/usr/share/clearwater/sprout/plugins/
+cp build/bin/sprout_icscf.so %{buildroot}/usr/share/clearwater/sprout/plugins/
 
 # See: debian/sprout-bgcf.install
-rsync build/bin/sprout_bgcf.so %{buildroot}/usr/share/clearwater/sprout/plugins/
-rsync --recursive sprout-bgcf.root/* %{buildroot}/
-rsync modules/clearwater-etcd-plugins/sprout/sprout_bgcf_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_config_access/bgcf_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+cp build/bin/sprout_bgcf.so %{buildroot}/usr/share/clearwater/sprout/plugins/
+cp --recursive sprout-bgcf.root/* %{buildroot}/
+cp modules/clearwater-etcd-plugins/sprout/sprout_bgcf_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_config_access/bgcf_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 
 # See: debian/sprout-mmtel-as.install
-rsync build/bin/sprout_mmtel_as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
-rsync --recursive sprout-mmtel-as.root/* %{buildroot}/
+cp build/bin/sprout_mmtel_as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
+cp --recursive sprout-mmtel-as.root/* %{buildroot}/
 
 # See: debian/gemini-as.install
-rsync build/bin/gemini-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
+cp build/bin/gemini-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
 
 # See: debian/memento-as.install
-rsync build/bin/memento-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
-rsync --recursive memento-as.root/* %{buildroot}/
+cp build/bin/memento-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
+cp --recursive memento-as.root/* %{buildroot}/
 
 # See: debian/call-diversion-as.install
-rsync build/bin/call-diversion-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
+cp build/bin/call-diversion-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
 
 # See: debian/mangelwurzel-as.install
-rsync build/bin/mangelwurzel-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
+cp build/bin/mangelwurzel-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
 
 # See: debian/bono.install
 mkdir --parents %{buildroot}%{_initrddir}/
-rsync build/bin/sprout %{buildroot}/usr/share/clearwater/bin/bono
-rsync debian/bono.init.d %{buildroot}%{_initrddir}/bono
-rsync --recursive bono.root/* %{buildroot}/
-rsync scripts/bono-log-cleanup %{buildroot}/etc/cron.hourly/
+cp build/bin/sprout %{buildroot}/usr/share/clearwater/bin/bono
+cp debian/bono.init.d %{buildroot}%{_initrddir}/bono
+cp --recursive bono.root/* %{buildroot}/
+cp scripts/bono-log-cleanup %{buildroot}/etc/cron.hourly/
 
 # See: debian/restund.install
 mkdir --parents %{buildroot}/usr/share/clearwater/restund/lib/
-rsync debian/restund.init.d %{buildroot}%{_initrddir}/restund
-rsync usr/sbin/restund %{buildroot}/usr/share/clearwater/bin/
-rsync usr/lib/libre.* %{buildroot}/usr/share/clearwater/restund/lib/
-rsync usr/lib/restund/modules/* %{buildroot}/usr/share/clearwater/restund/lib/
-rsync --recursive restund.root/* %{buildroot}/
+cp debian/restund.init.d %{buildroot}%{_initrddir}/restund
+cp usr/sbin/restund %{buildroot}/usr/share/clearwater/bin/
+cp usr/lib/libre.* %{buildroot}/usr/share/clearwater/restund/lib/
+cp usr/lib/restund/modules/* %{buildroot}/usr/share/clearwater/restund/lib/
+cp --recursive restund.root/* %{buildroot}/
 
 # See: debian/clearwater-sipp.install
-rsync --recursive clearwater-sipp.root/* %{buildroot}/
-rsync modules/sipp/sipp %{buildroot}/usr/share/clearwater/bin/
+cp --recursive clearwater-sipp.root/* %{buildroot}/
+cp modules/sipp/sipp %{buildroot}/usr/share/clearwater/bin/
 
 # See: debian/clearwater-sip-stress.install
-rsync debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
-rsync --recursive clearwater-sip-stress.root/* %{buildroot}/
+cp debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
+cp --recursive clearwater-sip-stress.root/* %{buildroot}/
 
 # See: debian/clearwater-sip-stress-stats.install
-rsync debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
-rsync scripts/sipp-stats/clearwater-sipp-stats-*.gem %{buildroot}/usr/share/clearwater/gems/
+mkdir --parents %{buildroot}/usr/share/clearwater/gems/
+cp debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
+cp scripts/sipp-stats/clearwater-sipp-stats-*.gem %{buildroot}/usr/share/clearwater/gems/
 
 # See: debian/clearwater-sip-perf.install
-rsync debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
-rsync --recursive clearwater-sip-perf.root/* %{buildroot}/
+cp debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
+cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 
 %files
 /usr/share/clearwater/bin/sprout

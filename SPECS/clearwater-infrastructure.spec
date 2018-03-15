@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https:/github.com/Metaswitch/clearwater-infrastructure
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make python-virtualenv
+BuildRequires: make python-virtualenv
 BuildRequires: zeromq-devel boost-devel
 BuildRequires: systemd
 
@@ -121,85 +121,85 @@ mkdir --parents %{buildroot}/usr/
 mkdir --parents %{buildroot}/usr/share/clearwater/infrastructure/eggs/
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/infrastructure/wheelhouse/
-rsync --recursive clearwater-infrastructure/etc/* %{buildroot}/etc/
-rsync --recursive clearwater-infrastructure/usr/* %{buildroot}/usr/
-rsync debian/clearwater-infrastructure.init.d %{buildroot}%{_initrddir}/clearwater-infrastructure
-rsync clearwater-infrastructure/PyZMQ/eggs/pyzmq* %{buildroot}/usr/share/clearwater/infrastructure/eggs/
-rsync build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/bin/
-rsync build/bin/ipv6-to-hostname %{buildroot}/usr/share/clearwater/bin/
-rsync build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/bin/
-rsync build/bin/issue-alarm %{buildroot}/usr/share/clearwater/bin/
-rsync .wheelhouse/* %{buildroot}/usr/share/clearwater/infrastructure/wheelhouse/
+cp --recursive clearwater-infrastructure/etc/* %{buildroot}/etc/
+cp --recursive clearwater-infrastructure/usr/* %{buildroot}/usr/
+cp debian/clearwater-infrastructure.init.d %{buildroot}%{_initrddir}/clearwater-infrastructure
+cp --recursive clearwater-infrastructure/PyZMQ/eggs/pyzmq* %{buildroot}/usr/share/clearwater/infrastructure/eggs/
+cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/bin/
+cp build/bin/ipv6-to-hostname %{buildroot}/usr/share/clearwater/bin/
+cp build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/bin/
+cp build/bin/issue-alarm %{buildroot}/usr/share/clearwater/bin/
+cp .wheelhouse/* %{buildroot}/usr/share/clearwater/infrastructure/wheelhouse/
 
 # See: debian/clearwater-memcached.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
-rsync debian/clearwater-memcached.init.d %{buildroot}%{_initrddir}/clearwater-memcached
-rsync --recursive clearwater-memcached/* %{buildroot}/
-rsync modules/clearwater-etcd-plugins/clearwater_memcached/memcached_plugin.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
-rsync modules/clearwater-etcd-plugins/clearwater_memcached/memcached_utils.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
+cp debian/clearwater-memcached.init.d %{buildroot}%{_initrddir}/clearwater-memcached
+cp --recursive clearwater-memcached/* %{buildroot}/
+cp modules/clearwater-etcd-plugins/clearwater_memcached/memcached_plugin.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
+cp modules/clearwater-etcd-plugins/clearwater_memcached/memcached_utils.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
 
 # See: debian/clearwater-tcp-scalability.install
-rsync --recursive clearwater-tcp-scalability/* %{buildroot}/
+cp --recursive clearwater-tcp-scalability/* %{buildroot}/
 
 # See: debian/clearwater-secure-connections.install
-rsync debian/clearwater-secure-connections.init.d %{buildroot}%{_initrddir}/clearwater-secure-connections
-rsync --recursive clearwater-secure-connections/* %{buildroot}/
+cp debian/clearwater-secure-connections.init.d %{buildroot}%{_initrddir}/clearwater-secure-connections
+cp --recursive clearwater-secure-connections/* %{buildroot}/
 
 # See: debian/clearwater-snmpd.install
-rsync --recursive clearwater-snmpd/* %{buildroot}/
+cp --recursive clearwater-snmpd/* %{buildroot}/
 
 # See: debian/clearwater-diags-monitor.install
-rsync debian/clearwater-diags-monitor.init.d %{buildroot}%{_initrddir}/clearwater-diags-monitor
-rsync --recursive clearwater-diags-monitor/* %{buildroot}/
+cp debian/clearwater-diags-monitor.init.d %{buildroot}%{_initrddir}/clearwater-diags-monitor
+cp --recursive clearwater-diags-monitor/* %{buildroot}/
 
 # See: debian/clearwater-socket-factory.install
 mkdir --parents %{buildroot}/etc/init/
-rsync clearwater-socket-factory/clearwater_socket_factory %{buildroot}/usr/share/clearwater/bin/
-rsync clearwater-socket-factory/clearwater-socket-factory-common %{buildroot}/usr/share/clearwater/bin/
-rsync clearwater-socket-factory/clearwater-socket-factory-mgmt-wrapper %{buildroot}/usr/share/clearwater/bin/
-rsync clearwater-socket-factory/clearwater-socket-factory-sig-wrapper %{buildroot}/usr/share/clearwater/bin/
-rsync clearwater-socket-factory/clearwater-socket-factory-mgmt.conf %{buildroot}/etc/init/
-rsync clearwater-socket-factory/clearwater-socket-factory-sig.conf %{buildroot}/etc/init/
+cp clearwater-socket-factory/clearwater_socket_factory %{buildroot}/usr/share/clearwater/bin/
+cp clearwater-socket-factory/clearwater-socket-factory-common %{buildroot}/usr/share/clearwater/bin/
+cp clearwater-socket-factory/clearwater-socket-factory-mgmt-wrapper %{buildroot}/usr/share/clearwater/bin/
+cp clearwater-socket-factory/clearwater-socket-factory-sig-wrapper %{buildroot}/usr/share/clearwater/bin/
+cp clearwater-socket-factory/clearwater-socket-factory-mgmt.conf %{buildroot}/etc/init/
+cp clearwater-socket-factory/clearwater-socket-factory-sig.conf %{buildroot}/etc/init/
 
 mkdir --parents %{buildroot}%{_unitdir}/
-rsync debian/clearwater-socket-factory-mgmt.service %{buildroot}%{_unitdir}/
-rsync debian/clearwater-socket-factory-sig.service %{buildroot}%{_unitdir}/
+cp debian/clearwater-socket-factory-mgmt.service %{buildroot}%{_unitdir}/
+cp debian/clearwater-socket-factory-sig.service %{buildroot}%{_unitdir}/
 
 # See: debian/clearwater-auto-config-aws.install
 mkdir --parents %{buildroot}/usr/share/clearwater-auto-config/bin/
-rsync debian/clearwater-auto-config-aws.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-aws
-rsync --recursive clearwater-auto-config/* %{buildroot}/
-rsync clearwater-infrastructure/usr/share/clearwater/infrastructure/install/common %{buildroot}/usr/share/clearwater-auto-config/bin/
+cp debian/clearwater-auto-config-aws.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-aws
+cp --recursive clearwater-auto-config/* %{buildroot}/
+cp clearwater-infrastructure/usr/share/clearwater/infrastructure/install/common %{buildroot}/usr/share/clearwater-auto-config/bin/
 
 # See: debian/clearwater-auto-config-docker.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
-rsync debian/clearwater-auto-config-docker.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-docker
-rsync --recursive clearwater-auto-config/* %{buildroot}/
-rsync build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
-rsync build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
+cp debian/clearwater-auto-config-docker.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-docker
+cp --recursive clearwater-auto-config/* %{buildroot}/
+cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
+cp build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
 
 # See: debian/clearwater-auto-config-generic.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
-rsync debian/clearwater-auto-config-generic.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-generic
-rsync --recursive clearwater-auto-config/* %{buildroot}/
-rsync build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
-rsync build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
-rsync clearwater-infrastructure/usr/share/clearwater/infrastructure/install/common %{buildroot}/usr/share/clearwater-auto-config/bin/
+cp debian/clearwater-auto-config-generic.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-generic
+cp --recursive clearwater-auto-config/* %{buildroot}/
+cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
+cp build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
+cp clearwater-infrastructure/usr/share/clearwater/infrastructure/install/common %{buildroot}/usr/share/clearwater-auto-config/bin/
 
 # See: debian/clearwater-log-cleanup.install
-rsync --recursive clearwater-log-cleanup/* %{buildroot}/
+cp --recursive clearwater-log-cleanup/* %{buildroot}/
 
 # See: clearwater-auto-upgrade
-rsync debian/clearwater-auto-upgrade.init.d %{buildroot}%{_initrddir}/clearwater-auto-upgrade
+cp debian/clearwater-auto-upgrade.init.d %{buildroot}%{_initrddir}/clearwater-auto-upgrade
 
 # See: debian/clearwater-radius-auth.install
-rsync --recursive clearwater-radius-auth/* %{buildroot}/
+cp --recursive clearwater-radius-auth/* %{buildroot}/
 
 # See: debian/velum.install
-rsync --recursive vellum/* %{buildroot}/
+cp --recursive vellum/* %{buildroot}/
 
 # See: debian/dime.install
-rsync --recursive dime/* %{buildroot}/
+cp --recursive dime/* %{buildroot}/
 
 %files
 %{_initrddir}/clearwater-infrastructure

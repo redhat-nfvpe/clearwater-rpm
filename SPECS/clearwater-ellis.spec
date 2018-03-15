@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ellis
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make python-virtualenv gcc-c++
+BuildRequires: make python-virtualenv gcc-c++
 BuildRequires: python-devel mysql-devel curl-devel libffi-devel
 
 %global debug_package %{nil}
@@ -36,21 +36,22 @@ make env
 mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
-rsync debian/ellis.init.d %{buildroot}%{_initrddir}/ellis
-rsync ellis_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
-rsync --recursive --exclude .project --exclude .settings web-content %{buildroot}/usr/share/clearwater/ellis/
-rsync local_settings.py %{buildroot}/usr/share/clearwater/ellis/
-rsync src/metaswitch/ellis/data/*.sql %{buildroot}/usr/share/clearwater/ellis/
-rsync --recursive src/metaswitch/ellis/tools %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
-rsync *.monit %{buildroot}/usr/share/clearwater/ellis/
-rsync --recursive root/* %{buildroot}/
-rsync --recursive backup %{buildroot}/usr/share/clearwater/ellis/
+cp debian/ellis.init.d %{buildroot}%{_initrddir}/ellis
+cp ellis_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
+rm --recursive web-content/.project web-content/.settings
+cp --recursive web-content %{buildroot}/usr/share/clearwater/ellis/
+cp local_settings.py %{buildroot}/usr/share/clearwater/ellis/
+cp src/metaswitch/ellis/data/*.sql %{buildroot}/usr/share/clearwater/ellis/
+cp --recursive src/metaswitch/ellis/tools %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
+cp *.monit %{buildroot}/usr/share/clearwater/ellis/
+cp --recursive root/* %{buildroot}/
+cp --recursive backup %{buildroot}/usr/share/clearwater/ellis/
 
 # See: debian/clearwater-prov-tools.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-prov-tools/.wheelhouse/
-rsync prov_tools_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/clearwater-prov-tools/.wheelhouse/
-rsync local_settings.py %{buildroot}/usr/share/clearwater/clearwater-prov-tools/
-rsync --recursive clearwater-prov-tools.root/* %{buildroot}/
+cp prov_tools_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/clearwater-prov-tools/.wheelhouse/
+cp local_settings.py %{buildroot}/usr/share/clearwater/clearwater-prov-tools/
+cp --recursive clearwater-prov-tools.root/* %{buildroot}/
 
 %files
 %{_initrddir}/ellis

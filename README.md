@@ -24,8 +24,9 @@ You then have a few options for building the RPMs:
 1. Are you on CentOS or RHEL? Then just run `build-rpms`. (The requirements are documented in the
    script.)
 2. On other Linuxes, use [mock](https://github.com/rpm-software-management/mock) to emulate CentOS
-   in a chroot environment. The script is `mock-build-rpms`. (Note that mock will use up a lot of space
-   in `/var/lib/mock` while running, so you may want to mount that directory somewhere spacious.)
+   in a chroot environment. Here you need to build the SRPMs first via `mock-build-srpms`, and then
+   run `mock-build-rpms`. (Note that mock will use up a lot of space in `/var/lib/mock` while running, so
+   you may want to mount that directory somewhere spacious.)
 3. Or, use our included [Vagrant](https://www.vagrantup.com/) configuration to quickly bring up a
    CentOS virtual machine. Just run `vagrant up`, and then `vagrant ssh` to login. The build scripts are
    in the `scripts` directory within the virtual machine. (Note that you will need the VirtualBox
@@ -78,6 +79,8 @@ cache.
 
 ### clearwater-infrastructure
 
+TODO
+
 ### clearwater-logging
 
 Clearwater's logging is based on Nagios and SYSSTAT.
@@ -85,6 +88,10 @@ Clearwater's logging is based on Nagios and SYSSTAT.
 ### clearwater-monit
 
 Fork of [Monit](https://mmonit.com/monit/). Monit is written in C.
+
+### clearwater-nginx
+
+Nginx (as a dependency, not a fork) with Clearwater-specific configurations.
 
 ### clearwater-ralf
 
@@ -103,4 +110,9 @@ and takes an especially long time to build.
 How To Use
 ----------
 
-TODO
+It's easiest to put the RPMs in a repository on a CentOS install. The `install-local-repository` script
+will do it for you. Make sure to re-run it if you rebuild any of the RPMs. 
+
+You can then use `yum install` for any of the components, e.g.
+
+    sudo yum install clearwater-sprout

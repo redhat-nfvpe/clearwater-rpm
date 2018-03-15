@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ralf
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make cmake libtool gcc-c++ bison flex
+BuildRequires: make cmake libtool gcc-c++ bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: boost-devel zeromq-devel libcurl-devel
 
@@ -39,15 +39,15 @@ make
 # See: debian/ralf.install
 mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
-rsync debian/ralf.init.d %{buildroot}%{_initrddir}/ralf
-rsync build/bin/ralf %{buildroot}/usr/share/clearwater/bin/
-rsync --recursive ralf.root/* %{buildroot}/
+cp debian/ralf.init.d %{buildroot}%{_initrddir}/ralf
+cp build/bin/ralf %{buildroot}/usr/share/clearwater/bin/
+cp --recursive ralf.root/* %{buildroot}/
 
 # See: debian/ralf-libs.install
 mkdir --parents %{buildroot}/usr/share/clearwater/ralf/lib/freeDiameter/
-rsync usr/lib/*.so %{buildroot}/usr/share/clearwater/ralf/lib/
-rsync usr/lib/*.so.* %{buildroot}/usr/share/clearwater/ralf/lib/
-rsync usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/ralf/lib/freeDiameter/
+cp usr/lib/*.so %{buildroot}/usr/share/clearwater/ralf/lib/
+cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/ralf/lib/
+cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/ralf/lib/freeDiameter/
 
 %files
 %{_initrddir}/ralf

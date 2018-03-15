@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/homestead
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make cmake libtool git gcc-c++ bison flex
+BuildRequires: make cmake libtool git gcc-c++ bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: openssl-devel boost-devel boost-static zeromq-devel libcurl-devel net-snmp-devel
 
@@ -47,18 +47,18 @@ make
 # See: debian/homestead.install
 mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
-rsync debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
-rsync build/bin/homestead %{buildroot}/usr/share/clearwater/bin/
-rsync --recursive homestead.root/* %{buildroot}/
+cp debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
+cp build/bin/homestead %{buildroot}/usr/share/clearwater/bin/
+cp --recursive homestead.root/* %{buildroot}/
 
 # See: debian/homestead-libs.install
 mkdir --parents %{buildroot}/usr/share/clearwater/homestead/lib/freeDiameter/
-rsync usr/lib/*.so %{buildroot}/usr/share/clearwater/homestead/lib/
-rsync usr/lib/*.so.* %{buildroot}/usr/share/clearwater/homestead/lib/
-rsync usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/homestead/lib/freeDiameter/
+cp usr/lib/*.so %{buildroot}/usr/share/clearwater/homestead/lib/
+cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/homestead/lib/
+cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/homestead/lib/freeDiameter/
 
 # See: debian/homestead-cassandra.install
-rsync --recursive homestead-cassandra.root/* %{buildroot}/
+cp --recursive homestead-cassandra.root/* %{buildroot}/
 
 %files
 %{_initrddir}/homestead

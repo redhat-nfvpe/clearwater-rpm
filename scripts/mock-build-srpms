@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+
+# Requirements:
+#
+# sudo dnf install --assumeyes mock dnf-utils
+# sudo usermod -a -G mock $USER
+#
+# See: /etc/mock/ for available roots
+
+SPEC=${1:-*}
+MOCK=epel-7-x86_64
+
+HERE=$(dirname "$(readlink -f "$0")")
+TOPDIR=$(readlink -f "$HERE/..")
+ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
+SPECS="$TOPDIR/SPECS"
+SOURCES="$TOPDIR/SOURCES"
+SRPMS="$TOPDIR/SRPMS"
+LOGS="$TOPDIR/logs"
+
+# Note that technically, if we are already on an RPM-based operating system, we could have built
+# local SRPMs with rpmbuild instead, for example of type ".fc27.src.rpm" on Fedora 27. However,
+# it is safer to use mock because then we can *guarantee* conformance to exactly the target platform
+# and its RPM tooling.  
+
+# Build SRPMs for target platform (e.g. ".el7.centos.src.rpm")
+for F in "$SPECS/"$SPEC.spec; do
+	# buildsrpm can only do one spec at a time
+	mock --buildsrpm --no-clean --no-cleanup-after --root="$MOCK" --sources="$SOURCES" --resultdir="$SRPMS" --spec="$F" \
+		2>&1 | tee "$LOGS/mock-build-rpms.log"
+done
+
+echo "See: \"$SRPMS/build.log\""
