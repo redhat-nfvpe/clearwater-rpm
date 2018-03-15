@@ -80,7 +80,11 @@ cache.
 
 ### clearwater-logging
 
-Clearwater's logging is based on Nagios and SYSSTAT. 
+Clearwater's logging is based on Nagios and SYSSTAT.
+
+### clearwater-monit
+
+Fork of [Monit](https://mmonit.com/monit/). Monit is written in C.
 
 ### clearwater-ralf
 
@@ -92,7 +96,8 @@ repositories might be better off combined.)
 Sprout (SIP router), Bono (SIP edge proxy/loadbalancer), and several Sprout plugins. Also includes
 forks of restund (STUN/TURN server) and SIPp (SIP stress testing). Sprout and Bono are in fact the
 same executable, just with different configurations, based on PJSIP, WebSocket++, and curl. SIPp
-provides Ruby gems for integration with Rake. 
+provides Ruby gems for integration with Rake. Note that this is the biggest spec of the bunch
+and takes an especially long time to build.
 
 
 How To Use

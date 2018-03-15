@@ -5,16 +5,20 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make cmake libtool gcc-c++ bison flex rubygems
+BuildRequires: rsync make cmake libtool gcc-c++ byacc bison flex rubygems
 BuildRequires: libevent-devel boost-devel boost-static openssl-devel ncurses-devel zeromq-devel
 BuildRequires: net-snmp-devel
+
+# Note: Why bison and byacc together? Because libmemached for some reason breaks with our version
+# of bison, but is OK with byacc. Why, then, do other specs (ralf, homestead) that have libmemcached
+# build fine with bison?
 
 # Note: zeromq-devel requires epel-release
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - Sprout
-Requires:      libevent openssl ncurses zeromq net-snmp-libs
+Requires:      libevent openssl-libs ncurses zeromq net-snmp-libs
 
 %package plugin-scscf
 Summary: Clearwater - Sprout S-CSCF Plugin

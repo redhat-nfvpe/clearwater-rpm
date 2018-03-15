@@ -17,7 +17,7 @@ Summary:       Clearwater - Homestead
 Requires:      clearwater-homestead-libs
 Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
 Requires:      clearwater-tcp-scalability clearwater-snmpd
-Requires:      libidn libgcrypt gnutls openssl zeromq libcurl net-snmp-libs
+Requires:      libidn libgcrypt gnutls openssl-libs zeromq libcurl net-snmp-libs
 
 %package libs
 Summary:       Clearwater - Homestead Libraries

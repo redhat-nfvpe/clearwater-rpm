@@ -9,7 +9,7 @@ VERSION=129
 
 HERE=$(dirname "$(readlink -f "$0")")
 TOPDIR="$HERE/.."
-SOURCES="$HERE/SOURCES"
+SOURCES="$TOPDIR/SOURCES"
 WORK=/tmp/clearwater-rpm
 
 function fetch()
@@ -26,15 +26,16 @@ function fetch()
 			git config --global --unset 'url.https://github.com/.insteadOf'
 		fi
 		mkdir --parents "$SOURCES"
-		tar --create --bzip2 --file="$ARCHIVE" --directory="$WORK" "$REPO"
+		tar --create --bzip2 --exclude-vcs --file="$ARCHIVE" --directory="$WORK" "$REPO"
 		rm --recursive --force "$WORK" 
 	fi
 }
 
-fetch clearwater-infrastructure
-fetch clearwater-logging
 fetch clearwater-crest crest
 fetch clearwater-ellis ellis
 fetch clearwater-homestead homestead
+fetch clearwater-infrastructure
+fetch clearwater-logging
+fetch clearwater-monit
 fetch clearwater-ralf ralf
 fetch clearwater-sprout sprout

@@ -14,6 +14,7 @@ curl
 
 freeDiameter
  BuildRequires: cmake bison flex
+ note: breaks if we use byacc instead of bison!
 
 gcovr
  Python
@@ -30,6 +31,8 @@ libevhtp
 +++
 
 libmemcached
+ BuildRequires: bison* flax
+ *oddly, building sprout breaks with bison, so replace with byacc
 
 libre
 

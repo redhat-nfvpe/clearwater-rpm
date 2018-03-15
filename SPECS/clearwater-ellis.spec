@@ -5,10 +5,8 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ellis
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: rsync make python-virtualenv git gcc-c++
+BuildRequires: rsync make python-virtualenv gcc-c++
 BuildRequires: python-devel mysql-devel curl-devel libffi-devel
-
-# Note: git is used in the Makefile
 
 %global debug_package %{nil}
 

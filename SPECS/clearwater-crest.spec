@@ -12,7 +12,7 @@ BuildRequires: python-devel libffi-devel libxslt-devel openssl-devel
 
 Summary:       Clearwater - Crest
 Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
-Requires:      python-virtualenv libffi libxslt openssl
+Requires:      python-virtualenv libffi libxslt openssl-libs
 
 %package prov
 Summary:       Clearwater - Crest Provisioning

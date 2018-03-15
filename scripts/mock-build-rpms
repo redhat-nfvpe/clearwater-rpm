@@ -3,10 +3,10 @@ set -e
 
 # Requirements:
 #
-# sudo dnf install --assumeyes mock dnf-utils rpm-build
+# sudo dnf install --assumeyes mock dnf-utils
 # sudo usermod -a -G mock $USER
 #
-# See: /etc/mock/ for available configs
+# See: /etc/mock/ for available roots
 
 SPEC=${1:-*}
 VERSION=129
@@ -15,13 +15,20 @@ MOCK=epel-7-x86_64
 HERE=$(dirname "$(readlink -f "$0")")
 TOPDIR="$HERE/.."
 ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
+SPECS="$TOPDIR/SPECS"
+SOURCES="$TOPDIR/SOURCES"
+SRPMS="$TOPDIR/SRPMS"
+RPMS="$TOPDIR/RPMS/x86_64"
 LOGS="$TOPDIR/logs"
 
-rpmbuild -bs --define "_topdir $ESCAPED_TOPDIR" "$TOPDIR/SPECS/"$SPEC.spec \
+mock --buildsrpm --root="$MOCK" --sources="$SOURCES" --resultdir="$SRPMS" --spec="$SPECS/"$SPEC.spec \
 	2>&1 | tee "$LOGS/mock-build-rpms.log"
 
-mock --root="$MOCK" --resultdir="$TOPDIR/RPMS/%(target_arch)s" --enable-network \
-rebuild "$TOPDIR/SRPMS/"$SPEC-$VERSION-* \
+mock --rebuild --enable-network --root="$MOCK" --resultdir="$RPMS" "$SRPMS/"$SPEC-*.src.rpm \
 	2>&1 | tee "$LOGS/mock-build-rpms.log"
 
-echo "See: \"$TOPDIR/RPMS/x86_64/build.log\""
+# Rebuild annoyingly also produces SRPMs
+rm --force "$RPMS/"*.src.rpm
+
+echo "See: \"$SRPMS/build.log\""
+echo "And: \"$RPMS/build.log\""
