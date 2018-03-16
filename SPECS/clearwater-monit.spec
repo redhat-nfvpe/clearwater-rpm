@@ -30,7 +30,7 @@ make all
 # See: debian/clearwater-monit.install
 mkdir --parents %{buildroot}/etc/monit/
 mkdir --parents %{buildroot}/usr/bin
-cp debian/monitrc %{buildroot}/etc/monit/
+install -m 700 debian/monitrc %{buildroot}/etc/monit/
 cp monit %{buildroot}/usr/bin/
 cp --recursive clearwater-monit.root/* %{buildroot}/
 
@@ -47,11 +47,14 @@ cp debian/clearwater-monit.service %{buildroot}%{_unitdir}/
 %config /etc/monit/conf.d/monit.monit
 %config /etc/monit/conf.d/ntp.monit
 %ghost /var/log/monit.log
+%ghost /var/lib/monit/state
+%ghost /var/lib/monit/id
 
 %post
 # See: debian/clearwater-monit.postinst
 set -e
-/usr/share/clearwater/infrastructure/install/clearwater-monit.postinst
+mkdir --parents /var/lib/monit/ # this was missing!
+/usr/share/clearwater/clearwater-monit/install/clearwater-monit.postinst
 %systemd_post clearwater-monit.service
 
 %preun

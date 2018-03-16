@@ -175,13 +175,13 @@ cp build/bin/mangelwurzel-as.so %{buildroot}/usr/share/clearwater/sprout/plugins
 # See: debian/bono.install
 mkdir --parents %{buildroot}%{_initrddir}/
 cp build/bin/sprout %{buildroot}/usr/share/clearwater/bin/bono
-cp debian/bono.init.d %{buildroot}%{_initrddir}/bono
+install -m 755 debian/bono.init.d %{buildroot}%{_initrddir}/bono
 cp --recursive bono.root/* %{buildroot}/
 cp scripts/bono-log-cleanup %{buildroot}/etc/cron.hourly/
 
 # See: debian/restund.install
 mkdir --parents %{buildroot}/usr/share/clearwater/restund/lib/
-cp debian/restund.init.d %{buildroot}%{_initrddir}/restund
+install -m 755 debian/restund.init.d %{buildroot}%{_initrddir}/restund
 cp usr/sbin/restund %{buildroot}/usr/share/clearwater/bin/
 cp usr/lib/libre.* %{buildroot}/usr/share/clearwater/restund/lib/
 cp usr/lib/restund/modules/* %{buildroot}/usr/share/clearwater/restund/lib/
@@ -192,16 +192,16 @@ cp --recursive clearwater-sipp.root/* %{buildroot}/
 cp modules/sipp/sipp %{buildroot}/usr/share/clearwater/bin/
 
 # See: debian/clearwater-sip-stress.install
-cp debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
+install -m 755 debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
 cp --recursive clearwater-sip-stress.root/* %{buildroot}/
 
 # See: debian/clearwater-sip-stress-stats.install
 mkdir --parents %{buildroot}/usr/share/clearwater/gems/
-cp debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
+install -m 755 debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
 cp scripts/sipp-stats/clearwater-sipp-stats-*.gem %{buildroot}/usr/share/clearwater/gems/
 
 # See: debian/clearwater-sip-perf.install
-cp debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
+install -m 755 debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
 cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 
 %files

@@ -16,25 +16,38 @@ BuildRequires: systemd
 %global debug_package %{nil}
 
 Summary:       Clearwater - Infrastructure
-Requires:      zeromq
+Requires:      zeromq python-setuptools
+Requires:      dnsmasq ntp gnutls-utils curl redhat-lsb-core 
+
+# Note: We actually require python-virtualenv, too, but unfortunately the version in epel-7 is too
+# old (its included pip is too old), so we will install it manually in the postinst scriptlet,
+# which is why we are requiring python-setuptools here instead
 
 %package -n clearwater-memcached
 Summary:       Clearwater - memcached
+Requires:      clearwater-infrastructure clearwater-monit
+Requires:      memcached
 
 %package -n clearwater-tcp-scalability
 Summary:       Clearwater - TCP Scalability
 
 %package -n clearwater-secure-connections
 Summary:       Clearwater - Secure Connections
+Requires:      racoon2 ipsec-tools
 
 %package -n clearwater-snmpd
 Summary:       Clearwater - snmpd
+Requires:      clearwater-infrastructure clearwater-monit
+Requires:      net-snmp
 
 %package -n clearwater-diags-monitor
 Summary:       Clearwater - Diagnostics Monitor
+Requires:      clearwater-infrastructure clearwater-monit
+Requires:      inotify-tools sysstat gzip iotop
 
 %package -n clearwater-socket-factory
 Summary:       Clearwater - Socket Factory
+Requires:      clearwater-infrastructure
 Requires:      boost
 
 %package -n clearwater-auto-config-aws
@@ -54,9 +67,11 @@ Summary:       Clearwater - Auto-upgrade
 
 %package -n clearwater-radius-auth
 Summary:       Clearwater - RADIUS Authentication
+Requires:      pam_radius
 
 %package -n clearwater-vellum
 Summary:       Clearwater - Vellum
+Requires:      clearwater-infrastructure clearwater-monit clearwater-memcached
 
 %package -n clearwater-dime
 Summary:       Clearwater - Dime
@@ -65,7 +80,7 @@ Summary:       Clearwater - Dime
 Common infrastructure
 
 %description -n clearwater-memcached
-memcached
+memcached configured for Clearwater
 
 %description -n clearwater-tcp-scalability
 TCP scalability improvements
@@ -123,7 +138,7 @@ mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/infrastructure/wheelhouse/
 cp --recursive clearwater-infrastructure/etc/* %{buildroot}/etc/
 cp --recursive clearwater-infrastructure/usr/* %{buildroot}/usr/
-cp debian/clearwater-infrastructure.init.d %{buildroot}%{_initrddir}/clearwater-infrastructure
+install -m 755 debian/clearwater-infrastructure.init.d %{buildroot}%{_initrddir}/clearwater-infrastructure
 cp --recursive clearwater-infrastructure/PyZMQ/eggs/pyzmq* %{buildroot}/usr/share/clearwater/infrastructure/eggs/
 cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/bin/
 cp build/bin/ipv6-to-hostname %{buildroot}/usr/share/clearwater/bin/
@@ -133,23 +148,25 @@ cp .wheelhouse/* %{buildroot}/usr/share/clearwater/infrastructure/wheelhouse/
 
 # See: debian/clearwater-memcached.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
-cp debian/clearwater-memcached.init.d %{buildroot}%{_initrddir}/clearwater-memcached
+install -m 755 debian/clearwater-memcached.init.d %{buildroot}%{_initrddir}/clearwater-memcached
 cp --recursive clearwater-memcached/* %{buildroot}/
+sed --in-place s/invoke-rc.d/service/g %{buildroot}/usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst # patch
 cp modules/clearwater-etcd-plugins/clearwater_memcached/memcached_plugin.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
 cp modules/clearwater-etcd-plugins/clearwater_memcached/memcached_utils.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
+touch %{buildroot}/etc/memcached.conf # missing!
 
 # See: debian/clearwater-tcp-scalability.install
 cp --recursive clearwater-tcp-scalability/* %{buildroot}/
 
 # See: debian/clearwater-secure-connections.install
-cp debian/clearwater-secure-connections.init.d %{buildroot}%{_initrddir}/clearwater-secure-connections
+install -m 755 debian/clearwater-secure-connections.init.d %{buildroot}%{_initrddir}/clearwater-secure-connections
 cp --recursive clearwater-secure-connections/* %{buildroot}/
 
 # See: debian/clearwater-snmpd.install
 cp --recursive clearwater-snmpd/* %{buildroot}/
 
 # See: debian/clearwater-diags-monitor.install
-cp debian/clearwater-diags-monitor.init.d %{buildroot}%{_initrddir}/clearwater-diags-monitor
+install -m 755 debian/clearwater-diags-monitor.init.d %{buildroot}%{_initrddir}/clearwater-diags-monitor
 cp --recursive clearwater-diags-monitor/* %{buildroot}/
 
 # See: debian/clearwater-socket-factory.install
@@ -167,20 +184,20 @@ cp debian/clearwater-socket-factory-sig.service %{buildroot}%{_unitdir}/
 
 # See: debian/clearwater-auto-config-aws.install
 mkdir --parents %{buildroot}/usr/share/clearwater-auto-config/bin/
-cp debian/clearwater-auto-config-aws.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-aws
+install -m 755 debian/clearwater-auto-config-aws.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-aws
 cp --recursive clearwater-auto-config/* %{buildroot}/
 cp clearwater-infrastructure/usr/share/clearwater/infrastructure/install/common %{buildroot}/usr/share/clearwater-auto-config/bin/
 
 # See: debian/clearwater-auto-config-docker.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
-cp debian/clearwater-auto-config-docker.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-docker
+install -m 755 debian/clearwater-auto-config-docker.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-docker
 cp --recursive clearwater-auto-config/* %{buildroot}/
 cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
 cp build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
 
 # See: debian/clearwater-auto-config-generic.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
-cp debian/clearwater-auto-config-generic.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-generic
+install -m 755 debian/clearwater-auto-config-generic.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-generic
 cp --recursive clearwater-auto-config/* %{buildroot}/
 cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
 cp build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
@@ -190,7 +207,7 @@ cp clearwater-infrastructure/usr/share/clearwater/infrastructure/install/common 
 cp --recursive clearwater-log-cleanup/* %{buildroot}/
 
 # See: clearwater-auto-upgrade
-cp debian/clearwater-auto-upgrade.init.d %{buildroot}%{_initrddir}/clearwater-auto-upgrade
+install -m 755 debian/clearwater-auto-upgrade.init.d %{buildroot}%{_initrddir}/clearwater-auto-upgrade
 
 # See: debian/clearwater-radius-auth.install
 cp --recursive clearwater-radius-auth/* %{buildroot}/
@@ -200,6 +217,8 @@ cp --recursive vellum/* %{buildroot}/
 
 # See: debian/dime.install
 cp --recursive dime/* %{buildroot}/
+
+# TODO: /usr/share/clearwater/bin/clearwater-version is Debian-specific 
 
 %files
 %{_initrddir}/clearwater-infrastructure
@@ -252,6 +271,7 @@ cp --recursive dime/* %{buildroot}/
 %config /etc/dnsmasq.d/dnsmasq.clearwater.conf
 %config /etc/monit/run_logged
 %config /etc/monit/conf.d/node.monit
+%ghost /etc/clearwater/config
 
 %files -n clearwater-memcached
 %{_initrddir}/clearwater-memcached
@@ -267,6 +287,7 @@ cp --recursive dime/* %{buildroot}/
 /usr/share/clearwater/clearwater-cluster-manager/plugins/memcached_plugin.py*
 /usr/share/clearwater/clearwater-cluster-manager/plugins/memcached_utils.py*
 %config /etc/clearwater/secure-connections/memcached.conf
+%config /etc/memcached.conf
 
 %files -n clearwater-tcp-scalability
 /usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.postinst
@@ -357,6 +378,7 @@ cp --recursive dime/* %{buildroot}/
 %post
 # See: debian/clearwater-infrastructure.postinst
 set -e
+sudo -H easy_install virtualenv 
 /usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
 
 # See: debian/clearwater-infrastructure.links

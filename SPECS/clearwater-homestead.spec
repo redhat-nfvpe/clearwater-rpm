@@ -47,7 +47,7 @@ make
 # See: debian/homestead.install
 mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
-cp debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
+install -m 755 debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
 cp build/bin/homestead %{buildroot}/usr/share/clearwater/bin/
 cp --recursive homestead.root/* %{buildroot}/
 

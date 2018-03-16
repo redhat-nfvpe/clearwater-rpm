@@ -67,9 +67,9 @@ Both are based on Crest: a custom, extensible HTTP-RESTful interface to Cassandr
 
 ### clearwater-ellis
 
-Provisioning web application and CLI tools. Web backend is written in Python 2 and based on Tornado 
-and SQLAlchemy over MySQL. Web frontend based on Bootstrap/jQuery. Python code accesses cpp-common
-via CFFI. 
+Ellis (provisioning portal). Web application and CLI tools. Web backend is written in Python 2 and
+based on Tornado  and SQLAlchemy over MySQL. Web frontend based on Bootstrap/jQuery. Python code
+accesses cpp-common via CFFI. 
 
 ### clearwater-homestead
 
@@ -113,6 +113,23 @@ How To Use
 It's easiest to put the RPMs in a repository on a CentOS install. The `install-local-repository` script
 will do it for you. Make sure to re-run it if you rebuild any of the RPMs. 
 
-You can then use `yum install` for any of the components, e.g.
+You can then use `yum install` for any of the components, e.g. `yum install clearwater-sprout`.
 
-    sudo yum install clearwater-sprout
+### Required
+
+*Before* installing any Clearwater component, make sure you have `/etc/clearwater/local_config` and
+`/etc/clearwater/shared_config`. The clearwater-auto-config-* packages come with templates for these files.
+
+Sprout (SIP router)
+
+Homer (XDMS)
+
+Vellum (Store)
+
+Dime = Homestead (HSS) + Ralf (CTF) 
+
+### Optional
+
+Ellis (provisioning portal)
+
+Bono (SIP edge proxy)

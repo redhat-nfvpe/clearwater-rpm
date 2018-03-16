@@ -39,7 +39,7 @@ make
 # See: debian/ralf.install
 mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
-cp debian/ralf.init.d %{buildroot}%{_initrddir}/ralf
+install -m 755 debian/ralf.init.d %{buildroot}%{_initrddir}/ralf
 cp build/bin/ralf %{buildroot}/usr/share/clearwater/bin/
 cp --recursive ralf.root/* %{buildroot}/
 

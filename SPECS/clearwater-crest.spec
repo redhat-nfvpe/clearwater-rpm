@@ -75,7 +75,7 @@ mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/src/metaswitch/homer/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/templates/
-cp debian/homer.init.d %{buildroot}%{_initrddir}/homer
+install -m 755 debian/homer.init.d %{buildroot}%{_initrddir}/homer
 cp homer_wheelhouse/* %{buildroot}/usr/share/clearwater/homer/.wheelhouse/
 cp --recursive src/metaswitch/homer/tools %{buildroot}/usr/share/clearwater/homer/src/metaswitch/homer/
 cp homer.local_settings/local_settings.py %{buildroot}/usr/share/clearwater/homer/templates/
@@ -86,7 +86,7 @@ cp --recursive homer.root/* %{buildroot}/
 cp --recursive homer-cassandra.root/* %{buildroot}/
 
 # See: debian/homestead-prov.install
-cp debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
+install -m 755 debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
 mkdir --parents %{buildroot}/usr/share/clearwater/homestead/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/homestead/templates/
 cp homestead_prov_wheelhouse/* %{buildroot}/usr/share/clearwater/homestead/.wheelhouse/

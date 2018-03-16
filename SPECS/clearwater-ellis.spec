@@ -12,7 +12,7 @@ BuildRequires: python-devel mysql-devel curl-devel libffi-devel
 
 Summary:       Clearwater - Ellis
 Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
-Requires:      python-virtualenv libffi
+Requires:      python-virtualenv python2-pip ibffi
 
 %package -n clearwater-prov-tools
 Summary:       Clearwater - Provisioning Tools
@@ -20,7 +20,7 @@ Requires:      clearwater-infrastructure
 Requires:      python-virtualenv
 
 %description
-user/number management interface
+user/number provisioning portal
 
 %description -n clearwater-prov-tools
 provisioning tools
