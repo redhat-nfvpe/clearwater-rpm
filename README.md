@@ -29,7 +29,7 @@ You then have a few options for building the RPMs:
    you may want to mount that directory somewhere spacious.)
 3. Or, use our included [Vagrant](https://www.vagrantup.com/) configuration to quickly bring up a
    CentOS virtual machine. Just run `vagrant up`, and then `vagrant ssh` to login. The build scripts are
-   in the `scripts` directory within the virtual machine. (Note that you will need the VirtualBox
+   in the `scripts` directory within the virtual machine. (Note that you may need the VirtualBox
    Guest Additions. Install them automatically via a plugin: `vagrant plugin install vagrant-vbguest`.)
 
 Once the build process starts, go make yourself a cup of tea, because it's going to take a while
@@ -45,64 +45,94 @@ You can also build individual spec files by providing the name as an argument, f
 Also useful may be the `validate-install` script, which skips the `%prepare` and `%build` sections in the
 spec file.
 
-All scripts capture their output into log files into `logs`. If you're using mock, there
-will be extra logs under `RPMS/x86_64`.
+All scripts capture their output into log files into the `logs` directory. If you're using mock
+there will be extra logs under `RPMS/x86_64`.
 
 
 Spec Overview
 -------------
 
-Each spec is devoted to a single git repository and generates several RPMs. A crucial design
+Each spec is devoted to a single git repository and most generate several RPMs. A crucial design
 feature is a preference is to include and build specific versions of C/C++ libraries rather than use
-those packaged for the operating system. Though it adds much complexity to the build process, it
-does ensure stability, though at the cost of losing security fixes provided by the operating system. 
-This preference is applied inconsistently: e.g. Sprout builds its own libcurl, while Ralf/Homestead
-use the operating system's.
+those packaged for the operating system. It adds much complexity to the build process, but it does
+ensure stability, though at the cost of losing security fixes provided by the operating system. This
+preference is applied inconsistently: e.g. Sprout builds its own libcurl, while Ralf/Homestead use
+the operating system's.
+
+### clearwater-astaire
+
+Astaire provides [memcached](https://memcached.org/) clustering with SNMP support, and Rogers
+is a memcached proxy. Both are written in C++.
+
+### clearwater-chronos
+
+Chronos is a distributed timer service with a HTTP API written in C++ based on
+[evhtp](https://github.com/criticalstack/libevhtp) and [rapidjson](http://rapidjson.org/) for HTTP.
 
 ### clearwater-crest
 
-Homer (XDMS) and Homestead's provisioning server (note that Homestead itself is in its own spec).
-Both are based on Crest: a custom, extensible HTTP-RESTful interface to Cassandra written in Python
-2, based on Zope/Cyclone/Twisted. Python code accesses cpp-common via CFFI.
+Contains Homer (XDMS) and Homestead's provisioning server (note that Homestead itself is in its own
+spec). Both are based on Crest: a custom, extensible HTTP-RESTful interface to
+[Cassandra](http://cassandra.apache.org/) written in Python 2, based on
+[Zope](http://www.zope.org/)/[Cyclone](http://cyclone.io/)/[Twisted](https://twistedmatrix.com/).
+Python code accesses cpp-common via [CFFI](https://cffi.readthedocs.io/).
 
 ### clearwater-ellis
 
-Ellis (provisioning portal). Web application and CLI tools. Web backend is written in Python 2 and
-based on Tornado  and SQLAlchemy over MySQL. Web frontend based on Bootstrap/jQuery. Python code
-accesses cpp-common via CFFI. 
+Contains Ellis (provisioning portal). Web application and CLI tools. Web backend is written in
+Python 2 and based on [Tornado](http://www.tornadoweb.org/) and
+[SQLAlchemy](https://www.sqlalchemy.org/) over [MySQL](https://www.mysql.com/). Web frontend based
+on [Bootstrap](https://getbootstrap.com/)/[jQuery](https://jquery.com/). Python code accesses
+cpp-common via CFFI. 
 
-### clearwater-homestead
-
-Homestead (HSS cache/gateway). A Diameter/Cx and HTTP-RESTful interface to Cassandra written in C++
-based on freeDiameter for Diameter and evhtp and Thrift/rapidjson for HTTP with memcached as the
-cache.
-
-### clearwater-infrastructure
+### clearwater-etcd
 
 TODO
 
+### clearwater-homestead
+
+Contains Homestead (HSS cache/gateway), a Diameter/Cx and HTTP-RESTful interface to Cassandra
+written in C++ based on [freeDiameter](http://www.freediameter.net/) for Diameter and evhtp and
+Thrift/rapidjson for HTTP with memcached as the cache.
+
+### clearwater-infrastructure
+
+Clearwater's miscellany. Contains Vellum (storage) and Dime (Ralf + Homestead) meta-packages.
+Contains the Diagnostics Monitor component is a set of bash scripts for gathering essential machine
+and component diagnostics. Contains pre-configured memcached and snmpd. Contains configuration
+validation (written in Python), loading, and auto-generation. There already is an effort in this
+repository to create RPMs.
+
 ### clearwater-logging
 
-Clearwater's logging is based on Nagios and SYSSTAT.
+Clearwater's logging is based on [Nagios](https://www.nagios.org/) and
+[Sysstat](https://github.com/sysstat/sysstat).
+
+### clearwater-memento
+
+TODO
 
 ### clearwater-monit
 
-Fork of [Monit](https://mmonit.com/monit/). Monit is written in C.
+Fork of [Monit](https://mmonit.com/monit/), written in C.
 
 ### clearwater-nginx
 
-Nginx (as a dependency, not a fork) with Clearwater-specific configurations.
+[Nginx](https://www.nginx.com/) (as a dependency, not a fork) with Clearwater-specific
+configurations.
 
 ### clearwater-ralf
 
-Ralf (CTF). Similar architecture to that of Homestead, but uses Diameter/Rf instead. (The two
-repositories might be better off combined.)
+Contains Ralf (CTF). Similar architecture to that of Homestead, but uses Diameter/Rf instead. (The
+two repositories might be better off combined.)
 
 ### clearwater-sprout
 
-Sprout (SIP router), Bono (SIP edge proxy/loadbalancer), and several Sprout plugins. Also includes
-forks of restund (STUN/TURN server) and SIPp (SIP stress testing). Sprout and Bono are in fact the
-same executable, just with different configurations, based on PJSIP, WebSocket++, and curl. SIPp
+Contains Sprout (SIP router), Bono (SIP edge proxy/loadbalancer), and several Sprout plugins. Also
+includes forks of [restund](http://www.creytiv.com/restund.html) (STUN/TURN server) and
+[SIPp](http://sipp.sourceforge.net/) (SIP stress testing). Sprout and Bono are in fact the same
+executable, just with different configurations, based on [PJSIP](http://www.pjsip.org/),
+[WebSocket++](https://www.zaphoyd.com/websocketpp), and [curl](https://curl.haxx.se/). SIPp
 provides Ruby gems for integration with Rake. Note that this is the biggest spec of the bunch
 and takes an especially long time to build.
 
@@ -110,10 +140,9 @@ and takes an especially long time to build.
 How To Use
 ----------
 
-It's easiest to put the RPMs in a repository on a CentOS install. The `install-local-repository` script
-will do it for you. Make sure to re-run it if you rebuild any of the RPMs. 
-
-You can then use `yum install` for any of the components, e.g. `yum install clearwater-sprout`.
+For testing, it's easiest to put the RPMs in a repository. The `install-local-repository` script will do
+it locally, using the filesystem. Make sure to re-run it if you rebuild any of the RPMs. You can
+then use `yum install` for any of the components, e.g. `yum install clearwater-sprout`.
 
 ### Required
 

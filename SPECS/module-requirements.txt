@@ -8,6 +8,7 @@ cassandra
 clearwater-etcd-plugins
 
 cpp-common
+ BuildRequires: zeromq-devel boost-devel net-snmp-devel
 
 curl
  BuildRequires: openssl-devel
@@ -26,12 +27,13 @@ gemini
 gmock
 
 libevhtp
- BuildRequires: cmake libevent-devel openssl-devel 
+ BuildRequires: cmake libevent-devel openssl-devel
 
 +++
 
 libmemcached
- BuildRequires: bison* flax
+ BuildRequires: bison* flex
+ BuildRequires: libevent-devel
  *oddly, building sprout breaks with bison, so replace with byacc
 
 libre
@@ -47,6 +49,7 @@ rapidjson
 restund
 
 sas-client
+ BuildRequires: zlib-devel
 
 sipp
 

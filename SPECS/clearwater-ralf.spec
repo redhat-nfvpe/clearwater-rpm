@@ -14,6 +14,7 @@ BuildRequires: boost-devel zeromq-devel libcurl-devel
 %global debug_package %{nil}
 
 Summary:       Clearwater - Ralf
+Requires:      clearwater-ralf-libs
 Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-socket-factory
 Requires:      clearwater-log-cleanup clearwater-monit
 Requires:      libidn libgcrypt gnutls boost zeromq libcurl

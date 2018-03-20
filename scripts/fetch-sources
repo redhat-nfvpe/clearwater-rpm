@@ -31,11 +31,15 @@ function fetch()
 	fi
 }
 
+fetch clearwater-astaire astaire
+fetch clearwater-chronos chronos
 fetch clearwater-crest crest
 fetch clearwater-ellis ellis
+fetch clearwater-etcd
 fetch clearwater-homestead homestead
 fetch clearwater-infrastructure
 fetch clearwater-logging
+fetch clearwater-memento memento
 fetch clearwater-monit
 fetch clearwater-nginx
 fetch clearwater-ralf ralf
