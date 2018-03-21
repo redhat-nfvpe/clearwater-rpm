@@ -49,10 +49,10 @@ All scripts capture their output into log files into the `logs` directory. If yo
 there will be extra logs under `RPMS/x86_64`.
 
 
-Spec Overview
--------------
+Build Architecture
+------------------
 
-Each spec is devoted to a single git repository and most generate several RPMs. A crucial design
+Each RPM spec is devoted to a single git repository and most generate several RPMs. A crucial design
 feature is a preference is to include and build specific versions of C/C++ libraries rather than use
 those packaged for the operating system. It adds much complexity to the build process, but it does
 ensure stability, though at the cost of losing security fixes provided by the operating system. This
@@ -83,11 +83,13 @@ Contains Ellis (provisioning portal). Web application and CLI tools. Web backend
 Python 2 and based on [Tornado](http://www.tornadoweb.org/) and
 [SQLAlchemy](https://www.sqlalchemy.org/) over [MySQL](https://www.mysql.com/). Web frontend based
 on [Bootstrap](https://getbootstrap.com/)/[jQuery](https://jquery.com/). Python code accesses
-cpp-common via CFFI. 
+cpp-common via [CFFI](https://cffi.readthedocs.io/).
 
 ### clearwater-etcd
 
-TODO
+Contains tools to configure a cluster of [etcd](https://github.com/coreos/etcd), comprising
+the Cluster Manager, Config Manager, and Queue Manager. All of these are written in Python 2.
+Python code accesses cpp-common via CFFI.
 
 ### clearwater-homestead
 
@@ -140,9 +142,10 @@ and takes an especially long time to build.
 How To Use
 ----------
 
-For testing, it's easiest to put the RPMs in a repository. The `install-local-repository` script will do
-it locally, using the filesystem. Make sure to re-run it if you rebuild any of the RPMs. You can
-then use `yum install` for any of the components, e.g. `yum install clearwater-sprout`.
+Because there are so many interdependencies, it's best to put the RPMs in a repository. The
+`install-local-repository` script will do it locally, using the filesystem. Make sure to re-run it if you
+rebuild any of the RPMs. You can then use `yum install` for any of the components, e.g.
+`yum install clearwater-sprout`.
 
 ### Required
 

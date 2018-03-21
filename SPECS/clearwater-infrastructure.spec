@@ -376,12 +376,8 @@ cp --recursive dime/* %{buildroot}/
 /usr/share/clearwater/node_type.d/10_dime
 
 %post
-# See: debian/clearwater-infrastructure.postinst
-set -e
-sudo -H easy_install virtualenv 
-/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
-
 # See: debian/clearwater-infrastructure.links
+set -e
 ln --symbolic /usr/share/clearwater/bin/gather_diags /usr/bin/cw-gather_diags
 ln --symbolic /usr/share/clearwater/bin/gather_diags_and_report_location /usr/bin/cw-gather_diags_and_report_location
 ln --symbolic /usr/share/clearwater/bin/sync_alarms.py /usr/bin/cw-sync_alarms
@@ -393,6 +389,10 @@ ln --symbolic /usr/share/clearwater/bin/clearwater-check-config /usr/sbin/cw-che
 ln --symbolic /usr/share/clearwater/bin/clearwater-check-config /usr/sbin/clearwater-check-config
 ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/cw-show_config
 ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/clearwater-show-config
+
+# See: debian/clearwater-infrastructure.postinst
+sudo -H easy_install virtualenv 
+/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
 
 %preun
 # See: debian/clearwater-infrastructure.prerm

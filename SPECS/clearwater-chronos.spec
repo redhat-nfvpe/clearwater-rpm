@@ -26,6 +26,7 @@ make
 
 %install
 # See: debian/chronos.install
+mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/chronos/bin/
 mkdir --parents %{buildroot}/usr/share/chronos/lib/
@@ -34,6 +35,7 @@ mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/plugi
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/scripts/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
+install -m 755 debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
 cp build/bin/chronos %{buildroot}/usr/bin/
 cp modules/cpp-common/scripts/stats-c/cw_stat %{buildroot}/usr/share/clearwater/chronos/bin/
 cp usr/lib/*.so %{buildroot}/usr/share/chronos/lib/
@@ -56,7 +58,44 @@ ln --symbolic /usr/share/clearwater/clearwater-queue-manager/scripts/check_chron
 ln --symbolic /usr/share/clearwater/clearwater-queue-manager/scripts/force_chronos_shared_restart_queue_state /usr/bin/cw-force_chronos_shared_config_restart_queue_state
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_chronos_shared_config /usr/bin/cw-upload_chronos_shared_config
 
+# See: debian/chronos.postinst
+if ! grep -q "^chronos:" /etc/passwd; then
+  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false chronos
+fi
+mkdir --parents /var/log/chronos/
+chown --recursive chronos /var/log/chronos/
+service clearwater-monit reload || /bin/true
+if [ -x /etc/init.d/clearwater-cluster-manager"]; then
+  service clearwater-cluster-manager stop || /bin/true
+fi
+if [ -x /etc/init.d/clearwater-config-manager ]; then
+  service clearwater-config-manager stop || /bin/true
+fi
+if [ -x /etc/init.d/clearwater-queue-manager ]; then
+  service clearwater-queue-manager stop || /bin/true
+fi
+service chronos stop || /bin/true
+
 %preun
+# See: debian/chronos.prerm
+set -e
+rm --force /etc/monit/conf.d/chronos.monit
+service clearwater-monit reload || /bin/true
+rm --force /usr/share/clearwater/clearwater-cluster-manager/plugins/chronos*
+if [ -x /etc/init.d/clearwater-cluster-manager ]; then
+  service clearwater-cluster-manager stop || /bin/true
+fi
+service chronos stop || /bin/true
+if [ "$1" = 0 ]; then # Uninstall
+  if grep -q "^chronos:" /etc/passwd; then
+    userdel chronos
+  fi
+  if [ -d /var/log/chronos/ ]; then
+    rm --recursive /var/log/chronos/
+  fi
+  rm --recursive --force /var/run/chronos/
+fi
+
 rm --force /usr/bin/cw-check_chronos_shared_config_restart_queue_state
 rm --force /usr/bin/cw-force_chronos_shared_config_restart_queue_state
 rm --force /usr/bin/cw-upload_chronos_shared_config
