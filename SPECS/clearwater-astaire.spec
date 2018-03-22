@@ -8,6 +8,8 @@ Source0:       %{name}-%{version}.tar.bz2
 BuildRequires: make libtool git gcc-c++
 BuildRequires: libevent-devel zeromq-devel zlib-devel boost-devel
 
+# Note: zeromq-devel requires epel-release
+
 %global debug_package %{nil}
 
 Summary:       Clearwater - Astaire
@@ -53,7 +55,7 @@ make
 mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/astaire/bin/
-install -m 755 debian/astaire.init.d %{buildroot}%{_initrddir}/astaire
+install --mode=755 debian/astaire.init.d %{buildroot}%{_initrddir}/astaire
 cp build/bin/astaire %{buildroot}/usr/share/clearwater/bin/
 cp modules/cpp-common/scripts/stats-c/cw_stat %{buildroot}/usr/share/clearwater/astaire/bin/
 cp --recursive astaire.root/* %{buildroot}/
@@ -64,7 +66,7 @@ cp usr/lib/*.so %{buildroot}/usr/share/clearwater/astaire/lib/
 cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/astaire/lib/
 
 # See: debian/rogers.install
-install -m 755 debian/rogers.init.d %{buildroot}%{_initrddir}/rogers
+install --mode=755 debian/rogers.init.d %{buildroot}%{_initrddir}/rogers
 cp build/bin/rogers %{buildroot}/usr/share/clearwater/bin/
 cp --recursive rogers.root/* %{buildroot}/
 

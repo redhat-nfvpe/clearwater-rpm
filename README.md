@@ -25,16 +25,19 @@ You then have a few options for building the RPMs:
    script.)
 2. On other Linuxes, use [mock](https://github.com/rpm-software-management/mock) to emulate CentOS
    in a chroot environment. Here you need to build the SRPMs first via `mock-build-srpms`, and then
-   run `mock-build-rpms`. (Note that mock will use up a lot of space in `/var/lib/mock` while running, so
-   you may want to mount that directory somewhere spacious.)
+   run `mock-build-rpms`. Note that mock will use up a lot of space in `/var/lib/mock` while running, so
+   you may want to mount that directory somewhere spacious.) Also see
+   [here](https://marcin.juszkiewicz.com.pl/2016/04/15/how-to-speed-up-mock/) and
+   [here](http://miroslav.suchy.cz/blog/archives/2015/05/28/increase_mock_performance_-_build_packages_in_memory/index.html)
+   for some tips to speed up mock.
 3. Or, use our included [Vagrant](https://www.vagrantup.com/) configuration to quickly bring up a
    CentOS virtual machine. Just run `vagrant up`, and then `vagrant ssh` to login. The build scripts are
    in the `scripts` directory within the virtual machine. (Note that you may need the VirtualBox
    Guest Additions. Install them automatically via a plugin: `vagrant plugin install vagrant-vbguest`.)
 
 Once the build process starts, go make yourself a cup of tea, because it's going to take a while
-(50 minutes on a powerful workstation). The reason it's so slow is that unfortunately the Clearwater
-build scripts were not designed to run with concurrency (`make --jobs` will not work), so you will not
+(60 minutes on a powerful workstation). The reason it's so slow is that unfortunately the Clearwater
+build scripts were not designed to run with concurrency (`make --jobs` will break), so you will not
 benefit from having a multi-core machine.
 
 When finished (phew!) your RPMs will be available under `RPMS/x86_64`.
@@ -95,7 +98,7 @@ Python code accesses cpp-common via CFFI.
 
 Contains Homestead (HSS cache/gateway), a Diameter/Cx and HTTP-RESTful interface to Cassandra
 written in C++ based on [freeDiameter](http://www.freediameter.net/) for Diameter and evhtp and
-Thrift/rapidjson for HTTP with memcached as the cache.
+[Thrift](http://thrift.apache.org/)/rapidjson for HTTP with memcached as the cache.
 
 ### clearwater-infrastructure
 
@@ -112,11 +115,12 @@ Clearwater's logging is based on [Nagios](https://www.nagios.org/) and
 
 ### clearwater-memento
 
-TODO
+Contains Memento (Application Server responsible for providing network-based call lists), written
+in C++ based on evhtp and Thrift/rapidjson for HTTP with memcached as the cache.
 
 ### clearwater-monit
 
-Fork of [Monit](https://mmonit.com/monit/), written in C.
+Fork of [Monit](https://mmonit.com/monit/) daemon monitor, written in C.
 
 ### clearwater-nginx
 
@@ -141,6 +145,8 @@ and takes an especially long time to build.
 
 How To Use
 ----------
+
+TODO
 
 Because there are so many interdependencies, it's best to put the RPMs in a repository. The
 `install-local-repository` script will do it locally, using the filesystem. Make sure to re-run it if you

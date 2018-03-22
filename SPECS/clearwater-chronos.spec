@@ -8,6 +8,8 @@ Source0:       %{name}-%{version}.tar.bz2
 BuildRequires: make cmake libtool gcc-c++
 BuildRequires: libevent-devel openssl-devel zlib-devel zeromq-devel boost-devel net-snmp-devel
 
+# Note: zeromq-devel requires epel-release
+
 %global debug_package %{nil}
 
 Summary:       Clearwater - Chronos
@@ -35,7 +37,7 @@ mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/plugi
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/scripts/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
-install -m 755 debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
+install --mode=755 debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
 cp build/bin/chronos %{buildroot}/usr/bin/
 cp modules/cpp-common/scripts/stats-c/cw_stat %{buildroot}/usr/share/clearwater/chronos/bin/
 cp usr/lib/*.so %{buildroot}/usr/share/chronos/lib/

@@ -8,7 +8,7 @@ cassandra
 clearwater-etcd-plugins
 
 cpp-common
- BuildRequires: zeromq-devel boost-devel net-snmp-devel
+ BuildRequires: zeromq-devel boost-devel net-snmp-devel curl-devel
 
 curl
  BuildRequires: openssl-devel
@@ -54,5 +54,7 @@ sas-client
 sipp
 
 thrift
+ BuildRequires: bison flex
+ BuildRequires: boost-devel boost-static openssl-devel
 
 websocketpp

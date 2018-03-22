@@ -30,7 +30,7 @@ make all
 # See: debian/clearwater-monit.install
 mkdir --parents %{buildroot}/etc/monit/
 mkdir --parents %{buildroot}/usr/bin
-install -m 700 debian/monitrc %{buildroot}/etc/monit/
+install --mode=700 debian/monitrc %{buildroot}/etc/monit/
 cp monit %{buildroot}/usr/bin/
 cp --recursive clearwater-monit.root/* %{buildroot}/
 

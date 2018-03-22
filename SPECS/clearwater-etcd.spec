@@ -49,16 +49,20 @@ make env
 
 %install
 # See: debian/clearwater-etcd.install
+mkdir --parents %{buildroot}%{_initrddir}/
+cp debian/clearwater-etcd.init.d %{buildroot}%{_initrddir}/clearwater-etcd
 cp --recursive clearwater-etcd/* %{buildroot}/
 
 # See: debian/clearwater-cluster-manager.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/wheelhouse/
+cp debian/clearwater-cluster-manager.init.d %{buildroot}%{_initrddir}/clearwater-cluster-manager
 cp cluster_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/wheelhouse/
 cp --recursive clearwater-cluster-manager.root/* %{buildroot}/
 
 # See: debian/clearwater-queue-manager.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/plugins/
+cp debian/clearwater-queue-manager.init.d %{buildroot}%{_initrddir}/clearwater-queue-manager
 cp queue_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-queue-manager/wheelhouse/
 cp --recursive clearwater-queue-manager.root/* %{buildroot}/
 cp src/clearwater_etcd_plugins/clearwater_queue_manager/apply_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-queue-manager/plugins/
@@ -67,6 +71,7 @@ cp src/clearwater_etcd_plugins/clearwater_queue_manager/apply_config_plugin.py %
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+cp debian/clearwater-config-manager.init.d %{buildroot}%{_initrddir}/clearwater-config-manager
 cp config_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-config-manager/wheelhouse/
 cp --recursive clearwater-config-manager.root/* %{buildroot}/
 cp src/clearwater_etcd_plugins/clearwater_config_manager/shared_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
@@ -75,6 +80,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/shared_config_config_plu
 cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 
 %files
+%{_initrddir}/clearwater-etcd
 /usr/bin/clearwater-etcdctl
 /usr/share/clearwater/bin/poll_etcd.sh
 /usr/share/clearwater/bin/get_etcd_initial_cluster.py*
@@ -99,6 +105,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 %config /etc/logrotate.d/clearwater-etcd
 
 %files -n clearwater-cluster-manager
+%{_initrddir}/clearwater-cluster-manager
 /usr/share/clearwater/clearwater-cluster-manager/wheelhouse/
 /usr/share/clearwater/bin/clearwater-cluster-manager
 /usr/share/clearwater/infrastructure/scripts/restart/clearwater_cluster_manager_restart
@@ -126,6 +133,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 %config /etc/cron.hourly/clearwater-cluster-manager-log-cleanup
 
 %files -n clearwater-queue-manager
+%{_initrddir}/clearwater-queue-manager
 /usr/share/clearwater/clearwater-queue-manager/wheelhouse/
 /usr/share/clearwater/clearwater-queue-manager/plugins/apply_config_plugin.py*
 /usr/share/clearwater/bin/clearwater-queue-manager
@@ -143,6 +151,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 %config /etc/cron.hourly/clearwater-queue-manager-log-cleanup
 
 %files -n clearwater-config-manager
+%{_initrddir}/clearwater-config-manager
 /usr/share/clearwater/clearwater-config-manager/wheelhouse/
 /usr/share/clearwater/clearwater-config-manager/plugins/shared_config_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/dns_json_plugin.py*
@@ -167,7 +176,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 %config /etc/cron.hourly/clearwater-config-manager-log-cleanup
 
 %post
-# See: debian/clearwater-etcs.postinst
+# See: debian/clearwater-etcd.postinst
 set -e
 if ! grep -q "^clearwater-etcd:" /etc/passwd; then
   useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false clearwater-etcd
@@ -183,7 +192,7 @@ rm --force /var/run/clearwater-etcd.pid
 rm --force /tmp/.clearwater_etcd_alarm_issued
 
 %preun
-# See: debian/clearwater-etcs.prerm
+# See: debian/clearwater-etcd.prerm
 set -e
 rm --force /etc/monit/conf.d/clearwater-etcd.monit
 service clearwater-monit reload || /bin/true
@@ -205,12 +214,36 @@ ln --symbolic /usr/share/clearwater/clearwater-cluster-manager/scripts/check_clu
 ln --symbolic /usr/share/clearwater/clearwater-cluster-manager/scripts/mark_node_failed /usr/sbin/cw-mark_node_failed
 
 # See: debian/clearwater-cluster-manager.postinst
-# TODO
+if ! grep -q "^clearwater-cluster-manager:" /etc/passwd; then
+  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false clearwater-cluster-manager
+fi
+mkdir --parents --mode=775 /var/log/clearwater-cluster-manager/
+chown --recursive clearwater-cluster-manager:adm /var/log/clearwater-cluster-manager/
+chmod g+s /var/log/clearwater-cluster-manager/
+rm --recursive --force /usr/share/clearwater/clearwater-cluster-manager/env/
+virtualenv /usr/share/clearwater/clearwater-cluster-manager/env/
+/usr/share/clearwater/clearwater-cluster-manager/env/bin/pip install --upgrade pip
+#/usr/share/clearwater/clearwater-cluster-manager/env/bin/pip install /usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/pip-*.whl
+/usr/share/clearwater/clearwater-cluster-manager/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/ wheel clearwater-cluster-manager
+chown --recursive ellis:root /usr/share/clearwater/clearwater-cluster-manager/
+install --mode=0644 /usr/share/clearwater/conf/clearwater-cluster-manager.monit /etc/monit/conf.d/        
+service clearwater-monit reload || /bin/true
+service clearwater-cluster-manager stop || /bin/true
 
 %preun -n clearwater-cluster-manager
 # See: debian/clearwater-cluster-manager.prerm
 set -e
-# TODO
+rm --force /etc/monit/conf.d/clearwater-cluster-manager.monit
+service clearwater-monit reload || /bin/true
+service clearwater-cluster-manager stop || /bin/true
+rm --recursive --force /usr/share/clearwater/clearwater-cluster-manager/env/
+rm --recursive --force /var/run/clearwater-cluster-manager/
+if [ "$1" = 0 ]; then # Uninstall
+  if grep -q "^clearwater-cluster-manager:" /etc/passwd; then
+    userdel clearwater-cluster-manager
+  fi
+  rm --recursive --force /var/log/clearwater-cluster-manager/
+fi
 
 rm --force /usr/bin/cw-check_cluster_state
 rm --force /usr/sbin/cw-mark_node_failed
@@ -221,12 +254,39 @@ set -e
 ln --symbolic /usr/share/clearwater/clearwater-queue-manager/scripts/check_restart_queue_state /usr/bin/cw-check_restart_queue_state
 
 # See: debian/clearwater-queue-manager.postinst
-# TODO
+if ! grep -q "^clearwater-queue-manager:" /etc/passwd; then
+  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false clearwater-queue-manager
+fi
+mkdir --parents --mode=775 /var/log/clearwater-queue-manager/
+chown --recursive clearwater-queue-manager:adm /var/log/clearwater-queue-manager/
+chmod g+s /var/log/clearwater-queue-manager/
+if [ -f /var/log/clearwater-queue-manager/queue_operation.log ]; then
+  chmod g+w /var/log/clearwater-queue-manager/queue_operation.log
+fi
+rm --recursive --force /usr/share/clearwater/clearwater-queue-manager/env/
+virtualenv /usr/share/clearwater/clearwater-queue-manager/env/
+/usr/share/clearwater/clearwater-queue-manager/env/bin/pip install --upgrade pip
+#/usr/share/clearwater/clearwater-queue-manager/env/bin/pip install /usr/share/clearwater/clearwater-queue-manager/.wheelhouse/pip-*.whl
+/usr/share/clearwater/clearwater-queue-manager/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-queue-manager/.wheelhouse/ wheel clearwater-queue-manager
+chown --recursive ellis:root /usr/share/clearwater/clearwater-queue-manager/
+install --mode=0644 /usr/share/clearwater/conf/clearwater-queue-manager.monit /etc/monit/conf.d/        
+service clearwater-monit reload || /bin/true
+service clearwater-queue-manager stop || /bin/true
 
 %preun -n clearwater-queue-manager
 # See: debian/clearwater-queue-manager.prerm
 set -e
-# TODO
+rm --force /etc/monit/conf.d/clearwater-queue-manager.monit
+service clearwater-monit reload || /bin/true
+service clearwater-queue-manager stop || /bin/true
+rm --recursive --force /usr/share/clearwater/clearwater-queue-manager/env/
+rm --recursive --force /var/run/clearwater-queue-manager/
+if [ "$1" = 0 ]; then # Uninstall
+  if grep -q "^clearwater-queue-manager:" /etc/passwd; then
+    userdel clearwater-queue-manager
+  fi
+  rm --recursive --force /var/log/clearwater-queue-manager/
+fi
 
 rm --force /usr/bin/cw-check_restart_queue_state
 
@@ -239,12 +299,36 @@ ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/check_conf
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/backup_config /usr/sbin/cw-backup_config
 
 # See: debian/clearwater-config-manager.postinst
-# TODO
+if ! grep -q "^clearwater-config-manager:" /etc/passwd; then
+  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false clearwater-config-manager
+fi
+mkdir --parents --mode=775 /var/log/clearwater-config-manager/
+chown --recursive clearwater-config-manager:adm /var/log/clearwater-config-manager/
+chmod g+s /var/log/clearwater-config-manager/
+rm --recursive --force /usr/share/clearwater/clearwater-config-manager/env/
+virtualenv /usr/share/clearwater/clearwater-config-manager/env/
+/usr/share/clearwater/clearwater-config-manager/env/bin/pip install --upgrade pip
+#/usr/share/clearwater/clearwater-config-manager/env/bin/pip install /usr/share/clearwater/clearwater-config-manager/.wheelhouse/pip-*.whl
+/usr/share/clearwater/clearwater-config-manager/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-config-manager/.wheelhouse/ wheel clearwater-config-manager
+chown --recursive ellis:root /usr/share/clearwater/clearwater-config-manager/
+install --mode=0644 /usr/share/clearwater/conf/clearwater-config-manager.monit /etc/monit/conf.d/        
+service clearwater-monit reload || /bin/true
+service clearwater-config-manager stop || /bin/true
 
 %preun -n clearwater-config-manager
 # See: debian/clearwater-config-manager.prerm
 set -e
-# TODO
+rm --force /etc/monit/conf.d/clearwater-config-manager.monit
+service clearwater-monit reload || /bin/true
+service clearwater-config-manager stop || /bin/true
+rm --recursive --force /usr/share/clearwater/clearwater-config-manager/env/
+rm --recursive --force /var/run/clearwater-config-manager/
+if [ "$1" = 0 ]; then # Uninstall
+  if grep -q "^clearwater-config-manager:" /etc/passwd; then
+    userdel clearwater-config-manager
+  fi
+  rm --recursive --force /var/log/clearwater-config-manager/
+fi
 
 rm --force /usr/bin/cw-config
 rm --force /usr/bin/cw-restore_config

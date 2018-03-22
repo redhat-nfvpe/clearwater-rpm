@@ -3,7 +3,7 @@ set -e
 
 # Requirements:
 #
-# sudo dnf install --assumeyes mock dnf-utils
+# sudo dnf install --assumeyes mock dnf-utils nosync nosync.i686 lbzip2 pigz
 # sudo usermod -a -G mock $USER
 #
 # See: /etc/mock/ for available roots
@@ -27,7 +27,7 @@ LOGS="$TOPDIR/logs"
 # Build SRPMs for target platform (e.g. ".el7.centos.src.rpm")
 for F in "$SPECS/"$SPEC.spec; do
 	# buildsrpm can only do one spec at a time
-	mock --buildsrpm --no-clean --no-cleanup-after --root="$MOCK" --sources="$SOURCES" --resultdir="$SRPMS" --spec="$F" \
+	mock --buildsrpm --no-clean --no-cleanup-after --dnf --root="$MOCK" --sources="$SOURCES" --resultdir="$SRPMS" --spec="$F" \
 		2>&1 | tee "$LOGS/mock-build-rpms.log"
 done
 
