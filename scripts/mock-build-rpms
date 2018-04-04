@@ -9,7 +9,6 @@ set -e
 # See: /etc/mock/ for available roots
 
 SPEC=${1:-*}
-VERSION=129
 MOCK=epel-7-x86_64
 
 HERE=$(dirname "$(readlink -f "$0")")
@@ -21,8 +20,10 @@ SRPMS="$TOPDIR/SRPMS"
 RPMS="$TOPDIR/RPMS/x86_64"
 LOGS="$TOPDIR/logs"
 
+. "$HERE/version"
+
 # Build RPMs for target platform from SRPMs (e.g. ".el7.centos.x86_64.rpm")
-mock --rebuild --no-cleanup-after --enable-network --dnf --root="$MOCK" --resultdir="$RPMS" "$SRPMS/"$SPEC-$VERSION-*.src.rpm \
+mock --rebuild --no-cleanup-after --enable-network --dnf --root="$MOCK" --resultdir="$RPMS" "$SRPMS/$SPEC-$VERSION-"*.src.rpm \
 	2>&1 | tee "$LOGS/mock-build-rpms.log"
 
 # Rebuild produces SRPMs, but we already have them (they were our input!)

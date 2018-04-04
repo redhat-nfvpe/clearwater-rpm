@@ -5,6 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/homestead
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       common.sh
 BuildRequires: make cmake libtool git gcc-c++ bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: openssl-devel boost-devel boost-static zeromq-devel libcurl-devel net-snmp-devel
@@ -40,8 +41,7 @@ Commission Cassandra for Homestead
 %setup
 
 %build
-# Note: the modules must be built in order, so unfortunately we can't use --jobs/-J
-make
+make MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/homestead.install

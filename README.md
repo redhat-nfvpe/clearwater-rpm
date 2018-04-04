@@ -21,12 +21,12 @@ only way to get the correct and complete source tarball.)
 
 You then have a few options for building the RPMs:
 
-1. Are you on CentOS or RHEL? Then just run `build-rpms`. (The requirements are documented in the
-   script.)
+1. Are you on CentOS or RHEL? Then just run `build-srpms` and then `build-rpms`. (The requirements are
+   documented in the scripts.)
 2. On other Linuxes, use [mock](https://github.com/rpm-software-management/mock) to emulate CentOS
-   in a chroot environment. Here you need to build the SRPMs first via `mock-build-srpms`, and then
-   run `mock-build-rpms`. Note that mock will use up a lot of space in `/var/lib/mock` while running, so
-   you may want to mount that directory somewhere spacious.) Also see
+   in a chroot environment. You then run `mock-build-srpms` and then `mock-build-rpms`. Note that mock will
+   use up a lot of space in `/var/lib/mock` while running, so you may want to mount that directory
+   somewhere spacious.) Also see
    [here](https://marcin.juszkiewicz.com.pl/2016/04/15/how-to-speed-up-mock/) and
    [here](http://miroslav.suchy.cz/blog/archives/2015/05/28/increase_mock_performance_-_build_packages_in_memory/index.html)
    for some tips to speed up mock.
@@ -36,9 +36,9 @@ You then have a few options for building the RPMs:
    Guest Additions. Install them automatically via a plugin: `vagrant plugin install vagrant-vbguest`.)
 
 Once the build process starts, go make yourself a cup of tea, because it's going to take a while
-(60 minutes on a powerful workstation). The reason it's so slow is that unfortunately the Clearwater
-build scripts were not designed to run with concurrency (`make --jobs` will break), so you will not
-benefit from having a multi-core machine.
+(25 minutes on a 6-core workstation). Though the Clearwater build scripts are not very friendly to
+concurrency (`make --jobs`) we've enabled concurrent builds in the sub-modules, and that has helped
+a lot (cut down from 60 minutes).
 
 When finished (phew!) your RPMs will be available under `RPMS/x86_64`.
 
@@ -156,7 +156,8 @@ rebuild any of the RPMs. You can then use `yum install` for any of the component
 ### Required
 
 *Before* installing any Clearwater component, make sure you have `/etc/clearwater/local_config` and
-`/etc/clearwater/shared_config`. The clearwater-auto-config-* packages come with templates for these files.
+`/etc/clearwater/shared_config`. The clearwater-auto-config-* packages come with templates for these
+files.
 
 Sprout (SIP router)
 

@@ -16,9 +16,12 @@ HERE=$(dirname "$(readlink -f "$0")")
 TOPDIR=$(readlink -f "$HERE/..")
 ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
 SPECS="$TOPDIR/SPECS"
+SRPMS="$TOPDIR/SRPMS"
 LOGS="$TOPDIR/logs"
 
-sudo yum-builddep --assumeyes "$SPECS/"$SPEC.spec
+. "$HERE/version"
+
+sudo yum-builddep --assumeyes "$SRPMS/$SPEC-$VERSION-"*.src.rpm
 
 rpmbuild -bb --define "_topdir $ESCAPED_TOPDIR" "$SPECS/"$SPEC.spec \
 	2>&1 | tee "$LOGS/build-rpms.log"

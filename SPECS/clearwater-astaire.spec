@@ -5,6 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/astaire
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       common.sh
 BuildRequires: make libtool git gcc-c++
 BuildRequires: libevent-devel zeromq-devel zlib-devel boost-devel
 
@@ -15,7 +16,7 @@ BuildRequires: libevent-devel zeromq-devel zlib-devel boost-devel
 Summary:       Clearwater - Astaire
 Requires:      clearwater-astaire-libs
 Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup 
-Requires:      clearwater-monit
+Requires:      clearwater-monit clearwater-debian
 Requires:      cpulimit
 Requires:      zeromq zlib boost
 
@@ -26,7 +27,7 @@ Summary:       Clearwater - Astaire Libraries
 Summary:       Clearwater - Rogers
 Requires:      clearwater-rogers-libs
 Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup 
-Requires:      clearwater-monit
+Requires:      clearwater-monit clearwater-debian
 Requires:      zeromq zlib boost
 
 %package -n clearwater-rogers-libs
@@ -48,7 +49,7 @@ Rogers libraries
 %setup
 
 %build
-make
+make MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/astaire.install
@@ -105,96 +106,43 @@ cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/rogers/lib/
 %files -n clearwater-rogers-libs
 /usr/share/clearwater/rogers/lib/
 
-%post
+%post -p /bin/bash
+%include %{SOURCE1}
 # See: debian/astaire.postinst
-set -e
-function add_section()
-{
-  local FILE=$1
-  local TAG=$2
-  local DELTA=$3
-  { echo "#+$TAG"
-    cat $DELTA
-    echo "#-$TAG" ; } >> $FILE
-}
-if ! grep -q "^astaire:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false astaire
-fi
-mkdir --parents /var/log/astaire/
-chown --recursive astaire /var/log/astaire/
-[ ! -x /usr/share/clearwater/bin/clearwater-logging-update ] || /usr/share/clearwater/bin/clearwater-logging-update
-add_section /etc/security/limits.conf astaire /etc/security/limits.conf.astaire
-service astaire-throttle start || /bin/true
-service clearwater-infrastructure restart
-service astaire stop || /bin/true
+cw-create-user astaire
+cw-create-log-dir astaire
+cw-add-security-limits astaire
+# TODO: convert from Upstart to systemd
+service-action astaire-throttle start
+cw-start astaire
 
-%preun
+%preun -p /bin/bash
+%include %{SOURCE1}
 # See: debian/astaire.prerm
-set -e
-function remove_section()
-{
-  local FILE=$1
-  local TAG=$2
-  awk '/^#\+'$TAG'$/,/^#-'$TAG'$/ {next} {print}' "$FILE" > "/tmp/$(basename "$FILE").$$"
-  mv "/tmp/$(basename "$FILE").$$" "$FILE"
-}
-rm --force /etc/monit/conf.d/astaire.monit
-service clearwater-monit reload || /bin/true
-service astaire stop || /bin/true
-service astaire-throttle stop || /bin/true
+cw-stop astaire
+service-action astaire-throttle stop
 if [ "$1" = 0 ]; then # Uninstall
-  if grep -q "^astaire:" /etc/passwd; then
-    userdel astaire
-  fi
-  if [ -d /var/log/astaire/ ]; then
-    rm --recursive /var/log/astaire/
-  fi
-  rm --recursive --force /var/run/astaire/
+  cw-remove-user astaire
+  cw-remove-log-dir astaire
+  cw-remove-run-dir astaire
 fi
-remove_section /etc/security/limits.conf astaire
+cw-remove-security-limits astaire
 
-%post -n clearwater-rogers
+%post -n clearwater-rogers -p /bin/bash
+%include %{SOURCE1}
 # See: debian/rogers.postinst
-set -e
-function add_section()
-{
-  local FILE=$1
-  local TAG=$2
-  local DELTA=$3
-  { echo "#+$TAG"
-    cat $DELTA
-    echo "#-$TAG" ; } >> $FILE
-}
-if ! grep -q "^rogers:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false rogers
-fi
-mkdir --parents /var/log/rogers/
-chown --recursive rogers /var/log/rogers/
-[ ! -x /usr/share/clearwater/bin/clearwater-logging-update ] || /usr/share/clearwater/bin/clearwater-logging-update
-add_section /etc/security/limits.conf rogers /etc/security/limits.conf.rogers
-service clearwater-infrastructure restart
-service rogers stop || /bin/true
+cw-create-user rogers
+cw-create-log-dir rogers
+cw-add-security-limits rogers
+cw-start rogers
 
-%preun -n clearwater-rogers
+%preun -n clearwater-rogers -p /bin/bash
+%include %{SOURCE1}
 # See: debian/rogers.prerm
-set -e
-function remove_section()
-{
-  local FILE=$1
-  local TAG=$2
-  awk '/^#\+'$TAG'$/,/^#-'$TAG'$/ {next} {print}' "$FILE" > "/tmp/$(basename "$FILE").$$"
-  mv "/tmp/$(basename "$FILE").$$" "$FILE"
-}
-rm --force /etc/monit/conf.d/rogers.monit
-service clearwater-monit reload || /bin/true
-service rogers stop || /bin/true
+cw-stop rogers stop
 if [ "$1" = 0 ]; then # Uninstall
-  if grep -q "^rogers:" /etc/passwd; then
-    userdel rogers
-  fi
-  if [ -d /var/log/rogers/ ]; then
-    rm --recursive /var/log/rogers/
-  fi
-  rm --recursive --force /var/run/rogers/
+  cw-remove-user rogers
+  cw-remove-log-dir rogers
+  cw-remove-run-dir rogers
 fi
-remove_section /etc/security/limits.conf rogers
+cw-remove-security-limits rogers

@@ -5,6 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ellis
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       common.sh
 BuildRequires: make python-virtualenv gcc-c++
 BuildRequires: python-devel mysql-devel curl-devel libffi-devel
 
@@ -29,7 +30,7 @@ provisioning tools
 %setup
 
 %build
-make env
+make env MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/ellis.install

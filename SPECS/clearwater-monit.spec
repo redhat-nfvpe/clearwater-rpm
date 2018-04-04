@@ -24,7 +24,7 @@ utility for managing and monitoring processes, files, directories, and filesyste
 %build
 ./bootstrap
 ./configure
-make all
+make all MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/clearwater-monit.install

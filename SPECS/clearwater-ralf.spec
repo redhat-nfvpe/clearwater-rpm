@@ -5,6 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ralf
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       common.sh
 BuildRequires: make cmake libtool gcc-c++ bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: boost-devel zeromq-devel libcurl-devel
@@ -33,8 +34,7 @@ Ralf libraries
 %setup
 
 %build
-# Note: the modules must be built in order, so unfortunately we can't use --jobs/-J
-make
+make MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/ralf.install
@@ -60,8 +60,8 @@ cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/ralf/lib/freeDia
 /usr/share/clearwater/ralf/lib/
 
 %post
+%include %{SOURCE1}
 # See: debian/ralf.postinst
-set -e
 function add_section()
 {
   local FILE=$1
@@ -85,8 +85,8 @@ fi
 service ralf stop || /bin/true
 
 %preun
+%include %{SOURCE1}
 # See: debian/ralf.prerm
-set -e
 function remove_section()
 {
   local FILE=$1

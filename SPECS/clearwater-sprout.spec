@@ -111,8 +111,7 @@ Runs SIP performance tests against Clearwater
 %setup
 
 %build
-# Note: the modules must be built in order, so unfortunately we can't use --jobs/-J
-make
+make MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/sprout-base.install

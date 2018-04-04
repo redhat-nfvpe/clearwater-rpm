@@ -5,6 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/clearwater-etcd
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       common.sh
 BuildRequires: make python-virtualenv git gcc-c++
 BuildRequires: libffi-devel
 
@@ -18,16 +19,19 @@ Requires:      python2-pip libffi
 Summary:       Clearwater - Cluster Manager
 Requires:      clearwater-etcd clearwater-monit
 Requires:      python-virtualenv python2-pip libffi
+AutoReq:       no
 
 %package -n clearwater-queue-manager
 Summary:       Clearwater - Queue Manager
 Requires:      clearwater-etcd clearwater-monit
 Requires:      python-virtualenv python2-pip libffi
+AutoReq:       no
 
 %package -n clearwater-config-manager
 Summary:       Clearwater - Config Manager
 Requires:      clearwater-etcd clearwater-queue-manager clearwater-monit
 Requires:      python-virtualenv python2-pip python2-requests python2-jsonschema libffi
+AutoReq:       no
 
 %description
 etcd configured for Clearwater
@@ -45,7 +49,7 @@ config manager
 %setup
 
 %build
-make env
+make env MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/clearwater-etcd.install
@@ -175,159 +179,96 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 %config /etc/logrotate.d/clearwater-config-manager
 %config /etc/cron.hourly/clearwater-config-manager-log-cleanup
 
-%post
+%post -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-etcd.postinst
-set -e
-if ! grep -q "^clearwater-etcd:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false clearwater-etcd
-fi
-mkdir --parents /var/lib/clearwater-etcd/
-chown --recursive clearwater-etcd /var/lib/clearwater-etcd/
-mkdir --parents /var/log/clearwater-etcd/
-chown --recursive clearwater-etcd /var/log/clearwater-etcd/
-install --mode=0644 /usr/share/clearwater/conf/clearwater-etcd.monit /etc/monit/conf.d/
-service clearwater-monit reload || /bin/true
-service clearwater-etcd stop || /bin/true
-rm --force /var/run/clearwater-etcd.pid
-rm --force /tmp/.clearwater_etcd_alarm_issued
+cw-create-user clearwater-etcd
+cw-create-log-dir clearwater-etcd
+cw-start clearwater-etcd
 
-%preun
+%preun -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-etcd.prerm
-set -e
-rm --force /etc/monit/conf.d/clearwater-etcd.monit
-service clearwater-monit reload || /bin/true
-service clearwater-etcd stop || /bin/true
+cw-stop clearwater-etcd
 if [ "$1" = 0 ]; then # Uninstall
-  if grep -q "^clearwater-etcd:" /etc/passwd; then
-    userdel clearwater-etcd
-  fi
-  rm --recursive --force /var/log/clearwater-etcd/
-  rm --recursive --force /var/lib/clearwater-etcd/
-  rm --force /tmp/.clearwater_etcd_alarm_issued
-  rm --force /tmp/.clearwater_etcd_alarm_to_raise
+  cw-remove-user clearwater-etcd
+  cw-remove-log-dir clearwater-etcd
+  cw-remove-run-dir clearwater-etcd
 fi
 
-%post -n clearwater-cluster-manager
+%post -n clearwater-cluster-manager -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-cluster-manager.links
-set -e
 ln --symbolic /usr/share/clearwater/clearwater-cluster-manager/scripts/check_cluster_state /usr/bin/cw-check_cluster_state
 ln --symbolic /usr/share/clearwater/clearwater-cluster-manager/scripts/mark_node_failed /usr/sbin/cw-mark_node_failed
 
 # See: debian/clearwater-cluster-manager.postinst
-if ! grep -q "^clearwater-cluster-manager:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false clearwater-cluster-manager
-fi
-mkdir --parents --mode=775 /var/log/clearwater-cluster-manager/
-chown --recursive clearwater-cluster-manager:adm /var/log/clearwater-cluster-manager/
-chmod g+s /var/log/clearwater-cluster-manager/
-rm --recursive --force /usr/share/clearwater/clearwater-cluster-manager/env/
-virtualenv /usr/share/clearwater/clearwater-cluster-manager/env/
-/usr/share/clearwater/clearwater-cluster-manager/env/bin/pip install --upgrade pip
-#/usr/share/clearwater/clearwater-cluster-manager/env/bin/pip install /usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/pip-*.whl
-/usr/share/clearwater/clearwater-cluster-manager/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/ wheel clearwater-cluster-manager
-chown --recursive ellis:root /usr/share/clearwater/clearwater-cluster-manager/
-install --mode=0644 /usr/share/clearwater/conf/clearwater-cluster-manager.monit /etc/monit/conf.d/        
-service clearwater-monit reload || /bin/true
-service clearwater-cluster-manager stop || /bin/true
+cw-create-user clearwater-cluster-manager
+cw-create-log-dir clearwater-cluster-manager adm
+cw-create-virtualenv clearwater-cluster-manager
+cw-start clearwater-cluster-manager
 
-%preun -n clearwater-cluster-manager
+%preun -n clearwater-cluster-manager -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-cluster-manager.prerm
-set -e
-rm --force /etc/monit/conf.d/clearwater-cluster-manager.monit
-service clearwater-monit reload || /bin/true
-service clearwater-cluster-manager stop || /bin/true
-rm --recursive --force /usr/share/clearwater/clearwater-cluster-manager/env/
-rm --recursive --force /var/run/clearwater-cluster-manager/
+cw-stop clearwater-cluster-manager
+cw-remove-virtualenv clearwater-cluster-manager
 if [ "$1" = 0 ]; then # Uninstall
-  if grep -q "^clearwater-cluster-manager:" /etc/passwd; then
-    userdel clearwater-cluster-manager
-  fi
-  rm --recursive --force /var/log/clearwater-cluster-manager/
+  cw-remove-user clearwater-cluster-manager
+  cw-remove-log-dir clearwater-cluster-manager
+  cw-remove-run-dir clearwater-cluster-manager
 fi
 
 rm --force /usr/bin/cw-check_cluster_state
 rm --force /usr/sbin/cw-mark_node_failed
 
-%post -n clearwater-queue-manager
+%post -n clearwater-queue-manager -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-queue-manager.links
-set -e
 ln --symbolic /usr/share/clearwater/clearwater-queue-manager/scripts/check_restart_queue_state /usr/bin/cw-check_restart_queue_state
 
 # See: debian/clearwater-queue-manager.postinst
-if ! grep -q "^clearwater-queue-manager:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false clearwater-queue-manager
-fi
-mkdir --parents --mode=775 /var/log/clearwater-queue-manager/
-chown --recursive clearwater-queue-manager:adm /var/log/clearwater-queue-manager/
-chmod g+s /var/log/clearwater-queue-manager/
-if [ -f /var/log/clearwater-queue-manager/queue_operation.log ]; then
-  chmod g+w /var/log/clearwater-queue-manager/queue_operation.log
-fi
-rm --recursive --force /usr/share/clearwater/clearwater-queue-manager/env/
-virtualenv /usr/share/clearwater/clearwater-queue-manager/env/
-/usr/share/clearwater/clearwater-queue-manager/env/bin/pip install --upgrade pip
-#/usr/share/clearwater/clearwater-queue-manager/env/bin/pip install /usr/share/clearwater/clearwater-queue-manager/.wheelhouse/pip-*.whl
-/usr/share/clearwater/clearwater-queue-manager/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-queue-manager/.wheelhouse/ wheel clearwater-queue-manager
-chown --recursive ellis:root /usr/share/clearwater/clearwater-queue-manager/
-install --mode=0644 /usr/share/clearwater/conf/clearwater-queue-manager.monit /etc/monit/conf.d/        
-service clearwater-monit reload || /bin/true
-service clearwater-queue-manager stop || /bin/true
+cw-create-user clearwater-queue-manager
+cw-create-log-dir clearwater-queue-manager adm
+cw-create-virtualenv clearwater-queue-manager
+cw-start clearwater-queue-manager
 
-%preun -n clearwater-queue-manager
+%preun -n clearwater-queue-manager -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-queue-manager.prerm
-set -e
-rm --force /etc/monit/conf.d/clearwater-queue-manager.monit
-service clearwater-monit reload || /bin/true
-service clearwater-queue-manager stop || /bin/true
-rm --recursive --force /usr/share/clearwater/clearwater-queue-manager/env/
-rm --recursive --force /var/run/clearwater-queue-manager/
+cw-stop clearwater-queue-manager
+cw-remove-virtualenv clearwater-queue-manager
 if [ "$1" = 0 ]; then # Uninstall
-  if grep -q "^clearwater-queue-manager:" /etc/passwd; then
-    userdel clearwater-queue-manager
-  fi
-  rm --recursive --force /var/log/clearwater-queue-manager/
+  cw-remove-user clearwater-queue-manager
+  cw-remove-log-dir clearwater-queue-manager
+  cw-remove-run-dir clearwater-queue-manager
 fi
 
 rm --force /usr/bin/cw-check_restart_queue_state
 
-%post -n clearwater-config-manager
+%post -n clearwater-config-manager -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-config-manager.links
-set -e
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/cw-config /usr/bin/cw-config
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/restore_config /usr/bin/cw-restore_config
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/check_config_sync /usr/sbin/cw-check_config_sync
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/backup_config /usr/sbin/cw-backup_config
 
 # See: debian/clearwater-config-manager.postinst
-if ! grep -q "^clearwater-config-manager:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false clearwater-config-manager
-fi
-mkdir --parents --mode=775 /var/log/clearwater-config-manager/
-chown --recursive clearwater-config-manager:adm /var/log/clearwater-config-manager/
-chmod g+s /var/log/clearwater-config-manager/
-rm --recursive --force /usr/share/clearwater/clearwater-config-manager/env/
-virtualenv /usr/share/clearwater/clearwater-config-manager/env/
-/usr/share/clearwater/clearwater-config-manager/env/bin/pip install --upgrade pip
-#/usr/share/clearwater/clearwater-config-manager/env/bin/pip install /usr/share/clearwater/clearwater-config-manager/.wheelhouse/pip-*.whl
-/usr/share/clearwater/clearwater-config-manager/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-config-manager/.wheelhouse/ wheel clearwater-config-manager
-chown --recursive ellis:root /usr/share/clearwater/clearwater-config-manager/
-install --mode=0644 /usr/share/clearwater/conf/clearwater-config-manager.monit /etc/monit/conf.d/        
-service clearwater-monit reload || /bin/true
-service clearwater-config-manager stop || /bin/true
+cw-create-user clearwater-config-manager
+cw-create-log-dir clearwater-config-manager adm
+cw-create-virtualenv clearwater-config-manager
+cw-start clearwater-config-manager
 
-%preun -n clearwater-config-manager
+%preun -n clearwater-config-manager -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-config-manager.prerm
-set -e
-rm --force /etc/monit/conf.d/clearwater-config-manager.monit
-service clearwater-monit reload || /bin/true
-service clearwater-config-manager stop || /bin/true
-rm --recursive --force /usr/share/clearwater/clearwater-config-manager/env/
-rm --recursive --force /var/run/clearwater-config-manager/
+cw-stop clearwater-config-manager
+cw-remove-virtualenv clearwater-config-manager
 if [ "$1" = 0 ]; then # Uninstall
-  if grep -q "^clearwater-config-manager:" /etc/passwd; then
-    userdel clearwater-config-manager
-  fi
-  rm --recursive --force /var/log/clearwater-config-manager/
+  cw-remove-user clearwater-config-manager
+  cw-remove-log-dir clearwater-config-manager
+  cw-remove-run-dir clearwater-config-manager
 fi
 
 rm --force /usr/bin/cw-config

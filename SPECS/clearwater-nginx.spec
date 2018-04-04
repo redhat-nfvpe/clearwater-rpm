@@ -5,6 +5,7 @@ License:       AGPLv3+
 URL:           https://github.com/Metaswitch/clearwater-nginx
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       common.sh
 
 %global debug_package %{nil}
 
@@ -37,23 +38,30 @@ cp nginx-ensite/nginx_dissite %{buildroot}/usr/bin/
 %config /etc/nginx/ssl/nginx_openssl_config
 
 %post
+%include %{SOURCE1}
 # See: debian/clearwater-nginx.postinst
-set -e
-install /usr/share/clearwater-nginx /etc/monit/conf.d/nginx.monit
+
+# Remove default site
 rm --force /etc/nginx/sites-enabled/default
 rm --force /etc/nginx/sites-available/default
+
+# Enable ping site
 nginx_ensite ping
+
+# Create self-signed cert
 mkdir --parents /etc/nginx/ssl/
 cd /etc/nginx/ssl/
 openssl req -nodes -sha256 -newkey rsa:2048 -keyout nginx.key -out nginx.csr -config nginx_openssl_config
 openssl x509 -sha256 -req -in nginx.csr -signkey nginx.key -out nginx.crt
-service nginx stop || /bin/true
-service clearwater-monit reload || /bin/true
+
+cp /usr/share/clearwater-nginx "$MONIT_CONTROL_FILES/nginx.monit"
+cw-start nginx
 
 %preun
+%include %{SOURCE1}
 # See: debian/clearwater-nginx.prerm
-set -e
-rm --force /etc/monit/conf.d/nginx.monit
-service clearwater-monit reload || /bin/true
+
 nginx_dissite ping
-service nginx reload
+
+rm --force "$MONIT_CONTROL_FILES/nginx.monit"
+cw-stop nginx

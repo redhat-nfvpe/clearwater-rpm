@@ -5,6 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/memento
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       common.sh
 BuildRequires: make cmake libtool gcc-c++ bison flex
 BuildRequires: libevent-devel boost-devel boost-static openssl-devel curl-devel zeromq-devel
 
@@ -47,7 +48,7 @@ Commission Cassandra for Memento
 %setup
 
 %build
-make
+make MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/memento.install
@@ -97,8 +98,8 @@ cp --recursive memento-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/cassandra-schemas/memento.sh
 
 %post
+%include %{SOURCE1}
 # See: debian/memento.postinst
-set -e
 . /usr/share/clearwater/bin/memento-disk-usage-functions
 function add_section()
 {
@@ -124,8 +125,8 @@ fi
 service memento stop || /bin/true
 
 %preun
+%include %{SOURCE1}
 # See: debian/memento.prerm
-set -e
 . /usr/share/clearwater/bin/memento-disk-usage-functions
 function remove_section()
 {
@@ -154,17 +155,17 @@ remove_section /etc/security/limits.conf memento
 rm --force "$MEMENTO_DISK_USAGE_FILE"
 
 %post nginx
+%include %{SOURCE1}
 # See: debian/memento-nginx.postinst
-set -e
 service clearwater-infrastructure restart
 
 %preun nginx
+%include %{SOURCE1}
 # See: debian/memento-nginx.prerm
-set -e
 nginx_dissite memento
 service nginx reload
 
 %post cassandra
+%include %{SOURCE1}
 # See: debian/memento-cassandra.postinst
-set -e
 service clearwater-infrastructure restart

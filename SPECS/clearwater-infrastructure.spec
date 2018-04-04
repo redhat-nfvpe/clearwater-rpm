@@ -125,8 +125,7 @@ HTTP-to-Rf/Cx gateway node
 %setup
 
 %build
-# Note: the modules must be built in order, so unfortunately we can't use --jobs/-J
-make
+make MAKE="make --jobs $(nproc)"
 
 %install
 # See: debian/clearwater-infrastructure.install

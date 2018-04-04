@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |virtualbox, override|
     virtualbox.memory = 2048
-    virtualbox.cpus = 2
+    virtualbox.cpus = 4
   end
 
 end

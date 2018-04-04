@@ -5,12 +5,12 @@ set -e
 #
 # sudo dnf install --assumeyes git
 
-VERSION=129
-
 HERE=$(dirname "$(readlink -f "$0")")
 TOPDIR=$(readlink -f "$HERE/..")
 SOURCES="$TOPDIR/SOURCES"
 WORK=/tmp/clearwater-rpm
+
+. "$HERE/version"
 
 function fetch()
 {
