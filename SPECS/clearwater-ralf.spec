@@ -34,7 +34,7 @@ Ralf libraries
 %setup
 
 %build
-make MAKE="make --jobs $(nproc)"
+make MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/ralf.install
@@ -81,7 +81,7 @@ add_section /etc/security/limits.conf ralf /etc/security/limits.conf.ralf
 service clearwater-infrastructure restart
 if [ -x /etc/init.d/clearwater-cluster-manager ]; then
   service clearwater-cluster-manager stop || /bin/true
-fi  
+fi
 service ralf stop || /bin/true
 
 %preun

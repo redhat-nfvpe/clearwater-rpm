@@ -15,7 +15,7 @@ BuildRequires: libevent-devel zeromq-devel zlib-devel boost-devel
 
 Summary:       Clearwater - Astaire
 Requires:      clearwater-astaire-libs
-Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup 
+Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup
 Requires:      clearwater-monit clearwater-debian
 Requires:      cpulimit
 Requires:      zeromq zlib boost
@@ -26,7 +26,7 @@ Summary:       Clearwater - Astaire Libraries
 %package -n clearwater-rogers
 Summary:       Clearwater - Rogers
 Requires:      clearwater-rogers-libs
-Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup 
+Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup
 Requires:      clearwater-monit clearwater-debian
 Requires:      zeromq zlib boost
 
@@ -49,7 +49,7 @@ Rogers libraries
 %setup
 
 %build
-make MAKE="make --jobs $(nproc)"
+make MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/astaire.install

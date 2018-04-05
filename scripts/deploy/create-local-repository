@@ -11,7 +11,7 @@ if ! rpm --query centos-release > /dev/null && ! rpm --query redhat-release > /d
 fi
 
 HERE=$(dirname "$(readlink -f "$0")")
-TOPDIR=$(readlink -f "$HERE/..")
+TOPDIR=$(readlink -f "$HERE/../..")
 RPMS="$TOPDIR/RPMS"
 URI_RPMS="file://$(python -c "import urllib; print urllib.quote(raw_input())" <<< "$RPMS")/"
 

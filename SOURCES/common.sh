@@ -1,3 +1,5 @@
+#set -x
+
 CLEARWATER_HOME=/usr/share/clearwater
 MONIT_CONTROL_FILES=/etc/monit/conf.d/
 SECURITY_LIMITS=/etc/security/limits.conf
@@ -77,9 +79,15 @@ function cw-remove-run-dir {
 function cw-start {
   local NAME=$1
   local MONIT="/usr/share/clearwater/conf/$NAME.monit"
+  local TEMPLATES="/usr/share/clearwater/$NAME/templates"
   if [ -f "$MONIT" ]; then
     mkdir --parents "$MONIT_CONTROL_FILES"
     install --mode=0644 "$MONIT" "$MONIT_CONTROL_FILES"
+  fi
+  if [ -d "$TEMPLATES" ]; then
+    if [ $(find "$TEMPLATES/" -name *.monit -maxdepth 1) ]; then
+      cp "$TEMPLATES/"*.monit "$MONIT_CONTROL_FILES"
+    fi
   fi
   service-action clearwater-infrastructure restart # run our install scripts
   service-action clearwater-secure-connections reload
@@ -90,8 +98,15 @@ function cw-start {
 
 function cw-stop {
   local NAME=$1
-  rm --force "/etc/monit/conf.d/$NAME.monit"
+  local TEMPLATES="/usr/share/clearwater/$NAME/templates"
+  rm --force "$MONIT_CONTROL_FILES/$NAME.monit"
+  if [ -d "$TEMPLATES" ]; then
+    for F in "$TEMPLATES"/*.monit; do
+      rm --force "$MONIT_CONTROL_FILES/$(basename "$F")"
+    done
+  fi
   rm --force "/usr/share/clearwater/clearwater-cluster-manager/plugins/$NAME"*
+  service-action nginx reload
   service-action clearwater-secure-connections reload
   service-action clearwater-monit reload # forget our monit control files
   service-action clearwater-cluster-manager stop # monit will restart it if it's installed
@@ -100,14 +115,26 @@ function cw-stop {
 
 function cw-create-virtualenv {
   local NAME=$1
-  local HOME_DIR="$CLEARWATER_HOME/$NAME"
-  local WHEELHOUSE="$HOME_DIR/wheelhouse"
+  local PACKAGE_NAME=${2:-$NAME}
   local ENV_DIR="$CLEARWATER_HOME/$NAME/env"
   local PIP="$ENV_DIR/bin/pip"
   virtualenv "$ENV_DIR/"
   "$PIP" install --upgrade pip
+  cw-add-to-virtualenv "$NAME" "$NAME" "$PACKAGE_NAME"
+}
+
+function cw-add-to-virtualenv {
+  local ENV_NAME=$1
+  local NAME=$2
+  local PACKAGE_NAME=${3:-$NAME}
+  local ENV_DIR="$CLEARWATER_HOME/$ENV_NAME/env"
+  local PIP="$ENV_DIR/bin/pip"
+  local HOME_DIR="$CLEARWATER_HOME/$NAME"
+  local WHEELHOUSE="$HOME_DIR/.wheelhouse"
   #"$PIP" install "$WHEELHOUSE/pip-"*.whl
-  "$PIP" install --no-index --find-links "$WHEELHOUSE/" wheel "$NAME"
+  # See: https://stackoverflow.com/a/36365834/849021
+  "$PIP" install --no-index --find-links "$WHEELHOUSE/" wheel "$PACKAGE_NAME" |& \
+  grep --invert-match 'Requirement already satisfied'
 }
 
 function cw-remove-virtualenv {

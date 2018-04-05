@@ -45,7 +45,7 @@ Summary: Clearwater - Sprout Call Diversion Application Server Plugin
 Summary: Clearwater - Sprout Mangelwurzel Application Server Plugin
 
 %package -n clearwater-bono
-Summary: Clearwater - Bono 
+Summary: Clearwater - Bono
 
 %package -n clearwater-restund
 Summary: Clearwater - restund
@@ -111,7 +111,7 @@ Runs SIP performance tests against Clearwater
 %setup
 
 %build
-make MAKE="make --jobs $(nproc)"
+make MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/sprout-base.install

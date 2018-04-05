@@ -25,7 +25,7 @@ distributed timer service
 %setup
 
 %build
-make MAKE="make --jobs $(nproc)"
+make MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/chronos.install

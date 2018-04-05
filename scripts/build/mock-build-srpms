@@ -12,7 +12,7 @@ SPEC=${1:-*}
 MOCK=epel-7-x86_64
 
 HERE=$(dirname "$(readlink -f "$0")")
-TOPDIR=$(readlink -f "$HERE/..")
+TOPDIR=$(readlink -f "$HERE/../..")
 ESCAPED_TOPDIR=$(printf %q "$TOPDIR")
 SPECS="$TOPDIR/SPECS"
 SOURCES="$TOPDIR/SOURCES"

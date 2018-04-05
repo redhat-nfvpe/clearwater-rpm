@@ -48,7 +48,7 @@ Commission Cassandra for Memento
 %setup
 
 %build
-make MAKE="make --jobs $(nproc)"
+make MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/memento.install
@@ -121,7 +121,7 @@ service clearwater-infrastructure restart
 memento_get_current_use > "$MEMENTO_DISK_USAGE_FILE"
 if [ -x /etc/init.d/clearwater-cluster-manager ]; then
   service clearwater-cluster-manager stop || /bin/true
-fi  
+fi
 service memento stop || /bin/true
 
 %preun

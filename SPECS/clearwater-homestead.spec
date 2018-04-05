@@ -41,7 +41,7 @@ Commission Cassandra for Homestead
 %setup
 
 %build
-make MAKE="make --jobs $(nproc)"
+make MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/homestead.install

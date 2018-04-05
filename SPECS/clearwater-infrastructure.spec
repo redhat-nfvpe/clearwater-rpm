@@ -17,7 +17,8 @@ BuildRequires: systemd
 
 Summary:       Clearwater - Infrastructure
 Requires:      zeromq python-setuptools
-Requires:      dnsmasq ntp gnutls-utils curl redhat-lsb-core 
+Requires:      dnsmasq ntp gnutls-utils curl redhat-lsb-core
+AutoReq:       no
 
 # Note: We actually require python-virtualenv, too, but unfortunately the version in epel-7 is too
 # old (its included pip is too old), so we will install it manually in the postinst scriptlet,
@@ -125,7 +126,9 @@ HTTP-to-Rf/Cx gateway node
 %setup
 
 %build
-make MAKE="make --jobs $(nproc)"
+# CentOS's virtualenv requires a newer version of setuptools
+sed --in-place 's/"setuptools==24"/"setuptools==39.0.1"/' clearwater-infrastructure/PyZMQ/Makefile
+make MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/clearwater-infrastructure.install
@@ -217,7 +220,7 @@ cp --recursive vellum/* %{buildroot}/
 # See: debian/dime.install
 cp --recursive dime/* %{buildroot}/
 
-# TODO: /usr/share/clearwater/bin/clearwater-version is Debian-specific 
+# TODO: /usr/share/clearwater/bin/clearwater-version is Debian-specific
 
 %files
 %{_initrddir}/clearwater-infrastructure
@@ -390,7 +393,7 @@ ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/cw-show
 ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/clearwater-show-config
 
 # See: debian/clearwater-infrastructure.postinst
-sudo -H easy_install virtualenv 
+sudo -H easy_install virtualenv
 /usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
 
 %preun

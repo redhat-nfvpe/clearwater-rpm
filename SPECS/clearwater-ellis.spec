@@ -30,7 +30,7 @@ provisioning tools
 %setup
 
 %build
-make env MAKE="make --jobs $(nproc)"
+make env MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/ellis.install
@@ -182,7 +182,7 @@ mkdir --parents --mode=755 /var/log/clearwater-prov-tools/
 chown --recursive clearwater-prov-tools:root /var/log/clearwater-prov-tools/
 virtualenv /usr/share/clearwater/clearwater-prov-tools/env/
 /usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --upgrade pip
-/usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-prov-tools/.wheelhouse/ wheel clearwater-prov-tools 
+/usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-prov-tools/.wheelhouse/ wheel clearwater-prov-tools
 chown --recursive clearwater-prov-tools:root /usr/share/clearwater/clearwater-prov-tools/
 mkdir --parents /var/log/clearwater-prov-tools/
 service clearwater-infrastructure restart

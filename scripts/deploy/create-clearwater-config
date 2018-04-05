@@ -1,0 +1,92 @@
+#!/bin/bash
+set -e
+
+ZONE=my_zone
+GEOGRAPHICALLY_REDUNDANT=false
+SITE_NAME=my_site
+SECRET=my_secret
+
+SMTP_HOSTNAME=$(hostname)
+SMTP_USERNAME=username
+SMTP_PASSWORD=password
+
+MAX_LOG_DIRECTORY_SIZE=52428800
+REDUCE_CASSANDRA_MEM_USAGE=true
+
+PRIVATE_IP=$(ip addr show eth0 | grep 'inet\b' | awk '{print $2}' | cut -d/ -f1)
+PUBLIC_IP=$PRIVATE_IP
+PUBLIC_HOSTNAME=$(hostname)
+# TODO: comma-separated list of all private IP addresses in group
+ETCD_CLUSTER=$PRIVATE_IP
+
+mkdir --parents /etc/clearwater/
+
+#
+# Local configuration
+#
+
+CONFIG_FILE=/etc/clearwater/local_config
+
+echo "# Created on $(date -u)" > "$CONFIG_FILE"
+
+echo >> "$CONFIG_FILE"
+echo "# Local IP configuration" >> "$CONFIG_FILE"
+echo "local_ip=$PRIVATE_IP" >> "$CONFIG_FILE"
+echo "public_ip=$PUBLIC_IP" >> "$CONFIG_FILE"
+echo "public_hostname=$PUBLIC_HOSTNAME" >> "$CONFIG_FILE"
+echo "etcd_cluster=$ETCD_CLUSTER" >> "$CONFIG_FILE"
+
+if [ "$MAX_LOG_DIRECTORY_SIZE" != 0 ]; then
+	echo >> "$CONFIG_FILE"
+	echo "max_log_directory_size=$MAX_LOG_DIRECTORY_SIZE" >> "$CONFIG_FILE"
+fi
+
+if [ "$GEOGRAPHICALLY_REDUNDANT" = true ]; then
+	echo >> "$CONFIG_FILE"
+	echo "# Geographically redundant" >> "$CONFIG_FILE"
+	echo "local_site_name=$SITE_NAME" >> "$CONFIG_FILE"
+
+	# On the first Vellum node in the second site, you should set remote_cassandra_seeds to the
+	# IP address of a Vellum node in the first site.
+	#echo "remote_cassandra_seeds=" >> "$CONFIG_FILE"
+fi
+
+CONFIG_FILE=/etc/clearwater/shared_config
+
+echo "# Created on $(date -u)" > "$CONFIG_FILE"
+
+echo >> "$CONFIG_FILE"
+echo "# Deployment definitions" >> "$CONFIG_FILE"
+echo "home_domain=$ZONE" >> "$CONFIG_FILE"
+echo "sprout_hostname=$SPROUT_HOSTNAME" >> "$CONFIG_FILE"
+echo "sprout_registration_store=$SPROUT_REGISTRATION_STORE" >> "$CONFIG_FILE"
+echo "hs_hostname=$HS_HOSTNAME" >> "$CONFIG_FILE"
+echo "hs_provisioning_hostname=$HS_PROVISIONING_HOSTNAME" >> "$CONFIG_FILE"
+echo "ralf_hostname=$RALF_HOSTNAME" >> "$CONFIG_FILE"
+echo "ralf_session_store=$RALF_SESSION_STORE" >> "$CONFIG_FILE"
+echo "xdms_hostname=$XDMS_HOSTNAME" >> "$CONFIG_FILE"
+echo "chronos_hostname=$CHRONOS_HOSTNAME" >> "$CONFIG_FILE"
+echo "cassandra_hostname=$CASSANDRA_HOSTNAME" >> "$CONFIG_FILE"
+
+echo >> "$CONFIG_FILE"
+echo "# Email server configuration" >> "$CONFIG_FILE"
+echo "smtp_smarthost=$SMTP_HOSTNAME" >> "$CONFIG_FILE"
+echo "smtp_username=$SMTP_USERNAME" >> "$CONFIG_FILE"
+echo "smtp_password=$SMTP_PASSWORD" >> "$CONFIG_FILE"
+echo "email_recovery_sender=clearwater@$ZONE" >> "$CONFIG_FILE"
+
+echo >> "$CONFIG_FILE"
+echo "# I-CSCF/S-CSCF configuration (used by Bono to proxy to Sprout)" >> "$CONFIG_FILE"
+echo "upstream_hostname=scscf.$HOSTNAME" >> "$CONFIG_FILE"
+
+echo >> "$CONFIG_FILE"
+echo "# Keys" >> "$CONFIG_FILE"
+echo "signup_key=$SECRET" >> "$CONFIG_FILE"
+echo "turn_workaround=$SECRET" >> "$CONFIG_FILE"
+echo "ellis_api_key=$SECRET" >> "$CONFIG_FILE"
+echo "ellis_cookie_key=$SECRET" >> "$CONFIG_FILE"
+
+if [ "$REDUCE_CASSANDRA_MEM_USAGE" = true ]; then
+	echo >> "$CONFIG_FILE"
+	echo "reduce_cassandra_mem_usage=Y" >> "$CONFIG_FILE"
+fi

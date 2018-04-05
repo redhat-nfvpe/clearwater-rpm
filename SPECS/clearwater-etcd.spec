@@ -49,7 +49,7 @@ config manager
 %setup
 
 %build
-make env MAKE="make --jobs $(nproc)"
+make env MAKE="make --jobs=$(nproc)"
 
 %install
 # See: debian/clearwater-etcd.install

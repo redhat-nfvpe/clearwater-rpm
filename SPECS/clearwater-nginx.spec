@@ -37,7 +37,7 @@ cp nginx-ensite/nginx_dissite %{buildroot}/usr/bin/
 %config /etc/nginx/sites-available/ping
 %config /etc/nginx/ssl/nginx_openssl_config
 
-%post
+%post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-nginx.postinst
 
@@ -54,14 +54,10 @@ cd /etc/nginx/ssl/
 openssl req -nodes -sha256 -newkey rsa:2048 -keyout nginx.key -out nginx.csr -config nginx_openssl_config
 openssl x509 -sha256 -req -in nginx.csr -signkey nginx.key -out nginx.crt
 
-cp /usr/share/clearwater-nginx "$MONIT_CONTROL_FILES/nginx.monit"
-cw-start nginx
+cw-start clearwater-nginx
 
-%preun
+%preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-nginx.prerm
-
 nginx_dissite ping
-
-rm --force "$MONIT_CONTROL_FILES/nginx.monit"
-cw-stop nginx
+cw-stop clearwater-nginx
