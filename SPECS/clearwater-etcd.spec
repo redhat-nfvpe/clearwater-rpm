@@ -6,32 +6,41 @@ URL:           https://github.com/Metaswitch/clearwater-etcd
 
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
+Source2:       clearwater-etcd.service
+Source3:       clearwater-cluster-manager.service
+Source4:       clearwater-queue-manager.service
+Source5:       clearwater-config-manager.service
 BuildRequires: make python-virtualenv git gcc-c++
 BuildRequires: libffi-devel
+BuildRequires: systemd
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - etcd
-Requires:      clearwater-infrastructure clearwater-monit clearwater-log-cleanup
 Requires:      python2-pip libffi
+#Requires:      clearwater-infrastructure clearwater-monit clearwater-log-cleanup
+%{?systemd_requires}
 
 %package -n clearwater-cluster-manager
 Summary:       Clearwater - Cluster Manager
-Requires:      clearwater-etcd clearwater-monit
 Requires:      python-virtualenv python2-pip libffi
+#Requires:      clearwater-etcd clearwater-monit
 AutoReq:       no
+%{?systemd_requires}
 
 %package -n clearwater-queue-manager
 Summary:       Clearwater - Queue Manager
-Requires:      clearwater-etcd clearwater-monit
 Requires:      python-virtualenv python2-pip libffi
+#Requires:      clearwater-etcd clearwater-monit
 AutoReq:       no
+%{?systemd_requires}
 
 %package -n clearwater-config-manager
 Summary:       Clearwater - Config Manager
-Requires:      clearwater-etcd clearwater-queue-manager clearwater-monit
 Requires:      python-virtualenv python2-pip python2-requests python2-jsonschema libffi
+#Requires:      clearwater-etcd clearwater-queue-manager clearwater-monit
 AutoReq:       no
+%{?systemd_requires}
 
 %description
 etcd configured for Clearwater
@@ -52,31 +61,38 @@ config manager
 make env MAKE="make --jobs=$(nproc)"
 
 %install
+mkdir --parents %{buildroot}%{_unitdir}/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-etcd.service
+install --mode=644 %{SOURCE3} %{buildroot}%{_unitdir}/clearwater-cluster-manager.service
+install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
+install --mode=644 %{SOURCE5} %{buildroot}%{_unitdir}/clearwater-config-manager.service
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/clearwater-etcd.init.d %{buildroot}%{_initrddir}/clearwater-etcd
+#install --mode=755 debian/clearwater-cluster-manager.init.d %{buildroot}%{_initrddir}/clearwater-cluster-manager
+#install --mode=755 debian/clearwater-queue-manager.init.d %{buildroot}%{_initrddir}/clearwater-queue-manager
+#install --mode=755 debian/clearwater-config-manager.init.d %{buildroot}%{_initrddir}/clearwater-config-manager
+
 # See: debian/clearwater-etcd.install
-mkdir --parents %{buildroot}%{_initrddir}/
-cp debian/clearwater-etcd.init.d %{buildroot}%{_initrddir}/clearwater-etcd
 cp --recursive clearwater-etcd/* %{buildroot}/
 
 # See: debian/clearwater-cluster-manager.install
-mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/wheelhouse/
-cp debian/clearwater-cluster-manager.init.d %{buildroot}%{_initrddir}/clearwater-cluster-manager
-cp cluster_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/wheelhouse/
+mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/
+cp cluster_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/
 cp --recursive clearwater-cluster-manager.root/* %{buildroot}/
 
 # See: debian/clearwater-queue-manager.install
-mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/wheelhouse/
+mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/plugins/
-cp debian/clearwater-queue-manager.init.d %{buildroot}%{_initrddir}/clearwater-queue-manager
-cp queue_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-queue-manager/wheelhouse/
+cp queue_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-queue-manager/.wheelhouse/
 cp --recursive clearwater-queue-manager.root/* %{buildroot}/
 cp src/clearwater_etcd_plugins/clearwater_queue_manager/apply_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-queue-manager/plugins/
 
 # See: debian/clearwater-config-manager.install
-mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/wheelhouse/
+mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
-cp debian/clearwater-config-manager.init.d %{buildroot}%{_initrddir}/clearwater-config-manager
-cp config_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-config-manager/wheelhouse/
+cp config_mgr_wheelhouse/* %{buildroot}/usr/share/clearwater/clearwater-config-manager/.wheelhouse/
 cp --recursive clearwater-config-manager.root/* %{buildroot}/
 cp src/clearwater_etcd_plugins/clearwater_config_manager/shared_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 cp src/clearwater_etcd_plugins/clearwater_config_manager/dns_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
@@ -84,7 +100,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/shared_config_config_plu
 cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 
 %files
-%{_initrddir}/clearwater-etcd
+%{_unitdir}/clearwater-etcd.service
 /usr/bin/clearwater-etcdctl
 /usr/share/clearwater/bin/poll_etcd.sh
 /usr/share/clearwater/bin/get_etcd_initial_cluster.py*
@@ -109,8 +125,8 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 %config /etc/logrotate.d/clearwater-etcd
 
 %files -n clearwater-cluster-manager
-%{_initrddir}/clearwater-cluster-manager
-/usr/share/clearwater/clearwater-cluster-manager/wheelhouse/
+%{_unitdir}/clearwater-cluster-manager.service
+/usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/
 /usr/share/clearwater/bin/clearwater-cluster-manager
 /usr/share/clearwater/infrastructure/scripts/restart/clearwater_cluster_manager_restart
 /usr/share/clearwater/infrastructure/alarms/clearwater_cluster_manager_alarms.json
@@ -137,8 +153,8 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 %config /etc/cron.hourly/clearwater-cluster-manager-log-cleanup
 
 %files -n clearwater-queue-manager
-%{_initrddir}/clearwater-queue-manager
-/usr/share/clearwater/clearwater-queue-manager/wheelhouse/
+%{_unitdir}/clearwater-queue-manager.service
+/usr/share/clearwater/clearwater-queue-manager/.wheelhouse/
 /usr/share/clearwater/clearwater-queue-manager/plugins/apply_config_plugin.py*
 /usr/share/clearwater/bin/clearwater-queue-manager
 /usr/share/clearwater/infrastructure/alarms/clearwater_queue_manager_alarms.json
@@ -155,8 +171,8 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 %config /etc/cron.hourly/clearwater-queue-manager-log-cleanup
 
 %files -n clearwater-config-manager
-%{_initrddir}/clearwater-config-manager
-/usr/share/clearwater/clearwater-config-manager/wheelhouse/
+%{_unitdir}/clearwater-config-manager.service
+/usr/share/clearwater/clearwater-config-manager/.wheelhouse/
 /usr/share/clearwater/clearwater-config-manager/plugins/shared_config_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/dns_json_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/shared_config_config_plugin.py*
@@ -185,16 +201,21 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 cw-create-user clearwater-etcd
 cw-create-log-dir clearwater-etcd
 cw-start clearwater-etcd
+%systemd_post clearwater-etcd.service
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-etcd.prerm
+%systemd_preun clearwater-etcd.service
 cw-stop clearwater-etcd
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user clearwater-etcd
   cw-remove-log-dir clearwater-etcd
   cw-remove-run-dir clearwater-etcd
 fi
+
+%postun
+%systemd_postun_with_restart clearwater-etcd.service
 
 %post -n clearwater-cluster-manager -p /bin/bash
 %include %{SOURCE1}
@@ -207,10 +228,12 @@ cw-create-user clearwater-cluster-manager
 cw-create-log-dir clearwater-cluster-manager adm
 cw-create-virtualenv clearwater-cluster-manager
 cw-start clearwater-cluster-manager
+%systemd_post clearwater-cluster-manager.service
 
 %preun -n clearwater-cluster-manager -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-cluster-manager.prerm
+%systemd_preun clearwater-cluster-manager.service
 cw-stop clearwater-cluster-manager
 cw-remove-virtualenv clearwater-cluster-manager
 if [ "$1" = 0 ]; then # Uninstall
@@ -219,8 +242,12 @@ if [ "$1" = 0 ]; then # Uninstall
   cw-remove-run-dir clearwater-cluster-manager
 fi
 
+# See: debian/clearwater-cluster-manager.links
 rm --force /usr/bin/cw-check_cluster_state
 rm --force /usr/sbin/cw-mark_node_failed
+
+%postun -n clearwater-cluster-manager
+%systemd_postun_with_restart clearwater-cluster-manager.service
 
 %post -n clearwater-queue-manager -p /bin/bash
 %include %{SOURCE1}
@@ -232,10 +259,12 @@ cw-create-user clearwater-queue-manager
 cw-create-log-dir clearwater-queue-manager adm
 cw-create-virtualenv clearwater-queue-manager
 cw-start clearwater-queue-manager
+%systemd_post clearwater-queue-manager.service
 
 %preun -n clearwater-queue-manager -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-queue-manager.prerm
+%systemd_preun clearwater-queue-manager.service
 cw-stop clearwater-queue-manager
 cw-remove-virtualenv clearwater-queue-manager
 if [ "$1" = 0 ]; then # Uninstall
@@ -244,7 +273,11 @@ if [ "$1" = 0 ]; then # Uninstall
   cw-remove-run-dir clearwater-queue-manager
 fi
 
+# See: debian/clearwater-queue-manager.links
 rm --force /usr/bin/cw-check_restart_queue_state
+
+%postun -n clearwater-queue-manager
+%systemd_postun_with_restart clearwater-queue-manager.service
 
 %post -n clearwater-config-manager -p /bin/bash
 %include %{SOURCE1}
@@ -259,10 +292,12 @@ cw-create-user clearwater-config-manager
 cw-create-log-dir clearwater-config-manager adm
 cw-create-virtualenv clearwater-config-manager
 cw-start clearwater-config-manager
+%systemd_post clearwater-config-manager.service
 
 %preun -n clearwater-config-manager -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-config-manager.prerm
+%systemd_preun clearwater-config-manager.service
 cw-stop clearwater-config-manager
 cw-remove-virtualenv clearwater-config-manager
 if [ "$1" = 0 ]; then # Uninstall
@@ -271,7 +306,11 @@ if [ "$1" = 0 ]; then # Uninstall
   cw-remove-run-dir clearwater-config-manager
 fi
 
+# See: debian/clearwater-config-manager.links
 rm --force /usr/bin/cw-config
 rm --force /usr/bin/cw-restore_config
 rm --force /usr/sbin/cw-check_config_sync
 rm --force /usr/sbin/cw-backup_config
+
+%postun -n clearwater-config-manager
+%systemd_postun_with_restart clearwater-config-manager.service

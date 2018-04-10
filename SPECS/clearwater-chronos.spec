@@ -6,17 +6,22 @@ URL:           https://github.com/Metaswitch/chronos
 
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
+Source2:       chronos.service
+Source3:       chronos.sh
+
 BuildRequires: make cmake libtool gcc-c++
 BuildRequires: libevent-devel openssl-devel zlib-devel zeromq-devel boost-devel net-snmp-devel
+BuildRequires: systemd
 
 # Note: zeromq-devel requires epel-release
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - Chronos
-Requires:      clearwater-infrastructure clearwater-snmpd clearwater-monit clearwater-queue-manager
-Requires:      clearwater-config-manager
+#Requires:      clearwater-infrastructure clearwater-snmpd clearwater-monit clearwater-queue-manager
+#Requires:      clearwater-config-manager
 Requires:      openssl-libs zlib zeromq boost net-snmp-libs
+%{?systemd_requires}
 
 %description
 distributed timer service
@@ -28,8 +33,15 @@ distributed timer service
 make MAKE="make --jobs=$(nproc)"
 
 %install
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/chronos.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/chronos.sh
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
+
 # See: debian/chronos.install
-mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/chronos/bin/
 mkdir --parents %{buildroot}/usr/share/chronos/lib/
@@ -38,7 +50,6 @@ mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/plugi
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-queue-manager/scripts/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
-install --mode=755 debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
 cp build/bin/chronos %{buildroot}/usr/bin/
 cp modules/cpp-common/scripts/stats-c/cw_stat %{buildroot}/usr/share/clearwater/chronos/bin/
 cp usr/lib/*.so %{buildroot}/usr/share/chronos/lib/
@@ -52,7 +63,8 @@ cp modules/clearwater-etcd-plugins/chronos/scripts/force_chronos_shared_restart_
 cp modules/clearwater-etcd-plugins/chronos/scripts/upload_chronos_shared_config %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
 
 %files
-%{_initrddir}/chronos
+%{_unitdir}/chronos.service
+/lib/systemd/scripts/chronos.sh
 /usr/bin/chronos
 /usr/share/clearwater/chronos/bin/
 /usr/share/chronos/lib/
@@ -87,10 +99,12 @@ ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_chr
 cw-create-user chronos
 cw-create-log-dir chronos
 cw-start chronos
+%systemd_post chronos.service
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/chronos.prerm
+%systemd_preun chronos.service
 cw-stop chronos
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user chronos
@@ -98,6 +112,10 @@ if [ "$1" = 0 ]; then # Uninstall
   cw-remove-run-dir chronos
 fi
 
+# See: debian/chronos.links
 rm --force /usr/bin/cw-check_chronos_shared_config_restart_queue_state
 rm --force /usr/bin/cw-force_chronos_shared_config_restart_queue_state
 rm --force /usr/bin/cw-upload_chronos_shared_config
+
+%postun
+%systemd_postun_with_restart chronos.service

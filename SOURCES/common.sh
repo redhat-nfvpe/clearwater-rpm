@@ -1,3 +1,9 @@
+#
+# RPM spec scriptlet utility functions
+#
+# For use by %post and %preun scriptlets in Clearwater components.
+#
+
 #set -x
 
 CLEARWATER_HOME=/usr/share/clearwater
@@ -16,6 +22,12 @@ function service-action {
     else 
       systemctl "$ACTION" "$SERVICE" || /bin/true
     fi
+  fi
+}
+
+function cw-config {
+  if [ -f /etc/clearwater/config ]; then
+    . /etc/clearwater/config
   fi
 }
 
@@ -76,6 +88,8 @@ function cw-remove-run-dir {
   rm --recursive --force "$RUN_DIR"
 }
 
+# If you use this, you must have "Requires: clearwater-monit", otherwise the service will not really
+# start
 function cw-start {
   local NAME=$1
   local MONIT="/usr/share/clearwater/conf/$NAME.monit"
@@ -113,13 +127,20 @@ function cw-stop {
   service-action "$NAME" stop # monit will *not* restart it
 }
 
+# If you use this in %post you want to set "Requires: python-virtualenv" and also "AutoReq: no" so
+# that rpmbuild won't automatically add an un-fulfillable dependency for our env/bin/python
 function cw-create-virtualenv {
   local NAME=$1
   local PACKAGE_NAME=${2:-$NAME}
-  local ENV_DIR="$CLEARWATER_HOME/$NAME/env"
+  local HOME_DIR="$CLEARWATER_HOME/$NAME"
+  local ENV_DIR="$HOME_DIR/env"
+  local EASY_INSTALL="$ENV_DIR/bin/easy_install"
   local PIP="$ENV_DIR/bin/pip"
-  virtualenv "$ENV_DIR/"
-  "$PIP" install --upgrade pip
+  local WHEELHOUSE="$HOME_DIR/.wheelhouse"
+  virtualenv --no-pip --no-wheel "$ENV_DIR/"
+  "$EASY_INSTALL" "$WHEELHOUSE/pip-"*.whl
+  "$PIP" install wheel --no-index --find-links="$WHEELHOUSE/" \
+    |& grep --invert-match 'Requirement already satisfied'
   cw-add-to-virtualenv "$NAME" "$NAME" "$PACKAGE_NAME"
 }
 
@@ -127,20 +148,20 @@ function cw-add-to-virtualenv {
   local ENV_NAME=$1
   local NAME=$2
   local PACKAGE_NAME=${3:-$NAME}
-  local ENV_DIR="$CLEARWATER_HOME/$ENV_NAME/env"
+  local ENV_HOME_DIR="$CLEARWATER_HOME/$ENV_NAME"
+  local ENV_WHEELHOUSE="$ENV_HOME_DIR/.wheelhouse"
+  local ENV_DIR="$ENV_HOME_DIR/env"
   local PIP="$ENV_DIR/bin/pip"
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
   local WHEELHOUSE="$HOME_DIR/.wheelhouse"
-  #"$PIP" install "$WHEELHOUSE/pip-"*.whl
-  # See: https://stackoverflow.com/a/36365834/849021
-  "$PIP" install --no-index --find-links "$WHEELHOUSE/" wheel "$PACKAGE_NAME" |& \
-  grep --invert-match 'Requirement already satisfied'
+  "$PIP" install "$PACKAGE_NAME" --no-index --find-links="$ENV_WHEELHOUSE/" --find-links="$WHEELHOUSE/" \
+    |& grep --invert-match 'Requirement already satisfied'
 }
 
 function cw-remove-virtualenv {
   local NAME=$1
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
-  local ENV_DIR="$CLEARWATER_HOME/$NAME/env"
+  local ENV_DIR="$HOME_DIR/env"
   rm --recursive --force "$ENV_DIR/"
 }
 

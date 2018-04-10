@@ -1,4 +1,1 @@
-*
-!.gitignore
-!common.sh
-!debian.sh
+*.tar.bz2

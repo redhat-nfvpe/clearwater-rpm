@@ -1,0 +1,14 @@
+[Unit]
+Description=Clearwater Astaire memcached clustering
+
+[Service]
+User=astaire
+RuntimeDirectory=astaire
+PIDFile=/var/run/astaire/astaire.pid
+WorkingDirectory=/etc/clearwater
+ExecStart=/lib/systemd/scripts/astaire.sh
+LimitNOFILE=1000000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

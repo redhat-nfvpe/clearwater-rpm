@@ -9,8 +9,6 @@ BuildRequires: make python-virtualenv
 BuildRequires: zeromq-devel boost-devel
 BuildRequires: systemd
 
-%{?systemd_requires}
-
 # Note: zeromq-devel requires epel-release
 
 %global debug_package %{nil}
@@ -19,6 +17,8 @@ Summary:       Clearwater - Infrastructure
 Requires:      zeromq python-setuptools
 Requires:      dnsmasq ntp gnutls-utils curl redhat-lsb-core
 AutoReq:       no
+
+%{?systemd_requires}
 
 # Note: We actually require python-virtualenv, too, but unfortunately the version in epel-7 is too
 # old (its included pip is too old), so we will install it manually in the postinst scriptlet,

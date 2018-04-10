@@ -1,0 +1,12 @@
+[Unit]
+Description=Clearwater Ellis provisioning portal
+
+[Service]
+User=ellis
+RuntimeDirectory=ellis
+PIDFile=/var/run/ellis/ellis.pid
+WorkingDirectory=/usr/share/clearwater/ellis
+ExecStart=/lib/systemd/scripts/ellis.sh
+
+[Install]
+WantedBy=multi-user.target

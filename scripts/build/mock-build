@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+SPEC=${1:-*}
+HERE=$(dirname "$(readlink -f "$0")")
+
+"$HERE/mock-build-srpms" "$SPEC"
+"$HERE/mock-build-rpms" "$SPEC"

@@ -21,19 +21,19 @@ only way to get the correct and complete source tarball.)
 
 You then have a few options for building the RPMs:
 
-1. Are you on CentOS or RHEL? Then just run `build-srpms` and then `build-rpms`. (The requirements are
-   documented in the scripts.)
-2. On other Linuxes, use [mock](https://github.com/rpm-software-management/mock) to emulate CentOS
-   in a chroot environment. You then run `mock-build-srpms` and then `mock-build-rpms`. Note that mock will
-   use up a lot of space in `/var/lib/mock` while running, so you may want to mount that directory
-   somewhere spacious.) Also see
+1. Are you on CentOS or RHEL? Then just run `scripts/build/build`. (The requirements are documented in
+   the scripts.)
+2. Or, use our included [Vagrant](https://www.vagrantup.com/) configuration to quickly bring up a
+   CentOS virtual machine. Just run `vagrant up`, and then `vagrant ssh` to login. The directories are
+   conveniently shared with the host operating system. (Note that you may need the VirtualBox Guest
+   Additions. Install them automatically via a plugin: `vagrant plugin install vagrant-vbguest`.)
+3. On other Linuxes, use [mock](https://github.com/rpm-software-management/mock) to emulate CentOS
+   in a chroot environment. For this, run `scripts/build/mock-build`. Note that mock will use up a lot of
+   space in `/var/lib/mock` while running, so you may want to mount that directory somewhere spacious.
+   Also see
    [here](https://marcin.juszkiewicz.com.pl/2016/04/15/how-to-speed-up-mock/) and
    [here](http://miroslav.suchy.cz/blog/archives/2015/05/28/increase_mock_performance_-_build_packages_in_memory/index.html)
    for some tips to speed up mock.
-3. Or, use our included [Vagrant](https://www.vagrantup.com/) configuration to quickly bring up a
-   CentOS virtual machine. Just run `vagrant up`, and then `vagrant ssh` to login. The build scripts are
-   in the `scripts` directory within the virtual machine. (Note that you may need the VirtualBox
-   Guest Additions. Install them automatically via a plugin: `vagrant plugin install vagrant-vbguest`.)
 
 Once the build process starts, go make yourself a cup of tea, because it's going to take a while
 (25 minutes on a 6-core workstation). Though the Clearwater build scripts are not very friendly to

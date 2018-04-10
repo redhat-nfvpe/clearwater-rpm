@@ -6,9 +6,11 @@ URL:           https://github.com/Metaswitch/homestead
 
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
+Source2:       homestead.service
 BuildRequires: make cmake libtool git gcc-c++ bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: openssl-devel boost-devel boost-static zeromq-devel libcurl-devel net-snmp-devel
+BuildRequires: systemd
 
 # Note: zeromq-devel requires epel-release
 
@@ -16,9 +18,10 @@ BuildRequires: openssl-devel boost-devel boost-static zeromq-devel libcurl-devel
 
 Summary:       Clearwater - Homestead
 Requires:      clearwater-homestead-libs
-Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
-Requires:      clearwater-tcp-scalability clearwater-snmpd
 Requires:      libidn libgcrypt gnutls openssl-libs zeromq libcurl net-snmp-libs
+#Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
+#Requires:      clearwater-tcp-scalability clearwater-snmpd
+%{?systemd_requires}
 
 %package libs
 Summary:       Clearwater - Homestead Libraries
@@ -44,10 +47,14 @@ Commission Cassandra for Homestead
 make MAKE="make --jobs=$(nproc)"
 
 %install
+mkdir --parents %{buildroot}%{_unitdir}/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homestead.service
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
+
 # See: debian/homestead.install
-mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
-install --mode=755 debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
 cp build/bin/homestead %{buildroot}/usr/share/clearwater/bin/
 cp --recursive homestead.root/* %{buildroot}/
 
@@ -61,7 +68,7 @@ cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/homestead/lib/fr
 cp --recursive homestead-cassandra.root/* %{buildroot}/
 
 %files
-%{_initrddir}/homestead
+%{_unitdir}/homestead.service
 /usr/share/clearwater/bin/homestead
 /usr/share/clearwater/bin/check_cx_health
 /usr/share/clearwater/bin/check_cx_health.py*
@@ -85,58 +92,32 @@ cp --recursive homestead-cassandra.root/* %{buildroot}/
 %files cassandra
 /usr/share/clearwater/cassandra-schemas/homestead_cache.sh
 
-%post
+%post -p /bin/bash
+%include %{SOURCE1}
 # See: debian/homestead.postinst
-set -e
-function add_section()
-{
-  local FILE=$1
-  local TAG=$2
-  local DELTA=$3
-  { echo "#+$TAG"
-    cat $DELTA
-    echo "#-$TAG" ; } >> $FILE
-}
-if ! grep -q "^homestead:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false homestead
-fi
-mkdir --parents /var/log/homestead/
-chown --recursive homestead /var/log/homestead/
-[ ! -x /usr/share/clearwater/bin/clearwater-logging-update ] || /usr/share/clearwater/bin/clearwater-logging-update
-add_section /etc/security/limits.conf homestead /etc/security/limits.conf.homestead
-service clearwater-infrastructure restart
-service homestead stop || /bin/true
+cw-create-user homestead
+cw-create-log-dir homestead
+cw-add-security-limits homestead
+cw-start homestead
+%systemd_post homestead.service
 
-%preun
+%preun -p /bin/bash
+%include %{SOURCE1}
 # See: debian/homestead.prerm
-set -e
-function remove_section()
-{
-  local FILE=$1
-  local TAG=$2
-  awk '/^#\+'$TAG'$/,/^#-'$TAG'$/ {next} {print}' "$FILE" > "/tmp/$(basename "$FILE").$$"
-  mv "/tmp/$(basename "$FILE").$$" "$FILE"
-}
-rm --force /etc/monit/conf.d/homestead.monit
-service clearwater-monit reload || /bin/true
-rm --force /usr/share/clearwater/clearwater-cluster-manager/plugins/homestead*
-if [ -x /etc/init.d/clearwater-cluster-manager ]; then
-  service clearwater-cluster-manager stop || /bin/true
-fi
-service homestead stop || /bin/true
+%systemd_preun homestead.service
+cw-stop homestead
 if [ "$1" = 0 ]; then # Uninstall
-  if grep -q "^homestead:" /etc/passwd; then
-    userdel homestead
-  fi
-  if [ -d /var/log/homestead/ ]; then
-    rm --recursive /var/log/homestead/
-  fi
-  rm --recursive --force /var/run/homestead/
+  cw-remove-user homestead
+  cw-remove-log-dir homestead
+  cw-remove-run-dir homestead
 fi
-remove_section /etc/security/limits.conf homestead
+cw-remove-security-limits homestead
 rm --force /var/lib/homestead/homestead.conf
 
-%post cassandra
+%postun
+%systemd_postun_with_restart homestead.service
+
+%post cassandra -p /bin/bash
+%include %{SOURCE1}
 # See: debian/homestead-cassandra.postinst
-set -e
-service clearwater-infrastructure restart
+service-action clearwater-infrastructure restart

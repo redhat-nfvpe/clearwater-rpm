@@ -6,14 +6,18 @@ URL:           https://github.com/Metaswitch/crest
 
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
+Source2:       homer.service
+Source3:       homer.sh
+
 BuildRequires: make python-virtualenv gcc-c++
 BuildRequires: python-devel libffi-devel libxslt-devel openssl-devel
+BuildRequires: systemd
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - Crest
-Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
 Requires:      python-virtualenv libffi libxslt openssl-libs
+#Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
 AutoReq:       no
 
 %package prov
@@ -23,12 +27,15 @@ AutoReq:       no
 
 %package -n clearwater-homer
 Summary:       Clearwater - Homer
-Requires:      clearwater-crest clearwater-debian
+Requires:      clearwater-crest
+#Requires:      clearwater-debian
 AutoReq:       no
+%{?systemd_requires}
 
 %package -n clearwater-homer-cassandra
 Summary:       Clearwater - Cassandra for Homer
-Requires:      clearwater-cassandra clearwater-infrastructure
+Requires:      clearwater-cassandra
+#Requires:      clearwater-infrastructure
 
 %package -n clearwater-homestead-prov
 Summary:       Clearwater - Homestead Provisioning
@@ -36,7 +43,8 @@ Requires:      clearwater-crest
 
 %package -n clearwater-homestead-prov-cassandra
 Summary:       Clearwater - Cassandra for Homestead Provisioning
-Requires:      clearwater-cassandra clearwater-infrastructure homestead-cassandra
+Requires:      clearwater-cassandra clearwater-homestead-cassandra
+#Requires:      clearwater-infrastructure
 
 %description
 Cassandra-powered generic RESTful HTTP server platform
@@ -63,6 +71,15 @@ Commission Cassandra for Homestead Provisioning
 make env MAKE="make --jobs=$(nproc)"
 
 %install
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homer.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/homer.sh
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/homer.init.d %{buildroot}%{_initrddir}/homer
+#install --mode=755 debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
+
 # See: debian/crest.install
 mkdir --parents %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
 cp --recursive crest_wheelhouse/* %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
@@ -76,11 +93,9 @@ cp src/metaswitch/crest/tools/sstable_provisioning/* %{buildroot}/usr/share/clea
 cp crest_wheelhouse/* %{buildroot}/usr/share/clearwater/crest-prov/.wheelhouse/
 
 # See: debian/homer.install
-mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/src/metaswitch/homer/
 mkdir --parents %{buildroot}/usr/share/clearwater/homer/templates/
-install --mode=755 debian/homer.init.d %{buildroot}%{_initrddir}/homer
 cp homer_wheelhouse/* %{buildroot}/usr/share/clearwater/homer/.wheelhouse/
 cp --recursive src/metaswitch/homer/tools %{buildroot}/usr/share/clearwater/homer/src/metaswitch/homer/
 cp homer.local_settings/local_settings.py %{buildroot}/usr/share/clearwater/homer/templates/
@@ -91,7 +106,6 @@ cp --recursive homer.root/* %{buildroot}/
 cp --recursive homer-cassandra.root/* %{buildroot}/
 
 # See: debian/homestead-prov.install
-install --mode=755 debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
 mkdir --parents %{buildroot}/usr/share/clearwater/homestead/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/homestead/templates/
 cp homestead_prov_wheelhouse/* %{buildroot}/usr/share/clearwater/homestead/.wheelhouse/
@@ -108,7 +122,8 @@ cp --recursive homestead-prov-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/crest-prov/
 
 %files -n clearwater-homer
-%{_initrddir}/homer
+%{_unitdir}/homer.service
+/lib/systemd/scripts/homer.sh
 /usr/share/clearwater/homer/.wheelhouse/
 /usr/share/clearwater/homer/handlers/
 /usr/share/clearwater/homer/schemas/
@@ -132,7 +147,7 @@ cp --recursive homestead-prov-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/cassandra-schemas/homer.sh
 
 %files -n clearwater-homestead-prov
-%{_initrddir}/homestead-prov
+#%{_unitdir}/homestead-prov.service
 /usr/share/clearwater/homestead/
 /usr/share/clearwater/bin/poll_homestead-prov.sh
 /usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_prov_diags
@@ -153,11 +168,16 @@ cp --recursive homestead-prov-cassandra.root/* %{buildroot}/
 cw-create-virtualenv crest
 service-action clearwater-secure-connections reload
 service-action clearwater-cluster-manager stop
+%systemd_post homer.service
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/crest.preun
+%systemd_preun homer.service
 cw-remove-virtualenv crest
+
+%postun
+%systemd_postun_with_restart homer.service
 
 %post prov -p /bin/bash
 %include %{SOURCE1}
@@ -172,9 +192,7 @@ cw-remove-virtualenv crest-prov
 %include %{SOURCE1}
 # See: debian/homer.postinst
 if [ -f /usr/share/clearwater/cassandra-schemas/homer.sh ]; then
-  if [ -f /etc/clearwater/config ]; then
-    . /etc/clearwater/config
-  fi
+  cw-config
   /usr/share/clearwater/cassandra-schemas/homer.sh
 fi
 cw-add-to-virtualenv crest homer

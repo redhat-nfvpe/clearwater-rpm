@@ -1,9 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+require "etc"
+
 Vagrant.configure("2") do |config|
 
   config.vm.box = "centos/7"
+  config.vm.network "public_network"
   config.vm.synced_folder "scripts", "/home/vagrant/scripts"
   config.vm.synced_folder "logs", "/home/vagrant/logs"
   config.vm.synced_folder "SPECS", "/home/vagrant/SPECS"
@@ -13,8 +16,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: "sudo yum install --assumeyes rpm-build yum-utils epel-release"
 
   config.vm.provider "virtualbox" do |virtualbox, override|
-    virtualbox.memory = 2048
-    virtualbox.cpus = 4
+    virtualbox.memory = 4096
+    virtualbox.cpus = Etc.nprocessors
   end
 
 end

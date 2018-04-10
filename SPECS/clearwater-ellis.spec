@@ -6,19 +6,26 @@ URL:           https://github.com/Metaswitch/ellis
 
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
+Source2:       ellis.service
+Source3:       ellis.sh
 BuildRequires: make python-virtualenv gcc-c++
 BuildRequires: python-devel mysql-devel curl-devel libffi-devel
+BuildRequires: systemd
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - Ellis
-Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
 Requires:      python-virtualenv python2-pip libffi
+Requires:      mariadb-server
+#Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
+#Requires:      clearwater-debian
+
+%{?systemd_requires}
 
 %package -n clearwater-prov-tools
 Summary:       Clearwater - Provisioning Tools
-Requires:      clearwater-infrastructure
 Requires:      python-virtualenv
+#Requires:      clearwater-infrastructure
 
 %description
 user/number provisioning portal
@@ -33,11 +40,17 @@ provisioning tools
 make env MAKE="make --jobs=$(nproc)"
 
 %install
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/ellis.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/ellis.sh
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/ellis.init.d %{buildroot}%{_initrddir}/ellis.service
+
 # See: debian/ellis.install
-mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
-cp debian/ellis.init.d %{buildroot}%{_initrddir}/ellis
 cp ellis_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
 rm --recursive web-content/.project web-content/.settings
 cp --recursive web-content %{buildroot}/usr/share/clearwater/ellis/
@@ -55,7 +68,8 @@ cp local_settings.py %{buildroot}/usr/share/clearwater/clearwater-prov-tools/
 cp --recursive clearwater-prov-tools.root/* %{buildroot}/
 
 %files
-%{_initrddir}/ellis
+%{_unitdir}/ellis.service
+/lib/systemd/scripts/ellis.sh
 /etc/cron.hourly/ellis-log-cleanup
 /usr/share/clearwater/bin/poll_ellis.sh
 /usr/share/clearwater/bin/poll_ellis_https.sh
@@ -130,69 +144,60 @@ cp --recursive clearwater-prov-tools.root/* %{buildroot}/
 %ghost /usr/share/clearwater/clearwater-prov-tools/env/
 %ghost /var/log/clearwater-prov-tools/
 
-%post
+%post -p /bin/bash
+%include %{SOURCE1}
 # See: debian/ellis.postinst
-set -e
-if ! grep -q "^ellis:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /usr/share/clearwater/ellis/ --shell /bin/false ellis
-fi
-mkdir --parents --mode=755 /var/log/ellis/
-chown --recursive ellis:root /var/log/ellis/
-virtualenv /usr/share/clearwater/ellis/env/
-/usr/share/clearwater/ellis/env/bin/pip install --upgrade pip
-#/usr/share/clearwater/ellis/env/bin/pip install /usr/share/clearwater/ellis/.wheelhouse/pip-*.whl
-/usr/share/clearwater/ellis/env/bin/pip install --no-index --find-links /usr/share/clearwater/ellis/.wheelhouse/ wheel ellis
-chown --recursive ellis:root /usr/share/clearwater/ellis/
+systemctl enable mariadb.service
+systemctl start mariadb.service
 mysql -u root --password= < /usr/share/clearwater/ellis/schema.sql
 mysql -u root --password= < /usr/share/clearwater/ellis/apply_db_updates.sql
-service clearwater-infrastructure restart
-cp /usr/share/clearwater/ellis/*.monit /etc/monit/conf.d/
-service clearwater-monit reload || /bin/true
-service ellis stop || /bin/true
+cw-create-user ellis
+cw-create-log-dir ellis
+cw-create-virtualenv ellis
+chown --recursive ellis:root /usr/share/clearwater/ellis/
+cw-start ellis
+%systemd_post ellis.service
 
-%preun
+%preun -p /bin/bash
+%include %{SOURCE1}
 # See: debian/ellis.prerm
-set -e
-for F in /usr/share/clearwater/ellis/*.monit; do rm --force "/etc/monit/conf.d/$(basename "$F")"; done
-service clearwater-monit reload || /bin/true
-service ellis stop
-rm --recursive --force /usr/share/clearwater/ellis/env
-rm --recursive --force /var/run/ellis/
+%systemd_remove ellis.service
+cw-stop ellis
+cw-remove-virtualenv ellis
 if [ "$1" = 0 ]; then # Uninstall
   rm --force /tmp/.ellis-sock*
-  if grep -q "^ellis:" /etc/passwd; then
-    userdel ellis
-  fi
+  cw-remove-user ellis
+  cw-remove-log-dir ellis
+  cw-remove-run-dir ellis
 fi
 
-%post -n clearwater-prov-tools
+%postun
+%systemd_postun_with_restart ellis.service
+
+%post -n clearwater-prov-tools -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-prov-tools.links
-set -e
 ln --symbolic /usr/share/clearwater/bin/create_user /usr/bin/cw-create_user
 ln --symbolic /usr/share/clearwater/bin/delete_user /usr/bin/cw-delete_user
 ln --symbolic /usr/share/clearwater/bin/display_user /usr/bin/cw-display_user
 ln --symbolic /usr/share/clearwater/bin/update_user /usr/bin/cw-update_user
 ln --symbolic /usr/share/clearwater/bin/list_users /usr/bin/cw-list_users
 
-# See: debian/clearwater-prov-tools.postinst
-if ! grep -q "^clearwater-prov-tools:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /usr/share/clearwater/clearwater-prov-tools/ --shell /bin/false clearwater-prov-tools
-fi
-mkdir --parents --mode=755 /var/log/clearwater-prov-tools/
-chown --recursive clearwater-prov-tools:root /var/log/clearwater-prov-tools/
-virtualenv /usr/share/clearwater/clearwater-prov-tools/env/
-/usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --upgrade pip
-/usr/share/clearwater/clearwater-prov-tools/env/bin/pip install --no-index --find-links /usr/share/clearwater/clearwater-prov-tools/.wheelhouse/ wheel clearwater-prov-tools
+cw-create-user clearwater-prov-tools
+cw-create-log-dir clearwater-prov-tools
+cw-create-virtualenv clearwater-prov-tools
 chown --recursive clearwater-prov-tools:root /usr/share/clearwater/clearwater-prov-tools/
-mkdir --parents /var/log/clearwater-prov-tools/
-service clearwater-infrastructure restart
+service-action clearwater-infrastructure restart
 
-%preun -n clearwater-prov-tools
-set -e
-rm --recursive --force /usr/share/clearwater/clearwater-prov-tools/env/
+%preun -n clearwater-prov-tools -p /bin/bash
+%include %{SOURCE1}
+cw-remove-virtualenv clearwater-prov-tools
 if [ "$1" = 0 ]; then # Uninstall
-  rm --recursive --force /var/log/clearwater-prov-tools
+  cw-remove-user clearwater-prov-tools
+  cw-remove-log-dir clearwater-prov-tools
 fi
+
+# See: debian/clearwater-prov-tools.links
 rm --force /usr/bin/cw-create_user
 rm --force /usr/bin/cw-delete_user
 rm --force /usr/bin/cw-display_user

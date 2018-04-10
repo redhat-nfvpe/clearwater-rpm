@@ -1,0 +1,14 @@
+[Unit]
+Description=Clearwater Rogers memcached proxy
+
+[Service]
+User=rogers
+RuntimeDirectory=rogers
+PIDFile=/var/run/rogers/rogers.pid
+WorkingDirectory=/etc/clearwater
+ExecStart=/lib/systemd/scripts/rogers.sh
+LimitNOFILE=1000000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

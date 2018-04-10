@@ -1,0 +1,13 @@
+[Unit]
+Description=Clearwater Chronos distributed timer service
+
+[Service]
+User=chronos
+RuntimeDirectory=chronos
+PIDFile=/var/run/chronos/chronos.pid
+ExecStart=/lib/systemd/scripts/chronos.sh
+LimitNOFILE=10000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

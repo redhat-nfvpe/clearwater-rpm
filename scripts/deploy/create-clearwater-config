@@ -14,7 +14,7 @@ MAX_LOG_DIRECTORY_SIZE=52428800
 REDUCE_CASSANDRA_MEM_USAGE=true
 
 PRIVATE_IP=$(ip addr show eth0 | grep 'inet\b' | awk '{print $2}' | cut -d/ -f1)
-PUBLIC_IP=$PRIVATE_IP
+PUBLIC_IP=$(ip addr show eth1 | grep 'inet\b' | awk '{print $2}' | cut -d/ -f1)
 PUBLIC_HOSTNAME=$(hostname)
 # TODO: comma-separated list of all private IP addresses in group
 ETCD_CLUSTER=$PRIVATE_IP
