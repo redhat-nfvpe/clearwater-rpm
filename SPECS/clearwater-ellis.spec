@@ -19,6 +19,7 @@ Requires:      python-virtualenv python2-pip libffi
 Requires:      mariadb-server
 #Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
 #Requires:      clearwater-debian
+AutoReq:       no
 
 %{?systemd_requires}
 
@@ -26,6 +27,7 @@ Requires:      mariadb-server
 Summary:       Clearwater - Provisioning Tools
 Requires:      python-virtualenv
 #Requires:      clearwater-infrastructure
+AutoReq:       no
 
 %description
 user/number provisioning portal

@@ -1,0 +1,14 @@
+[Unit]
+Description=Clearwater Sprout SIP router
+
+[Service]
+User=sprout
+RuntimeDirectory=sprout
+PIDFile=/var/run/sprout/sprout.pid
+WorkingDirectory=/etc/clearwater
+ExecStart=/lib/systemd/scripts/sprout.sh
+LimitNOFILE=1000000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

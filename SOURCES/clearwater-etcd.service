@@ -3,18 +3,10 @@ Description=Clearwater etcd
 
 [Service]
 User=clearwater-etcd
+RuntimeDirectory=clearwater-etcd
 PIDFile=/var/run/clearwater-etcd/clearwater-etcd.pid
 WorkingDirectory=/etc/clearwater
-Environment=log_level=2
-Environment=etcd_version=3.1.7
-ExecStart=/bin/bash -c ' \
-. /etc/clearwater/config && \
-/usr/share/clearwater/clearwater-etcd/$etcd_version/etcd \
---listen-client-urls http://0.0.0.0:4000 \
- --advertise-client-urls http://$advertisement_ip:4000 \
- --data-dir $DATA_DIR/$advertisement_ip \
- --name $ETCD_NAME \
- --debug'
+ExecStart=/lib/systemd/scripts/clearwater-etcd.sh
  
 [Install]
 WantedBy=multi-user.target

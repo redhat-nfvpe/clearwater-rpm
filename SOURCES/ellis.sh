@@ -1,10 +1,12 @@
 #!/bin/bash
+set -e
 
 # See: debian/ellis.init.d
 
 NAME=ellis
 
 log_level=2
+
 . /etc/clearwater/config
 
 # PID file is configured in /usr/share/clearwater/ellis/local_settings.py

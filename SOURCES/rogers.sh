@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # See: debian/rogers.init.d
 

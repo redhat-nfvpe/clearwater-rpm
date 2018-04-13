@@ -7,6 +7,8 @@ URL:           https://github.com/Metaswitch/homestead
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
 Source2:       homestead.service
+Source3:       homestead.sh
+
 BuildRequires: make cmake libtool git gcc-c++ bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: openssl-devel boost-devel boost-static zeromq-devel libcurl-devel net-snmp-devel
@@ -29,7 +31,7 @@ Requires:      libevent lksctp-tools
 
 %package cassandra
 Summary:       Clearwater - Cassandra for Homestead
-Requires:      clearwater-infrastructure clearwater-cassandra
+#Requires:      clearwater-infrastructure clearwater-cassandra
 
 %description
 HSS cache/gateway
@@ -48,7 +50,9 @@ make MAKE="make --jobs=$(nproc)"
 
 %install
 mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
 install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homestead.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/homestead.sh
 
 #mkdir --parents %{buildroot}%{_initrddir}/
 #install --mode=755 debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
@@ -69,6 +73,7 @@ cp --recursive homestead-cassandra.root/* %{buildroot}/
 
 %files
 %{_unitdir}/homestead.service
+/lib/systemd/scripts/homestead.sh
 /usr/share/clearwater/bin/homestead
 /usr/share/clearwater/bin/check_cx_health
 /usr/share/clearwater/bin/check_cx_health.py*

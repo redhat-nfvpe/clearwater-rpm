@@ -3,17 +3,10 @@ Description=Clearwater Homestead HSS cache/gateway
 
 [Service]
 User=homestead
+RuntimeDirectory=homestead
 PIDFile=/var/run/homestead/homestead.pid
 WorkingDirectory=/etc/clearwater
-Environment=log_level=2
-LimitNOFILE=1000000
-LimitCORE=infinity
-ExecStart=/bin/bash -c ' \
-. /etc/clearwater/config && \
-/usr/share/clearwater/crest/env/bin/python -m metaswitch.crest.main \
---worker-processes=$(nproc) \
-$signaling_opt \
---log-level=$log_level'
+ExecStart=/lib/systemd/scripts/homestead.sh
 
 [Install]
 WantedBy=multi-user.target

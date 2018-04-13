@@ -1,0 +1,13 @@
+# Note: PID location is different from other Clearwater components
+
+[Unit]
+Description=Clearwater Queue Manager
+
+[Service]
+User=clearwater-queue-manager
+PIDFile=/var/run/clearwater-queue-manager.pid
+WorkingDirectory=/usr/share/clearwater/clearwater-queue-manager
+ExecStart=/lib/systemd/scripts/clearwater-queue-manager.sh
+ 
+[Install]
+WantedBy=multi-user.target

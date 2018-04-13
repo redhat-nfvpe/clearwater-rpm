@@ -1,10 +1,12 @@
 #!/bin/bash
+set -e
 
 # See: debian/homer.init.d
 
 NAME=homer
 
 log_level=2
+
 . /etc/clearwater/config
 
 export CREST_SETTINGS="/usr/share/clearwater/$NAME/local_settings.py"

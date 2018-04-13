@@ -5,20 +5,40 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       common.sh
+Source2:       sprout.service
+Source3:       sprout.sh
+Source4:       bono.service
+Source5:       bono.sh
+Source6:       restund.service
+Source7:       restund.sh
+Source8:       clearwater-sip-stress.service
+Source9:       clearwater-sip-stress.sh
+Source10:      clearwater-sip-stress-stats.service
+Source11:      clearwater-sip-stress-stats.sh
+Source12:      clearwater-sip-perf.service
+Source13:      clearwater-sip-perf.sh
+
 BuildRequires: make cmake libtool gcc-c++ byacc flex rubygems rsync
 BuildRequires: libevent-devel boost-devel boost-static openssl-devel ncurses-devel zeromq-devel
 BuildRequires: net-snmp-devel
+BuildRequires: systemd
 
-# Note: Why byacc and not buson? Because libmemached for some reason breaks with our version of
-# bison, but is OK with byacc. Why, then, do other specs (ralf, homestead) that have libmemcached
-# build fine with bison?
+# Note: Why byacc and not bison? Because libmemached for some reason breaks with our version of
+# bison, but is OK with byacc. (Why, then, do other specs (ralf, homestead) that have libmemcached
+# build fine with bison?)
 
 # Note: zeromq-devel requires epel-release
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - Sprout
+Requires:      clearwater-sprout-libs
 Requires:      libevent openssl-libs ncurses zeromq net-snmp-libs
+%{?systemd_requires}
+
+%package libs
+Summary:       Clearwater - Sprout Libraries
 
 %package plugin-scscf
 Summary: Clearwater - Sprout S-CSCF Plugin
@@ -46,24 +66,32 @@ Summary: Clearwater - Sprout Mangelwurzel Application Server Plugin
 
 %package -n clearwater-bono
 Summary: Clearwater - Bono
+%{?systemd_requires}
 
 %package -n clearwater-restund
 Summary: Clearwater - restund
+%{?systemd_requires}
 
 %package -n clearwater-sipp
 Summary: Clearwater - SIPp
 
 %package -n clearwater-sip-stress
 Summary: Clearwater - SIP Stress Tests
+%{?systemd_requires}
 
 %package -n clearwater-sip-stress-stats
 Summary: Clearwater - SPI Stress Tests Statistics
+%{?systemd_requires}
 
 %package -n clearwater-sip-perf
 Summary: Clearwater - SIP Performance Tests
+%{?systemd_requires}
 
 %description
 SIP router
+
+%description libs
+Sprout libraries
 
 %description plugin-scscf
 SIP router S-CSCF plugin
@@ -111,9 +139,34 @@ Runs SIP performance tests against Clearwater
 %setup
 
 %build
+# pjsip fails to build in concurrent mode, so override
+sed --in-place '1ioverride MAKE = make' modules/pjsip/Makefile
+
 make MAKE="make --jobs=$(nproc)"
 
 %install
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/sprout.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/sprout.sh
+install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/bono.service
+install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/bono.sh
+install --mode=644 %{SOURCE6} %{buildroot}%{_unitdir}/restund.service
+install --mode=755 %{SOURCE7} %{buildroot}/lib/systemd/scripts/restund.sh
+install --mode=644 %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-sip-stress.service
+install --mode=755 %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress.sh
+install --mode=644 %{SOURCE10} %{buildroot}%{_unitdir}/clearwater-sip-stress-stats.service
+install --mode=755 %{SOURCE11} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress-stats.sh
+install --mode=644 %{SOURCE12} %{buildroot}%{_unitdir}/clearwater-sip-perf.service
+install --mode=755 %{SOURCE13} %{buildroot}/lib/systemd/scripts/clearwater-sip-perf.sh
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/bono.init.d %{buildroot}%{_initrddir}/bono
+#install --mode=755 debian/restund.init.d %{buildroot}%{_initrddir}/restund
+#install --mode=755 debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
+#install --mode=755 debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
+#install --mode=755 debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
+
 # See: debian/sprout-base.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
@@ -121,6 +174,7 @@ mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-access/plugi
 mkdir --parents %{buildroot}/etc/cron.hourly/
 cp build/bin/sprout %{buildroot}/usr/share/clearwater/bin/
 cp --recursive sprout-base.root/* %{buildroot}/
+rm %{buildroot}/etc/init.d/sprout
 cp scripts/sprout-log-cleanup %{buildroot}/etc/cron.hourly/
 cp modules/clearwater-etcd-plugins/sprout/sprout_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 cp modules/clearwater-etcd-plugins/sprout/sprout_scscf_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
@@ -129,6 +183,11 @@ cp modules/clearwater-etcd-plugins/sprout/sprout_rph_json_plugin.py %{buildroot}
 cp modules/clearwater-etcd-plugins/clearwater_config_access/scscf_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 cp modules/clearwater-etcd-plugins/clearwater_config_access/enum_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 cp modules/clearwater-etcd-plugins/clearwater_config_access/rph_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+
+# See: debian/sprout-libs.install
+mkdir --parents %{buildroot}/usr/share/clearwater/sprout/lib/
+cp usr/lib/*.so %{buildroot}/usr/share/clearwater/sprout/lib/
+cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/sprout/lib/
 
 # See: debian/sprout-scscf.install
 mkdir --parents %{buildroot}/usr/share/clearwater/sprout/plugins
@@ -172,15 +231,12 @@ cp build/bin/call-diversion-as.so %{buildroot}/usr/share/clearwater/sprout/plugi
 cp build/bin/mangelwurzel-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
 
 # See: debian/bono.install
-mkdir --parents %{buildroot}%{_initrddir}/
 cp build/bin/sprout %{buildroot}/usr/share/clearwater/bin/bono
-install --mode=755 debian/bono.init.d %{buildroot}%{_initrddir}/bono
 cp --recursive bono.root/* %{buildroot}/
 cp scripts/bono-log-cleanup %{buildroot}/etc/cron.hourly/
 
 # See: debian/restund.install
 mkdir --parents %{buildroot}/usr/share/clearwater/restund/lib/
-install --mode=755 debian/restund.init.d %{buildroot}%{_initrddir}/restund
 cp usr/sbin/restund %{buildroot}/usr/share/clearwater/bin/
 cp usr/lib/libre.* %{buildroot}/usr/share/clearwater/restund/lib/
 cp usr/lib/restund/modules/* %{buildroot}/usr/share/clearwater/restund/lib/
@@ -191,19 +247,18 @@ cp --recursive clearwater-sipp.root/* %{buildroot}/
 cp modules/sipp/sipp %{buildroot}/usr/share/clearwater/bin/
 
 # See: debian/clearwater-sip-stress.install
-install --mode=755 debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
 cp --recursive clearwater-sip-stress.root/* %{buildroot}/
 
 # See: debian/clearwater-sip-stress-stats.install
 mkdir --parents %{buildroot}/usr/share/clearwater/gems/
-install --mode=755 debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
 cp scripts/sipp-stats/clearwater-sipp-stats-*.gem %{buildroot}/usr/share/clearwater/gems/
 
 # See: debian/clearwater-sip-perf.install
-install --mode=755 debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
 cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 
 %files
+%{_unitdir}/sprout.service
+/lib/systemd/scripts/sprout.sh
 /usr/share/clearwater/bin/sprout
 /usr/share/clearwater/bin/poll_sprout_http.sh
 /usr/share/clearwater/bin/poll_sprout_sip.sh
@@ -231,10 +286,12 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/clearwater-config-access/plugins/enum_json_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/rph_json_config_plugin.py*
 %config /etc/clearwater/logging/sprout
-%config /etc/init.d/sprout
 %config /etc/logrotate.d/sproutanalytics
 %config /etc/security/limits.conf.sprout
 %config /etc/cron.hourly/sprout-log-cleanup
+
+%files libs
+/usr/share/clearwater/sprout/lib/
 
 %files plugin-scscf
 /usr/share/clearwater/sprout/plugins/sprout_scscf.so
@@ -279,7 +336,8 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/sprout/plugins/mangelwurzel-as.so
 
 %files -n clearwater-bono
-%{_initrddir}/bono
+%{_unitdir}/bono.service
+/lib/systemd/scripts/bono.sh
 /usr/share/clearwater/bin/bono
 /usr/share/clearwater/bin/poll_bono.sh
 /usr/share/clearwater/clearwater-diags-monitor/scripts/bono_diags
@@ -291,7 +349,8 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 %config /etc/cron.hourly/bono-log-cleanup
 
 %files -n clearwater-restund
-%{_initrddir}/restund
+%{_unitdir}/restund.service
+/lib/systemd/scripts/restund.sh
 /usr/share/clearwater/bin/restund
 /usr/share/clearwater/restund/lib/
 /usr/share/clearwater/bin/poll_restund.sh
@@ -303,21 +362,48 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/bin/sipp
 
 %files -n clearwater-sip-stress
-%{_initrddir}/clearwater-sip-stress
+%{_unitdir}/clearwater-sip-stress.service
+/lib/systemd/scripts/clearwater-sip-stress.sh
 /etc/cron.hourly/clearwater-sip-stress-log-cleanup
 /usr/share/clearwater/bin/sip-stress
 /usr/share/clearwater/infrastructure/scripts/sip-stress
 /usr/share/clearwater/sip-stress/sip-stress.xml
 
 %files -n clearwater-sip-stress-stats
-%{_initrddir}/clearwater-sip-stress-stats
+%{_unitdir}/clearwater-sip-stress-stats.service
+/lib/systemd/scripts/clearwater-sip-stress-stats.sh
 /usr/share/clearwater/gems/clearwater-sipp-stats-*.gem
 
 %files -n clearwater-sip-perf
-%{_initrddir}/clearwater-sip-perf
+%{_unitdir}/clearwater-sip-perf.service
+/lib/systemd/scripts/clearwater-sip-perf.sh
 /usr/share/clearwater/bin/sip-perf
 /usr/share/clearwater/infrastructure/scripts/sip-perf
 /usr/share/clearwater/sip-perf/sip-perf.xml
+
+%post -p /bin/bash
+%include %{SOURCE1}
+# See: debian/sprout-base.postinst
+cw-create-user sprout
+cw-create-log-dir sprout
+cw-add-security-limits sprout
+cw-start sprout
+%systemd_post sprout.service
+
+%preun -p /bin/bash
+%include %{SOURCE1}
+# See: debian/sprout-base.prerm
+%systemd_preun sprout.service
+cw-stop sprout
+if [ "$1" = 0 ]; then # Uninstall
+  cw-remove-user sprout
+  cw-remove-log-dir sprout
+  cw-remove-run-dir sprout
+fi
+cw-remove-security-limits sprout
+
+%postun
+%systemd_postun_with_restart sprout.service
 
 %post plugin-scscf
 # See: debian/scsf-bgcf.links
@@ -342,3 +428,89 @@ ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_bgc
 
 %preun plugin-bgcf
 rm --force /usr/bin/cw-upload_bgcf_json
+
+%post -n clearwater-bono -p /bin/bash
+%include %{SOURCE1}
+# See: debian/bono.postinst
+cw-create-user bono
+cw-create-log-dir bono
+cw-add-security-limits bono
+cw-start bono
+%systemd_post bono.service
+
+%preun -n clearwater-bono -p /bin/bash
+%include %{SOURCE1}
+# See: debian/bono.prerm
+%systemd_preun bono.service
+cw-stop bono
+if [ "$1" = 0 ]; then # Uninstall
+  cw-remove-user bono
+  cw-remove-log-dir bono
+  cw-remove-run-dir bono
+fi
+cw-remove-security-limits bono
+
+%postun -n clearwater-bono
+%systemd_postun_with_restart bono.service
+
+%post -n clearwater-restund -p /bin/bash
+%include %{SOURCE1}
+# See: debian/restund.postinst
+cw-create-user restund
+cw-create-log-dir restund
+cw-add-security-limits restund
+cw-start restund
+%systemd_post restund.service
+
+%preun -n clearwater-restund -p /bin/bash
+%include %{SOURCE1}
+# See: debian/restund.prerm
+%systemd_preun restund.service
+cw-stop restund
+if [ "$1" = 0 ]; then # Uninstall
+  cw-remove-user restund
+  cw-remove-log-dir restund
+  cw-remove-run-dir restund
+fi
+cw-remove-security-limits restund
+
+%postun -n clearwater-restund
+%systemd_postun_with_restart restund.service
+
+%post -n clearwater-sip-stress -p /bin/bash
+%include %{SOURCE1}
+# See: debian/clearwater-sip-stress.postinst
+/usr/share/clearwater/infrastructure/scripts/sip-stress
+service-action clearwater-sip-stress start
+%systemd_post clearwater-sip-stress.service
+
+%preun -n clearwater-sip-stress
+%systemd_preun clearwater-sip-stress.service
+
+%postun -n clearwater-sip-stress
+%systemd_postun_with_restart clearwater-sip-stress.service
+
+%post -n clearwater-sip-stress-stats -p /bin/bash
+%include %{SOURCE1}
+# See: debian/clearwater-sip-stress-stats.postinst
+gem install /usr/share/clearwater/gems/clearwater-sipp-stats-1.0.0.gem --no-ri --no-rdoc
+service-action clearwater-sip-stress-stats start
+%systemd_post clearwater-sip-stress-stats.service
+
+%preun -n clearwater-sip-stress-stats
+%systemd_preun clearwater-sip-stress-stats.service
+
+%postun -n clearwater-sip-stress-stats
+%systemd_postun_with_restart clearwater-sip-stress-stats.service
+
+%post -n clearwater-sip-perf -p /bin/bash
+%include %{SOURCE1}
+# See: debian/clearwater-sip-perf.postinst
+/usr/share/clearwater/infrastructure/scripts/sip-perf
+%systemd_post clearwater-sip-perf.service
+
+%preun -n clearwater-sip-perf
+%systemd_preun clearwater-sip-perf.service
+
+%postun -n clearwater-sip-perf
+%systemd_postun_with_restart clearwater-sip-perf.service

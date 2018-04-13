@@ -7,9 +7,14 @@ URL:           https://github.com/Metaswitch/clearwater-etcd
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
 Source2:       clearwater-etcd.service
-Source3:       clearwater-cluster-manager.service
-Source4:       clearwater-queue-manager.service
-Source5:       clearwater-config-manager.service
+Source3:       clearwater-etcd.sh
+Source4:       clearwater-cluster-manager.service
+Source5:       clearwater-cluster-manager.sh
+Source6:       clearwater-queue-manager.service
+Source7:       clearwater-queue-manager.sh
+Source8:       clearwater-config-manager.service
+Source9:       clearwater-config-manager.sh
+
 BuildRequires: make python-virtualenv git gcc-c++
 BuildRequires: libffi-devel
 BuildRequires: systemd
@@ -62,10 +67,15 @@ make env MAKE="make --jobs=$(nproc)"
 
 %install
 mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
 install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-etcd.service
-install --mode=644 %{SOURCE3} %{buildroot}%{_unitdir}/clearwater-cluster-manager.service
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
-install --mode=644 %{SOURCE5} %{buildroot}%{_unitdir}/clearwater-config-manager.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-etcd.sh
+install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/clearwater-cluster-manager.service
+install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/clearwater-cluster-manager.sh
+install --mode=644 %{SOURCE6} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
+install --mode=755 %{SOURCE7} %{buildroot}/lib/systemd/scripts/clearwater-queue-manager.sh
+install --mode=644 %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-config-manager.service
+install --mode=755 %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-config-manager.sh
 
 #mkdir --parents %{buildroot}%{_initrddir}/
 #install --mode=755 debian/clearwater-etcd.init.d %{buildroot}%{_initrddir}/clearwater-etcd
@@ -101,6 +111,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 
 %files
 %{_unitdir}/clearwater-etcd.service
+/lib/systemd/scripts/clearwater-etcd.sh
 /usr/bin/clearwater-etcdctl
 /usr/share/clearwater/bin/poll_etcd.sh
 /usr/share/clearwater/bin/get_etcd_initial_cluster.py*
@@ -126,6 +137,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 
 %files -n clearwater-cluster-manager
 %{_unitdir}/clearwater-cluster-manager.service
+/lib/systemd/scripts/clearwater-cluster-manager.sh
 /usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/
 /usr/share/clearwater/bin/clearwater-cluster-manager
 /usr/share/clearwater/infrastructure/scripts/restart/clearwater_cluster_manager_restart
@@ -154,6 +166,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 
 %files -n clearwater-queue-manager
 %{_unitdir}/clearwater-queue-manager.service
+/lib/systemd/scripts/clearwater-queue-manager.sh
 /usr/share/clearwater/clearwater-queue-manager/.wheelhouse/
 /usr/share/clearwater/clearwater-queue-manager/plugins/apply_config_plugin.py*
 /usr/share/clearwater/bin/clearwater-queue-manager
@@ -172,6 +185,7 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 
 %files -n clearwater-config-manager
 %{_unitdir}/clearwater-config-manager.service
+/lib/systemd/scripts/clearwater-config-manager.sh
 /usr/share/clearwater/clearwater-config-manager/.wheelhouse/
 /usr/share/clearwater/clearwater-config-manager/plugins/shared_config_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/dns_json_plugin.py*

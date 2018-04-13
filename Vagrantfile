@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: "sudo yum install --assumeyes rpm-build yum-utils epel-release"
 
   config.vm.provider "virtualbox" do |virtualbox, override|
-    virtualbox.memory = 4096
+    virtualbox.memory = 8192
     virtualbox.cpus = Etc.nprocessors
   end
 

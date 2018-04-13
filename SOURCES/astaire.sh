@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # See: debian/astaire.init.d
 
@@ -9,6 +10,7 @@ PIDFILE="/var/run/$NAME/$NAME.pid"
 export LD_LIBRARY_PATH="/usr/share/clearwater/$NAME/lib"
 
 log_level=2
+
 . /etc/clearwater/config
 
 if [ -n "$signaling_namespace" ]; then

@@ -1,0 +1,14 @@
+[Unit]
+Description=Clearwater Ralf CTF
+
+[Service]
+User=ralf
+RuntimeDirectory=ralf
+PIDFile=/var/run/ralf/ralf.pid
+WorkingDirectory=/etc/clearwater
+ExecStart=/lib/systemd/scripts/ralf.sh
+LimitNOFILE=1000000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

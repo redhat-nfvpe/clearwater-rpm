@@ -21,10 +21,11 @@ only way to get the correct and complete source tarball.)
 
 You then have a few options for building the RPMs:
 
-1. Are you on CentOS or RHEL? Then just run `scripts/build/build`. (The requirements are documented in
-   the scripts.)
+1. Are you on CentOS or RHEL? Then run `scripts/build/build`. (The requirements are documented in the
+   scripts.) Note that the more CPU threads you have, the more RAM you will need. 8 GB of RAM
+   seems to be enough for a 12 thread machine. 
 2. Or, use our included [Vagrant](https://www.vagrantup.com/) configuration to quickly bring up a
-   CentOS virtual machine. Just run `vagrant up`, and then `vagrant ssh` to login. The directories are
+   CentOS virtual machine. Run `vagrant up`, and then `vagrant ssh` to login. The directories are
    conveniently shared with the host operating system. (Note that you may need the VirtualBox Guest
    Additions. Install them automatically via a plugin: `vagrant plugin install vagrant-vbguest`.)
 3. On other Linuxes, use [mock](https://github.com/rpm-software-management/mock) to emulate CentOS

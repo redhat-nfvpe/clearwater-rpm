@@ -1,0 +1,11 @@
+[Unit]
+Description=Clearwater restund STUN/TURN server
+
+[Service]
+User=restund
+ExecStart=/lib/systemd/scripts/restund.sh
+LimitNOFILE=10000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

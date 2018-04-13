@@ -1,0 +1,14 @@
+[Unit]
+Description=Clearwater Sprout SIP edge proxy
+
+[Service]
+User=bono
+RuntimeDirectory=bono
+PIDFile=/var/run/bono/bono.pid
+WorkingDirectory=/etc/clearwater
+ExecStart=/lib/systemd/scripts/bono.sh
+LimitNOFILE=1000000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target
