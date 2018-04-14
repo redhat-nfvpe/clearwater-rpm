@@ -1,0 +1,3 @@
+ansible
+os-client-config
+shade # for os_server, os_keypair

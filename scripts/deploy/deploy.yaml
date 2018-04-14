@@ -1,0 +1,70 @@
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+
+  # Configuration
+  - name: Configure OpenStack
+    os_client_config:
+  - name: Process topology
+    include_vars:
+      name: topology
+      file: topology.yaml
+  
+  # Keypair
+  - name: Provision keypair
+    register: keypair
+    os_keypair:
+      name: "{{ topology.prefix }}"
+      state: present
+  - name: Write private key
+    when: keypair.key.private_key is not none
+    copy:
+      content: "{{ keypair.key.private_key }}"
+      dest: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
+  - name: Private key permissions
+    when: keypair.key.private_key is not none
+    file:
+      mode: 0600
+      dest: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
+  - name: Write public key
+    copy:
+      content: "{{ keypair.key.public_key }}"
+      dest: "{{ playbook_dir }}/{{ keypair.key.name }}.pub"
+  
+  # Servers
+  - name: Provision server
+    with_items: "{{ topology.servers }}"
+    register: servers
+    os_server:
+      name: "{{ topology.prefix }}-{{ item.name }}"
+      state: present
+      key_name: clearwater
+      image: "{{ topology.image }}"
+      flavor: "{{ item.flavor }}"
+      #network: public # Not currently supported in Rackspace
+  - name: Wait for server to be ready
+    with_items: "{{ servers.results }}"
+    register: result
+    until: result is success
+    retries: 30
+    delay: 5
+    command: /usr/bin/ssh
+      -i "{{ playbook_dir }}/{{ keypair.key.name }}.key"
+      -o StrictHostKeyChecking=no
+      -o BatchMode=yes
+       root@{{ item.server.public_v4 }} /bin/true
+  - name: Add server to group
+    with_items: "{{ servers.results }}"
+    add_host:
+      name: "{{ item.id }}"
+      groups: clearwater
+      ansible_ssh_host: "{{ item.server.public_v4 }}"
+      ansible_ssh_user: root
+      ansible_ssh_private_key_file: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
+
+- hosts: clearwater
+  gather_facts: false
+  tasks:
+    - name: Test
+      command: ls /etc

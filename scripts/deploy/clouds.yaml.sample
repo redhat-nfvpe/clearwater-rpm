@@ -1,0 +1,8 @@
+clouds:
+  rackspace:
+    region_name: ORD
+    auth_type: rackspace_apikey
+    auth:
+      username: username
+      api_key: api_key
+      auth_url: https://identity.api.rackspacecloud.com/v2.0/

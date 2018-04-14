@@ -1,0 +1,7 @@
+prefix: clearwater
+image: CentOS 7 (PVHVM)
+servers:
+- name: vellum
+  flavor: 512MB Standard Instance
+- name: ellis
+  flavor: 512MB Standard Instance
