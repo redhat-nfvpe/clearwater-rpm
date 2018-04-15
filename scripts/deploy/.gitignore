@@ -1,4 +1,5 @@
 env/
+repository/
 clouds.yaml
 topology.yaml
 *.retry

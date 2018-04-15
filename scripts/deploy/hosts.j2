@@ -5,5 +5,7 @@
 
 {% for item in play_hosts %}
 {% set item = hostvars[item] %}
-{{ '%-20s' | format(item.server.private_v4) }} {{ item.inventory_hostname }} {{ item.inventory_hostname_short }}
+{% set server = item.server %}
+{% set metadata = server.metadata %}
+{{ '%-20s' | format(server.private_v4) }} {{ item.inventory_hostname }} {{ item.inventory_hostname_short }} {{ metadata['clearwater.type'] }}.{{ metadata['clearwater.site_name'] }}.{{ metadata['clearwater.zone'] }}
 {% endfor %}

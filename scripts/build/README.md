@@ -1,7 +1,7 @@
 How to Build Clearwater RPMs
 ============================
 
-The build scripts are all under `scripts`.
+The build scripts are all under `scripts/build`.
 
 First run `fetch-sources` to download the sources and archive them in the `SOURCES` directory. (Note:
 we must use git to fetch them, because the repositories are designed with many git submodules,

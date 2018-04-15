@@ -1,7 +1,8 @@
 Deploy Clearwater on OpenStack Using Ansible
 ============================================
 
-The playbook could be easily adapted to support other clouds and also bare metal deployments.
+The playbook is under `scripts/deploy`. It can be easily adapted to support other clouds and also bare
+metal deployments.
 
 First, install Ansible and the requirements for the modules we will use. The least intrusive way is
 to use a Python virtualenv. You will also need SELinux extensions for Python. On Fedora:
@@ -14,25 +15,30 @@ to use a Python virtualenv. You will also need SELinux extensions for Python. On
 Then, you will need to create a
 `clouds.yaml` file
 ([documentation](https://docs.openstack.org/python-openstackclient/pike/configuration/)).
-You can use `clouds.yaml.sample` as an template for deploying on Rackspace. For Rackspace you will
+You can use `clouds.yaml.sample` as a template for deploying on Rackspace. For Rackspace you will
 also need:
 
     pip install rackspaceauth
 
-Finally, you will need to create a `topology.yaml` file, using `topology.yaml.sample` as a template. The
-topology `name` will be the domain of your server names and will also be used as the keypair name.
-You can choose different topology names to support multiple deployments in one cloud.
-In this file you can also choose the OpenStack image and flavors to use per server. (See Rackspace
+Finally, you will need to create a `topology.yaml` file, using `topology.yaml.sample` as a template.
+Multiple deployments in the same zone should each have their own unique `site_name`, and each will get
+its own keypair with that name. In this file you can also choose the OpenStack image and flavors to
+use per server. (See Rackspace
 [flavors](https://developer.rackspace.com/docs/cloud-servers/v2/general-api-info/flavors/)).
 
 You can now deploy Clearwater:
 
     ansible-playbook deploy.yaml
 
-The playbook will create a keypair for you and write keys to `.key` and `.pub` files. Note that the
+The play will create a keypair for you and write keys to `.key` and `.pub` files. Note that the
 private key cannot be retrieved after creation, so make sure not to lose the private key file. It
-will then provision the servers and install the necessary packages on them. It is safe to re-run
+will then provision the servers and install the necessary packages on them. It is safe to replay
 the playbook: it will never create additional servers beyond those declared in `topology.yaml`.
+
+To manully login to the servers use the private key and disable host key checking (something you
+always want to do when dealing we cloud IP addresses, which might be reused), for example:
+
+    ssh -i clearwater.key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.237.176.164
 
 
 TODO
@@ -89,3 +95,5 @@ install RPMs
 https://blog.cloudandheat.com/index.php/en/2017/09/01/manage-openstack-vms-with-ansible/
 https://github.com/msolberg/openstack-ansible-demo/tree/master/tutorial
 https://dmsimard.com/2016/01/08/selinux-python-virtualenv-chroot-and-ansible-dont-play-nice/
+
+

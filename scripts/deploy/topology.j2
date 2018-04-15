@@ -1,0 +1,25 @@
+{% set server = hostvars[inventory_hostname].server %}
+{% set zone = server.metadata['clearwater.zone'] %}
+{% set site_name = server.metadata['clearwater.site_name'] %}
+{% set type = server.metadata['clearwater.type'] %}
+{% set index = server.metadata['clearwater.index'] %}
+
+{%- macro nodes_of(type, attr) -%}
+  {%- set ns = namespace(items=[]) -%}
+  {%- for item in play_hosts -%}
+    {%- set item = hostvars[item] -%}
+    {%- if item.server.metadata['clearwater.type'] == type -%}
+      {%- set ns.items = ns.items + [item.server[attr]] -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {{- ns.items | join(',') -}}
+{%- endmacro -%}
+
+{%- macro nodes(attr) -%}
+  {%- set ns = namespace(items=[]) -%}
+  {%- for item in play_hosts -%}
+    {%- set item = hostvars[item] -%}
+    {%- set ns.items = ns.items + [item.server[attr]] -%}
+  {%- endfor -%}
+  {{- ns.items | join(',') -}}
+{%- endmacro -%}

@@ -1,32 +1,35 @@
 # {{ ansible_managed }}
+{% import 'topology.j2' as topology with context %}
 
-# Deployment definitions
-home_domain=$ZONE
-sprout_hostname=$SPROUT_HOSTNAME
-sprout_registration_store=$SPROUT_REGISTRATION_STORE
-hs_hostname=$HS_HOSTNAME
-hs_provisioning_hostname=$HS_PROVISIONING_HOSTNAME
-ralf_hostname=$RALF_HOSTNAME
-ralf_session_store=$RALF_SESSION_STORE
-xdms_hostname=$XDMS_HOSTNAME
-chronos_hostname=$CHRONOS_HOSTNAME
-cassandra_hostname=$CASSANDRA_HOSTNAME
+# Topology
 
-# Email server configuration
+home_domain={{ topology.zone }}
+sprout_hostname=sprout.{{ topology.site_name }}.{{ topology.zone }}
+sprout_hostname_mgmt=sprout.{{ topology.site_name }}.{{ topology.zone }}:9886
+sprout_registration_store=vellum.{{ topology.site_name }}.{{ topology.zone }}
+hs_hostname=homestead.{{ topology.site_name }}.{{ topology.zone }}:8888
+hs_hostname_mgmt=homestead.{{ topology.site_name }}.{{ topology.zone }}:8886
+hs_provisioning_hostname=homestead.{{ topology.site_name }}.{{ topology.zone }}:8889
+ralf_hostname=ralf.{{ topology.site_name }}.{{ topology.zone }}:10888 # 9888?
+ralf_session_store=vellum.{{ topology.site_name }}.{{ topology.zone }}
+xdms_hostname=homer.{{ topology.site_name }}.{{ topology.zone }}:7888
+chronos_hostname=vellum.{{ topology.site_name }}.{{ topology.zone }}
+cassandra_hostname=vellum.{{ topology.site_name }}.{{ topology.zone }}
+
+# SMTP
+
 smtp_smarthost=$SMTP_HOSTNAME
 smtp_username=$SMTP_USERNAME
 smtp_password=$SMTP_PASSWORD
-email_recovery_sender=clearwater@$ZONE
-
-# I-CSCF/S-CSCF configuration (used by Bono to proxy to Sprout)
-upstream_hostname=scscf.$HOSTNAME
+email_recovery_sender=clearwater@{{ topology.zone }}
 
 # Keys
+
 signup_key=$SECRET
 turn_workaround=$SECRET
 ellis_api_key=$SECRET
 ellis_cookie_key=$SECRET
 
-if [ "$REDUCE_CASSANDRA_MEM_USAGE" = true ]; then
-	reduce_cassandra_mem_usage=Y
-fi
+# Misc
+
+reduce_cassandra_mem_usage=Y
