@@ -1,0 +1,32 @@
+# {{ ansible_managed }}
+
+# Deployment definitions
+home_domain=$ZONE
+sprout_hostname=$SPROUT_HOSTNAME
+sprout_registration_store=$SPROUT_REGISTRATION_STORE
+hs_hostname=$HS_HOSTNAME
+hs_provisioning_hostname=$HS_PROVISIONING_HOSTNAME
+ralf_hostname=$RALF_HOSTNAME
+ralf_session_store=$RALF_SESSION_STORE
+xdms_hostname=$XDMS_HOSTNAME
+chronos_hostname=$CHRONOS_HOSTNAME
+cassandra_hostname=$CASSANDRA_HOSTNAME
+
+# Email server configuration
+smtp_smarthost=$SMTP_HOSTNAME
+smtp_username=$SMTP_USERNAME
+smtp_password=$SMTP_PASSWORD
+email_recovery_sender=clearwater@$ZONE
+
+# I-CSCF/S-CSCF configuration (used by Bono to proxy to Sprout)
+upstream_hostname=scscf.$HOSTNAME
+
+# Keys
+signup_key=$SECRET
+turn_workaround=$SECRET
+ellis_api_key=$SECRET
+ellis_cookie_key=$SECRET
+
+if [ "$REDUCE_CASSANDRA_MEM_USAGE" = true ]; then
+	reduce_cassandra_mem_usage=Y
+fi

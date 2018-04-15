@@ -6,7 +6,7 @@
   # Configuration
   - name: Configure OpenStack
     os_client_config:
-  - name: Process topology
+  - name: Import topology.yaml
     include_vars:
       name: topology
       file: topology.yaml
@@ -15,50 +15,47 @@
   - name: Provision keypair
     register: keypair
     os_keypair:
-      name: "{{ topology.prefix }}"
       state: present
-  - name: Write private key
-    when: keypair.key.private_key is not none
-    copy:
-      content: "{{ keypair.key.private_key }}"
-      dest: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
-  - name: Private key permissions
-    when: keypair.key.private_key is not none
-    file:
-      mode: 0600
-      dest: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
-  - name: Write public key
-    copy:
-      content: "{{ keypair.key.public_key }}"
-      dest: "{{ playbook_dir }}/{{ keypair.key.name }}.pub"
+      name: "{{ topology.name }}"
+  - name: Write keys
+    when: keypair.key.private_key is not none # will only be available when keypair is created
+    block:
+    - copy:
+        content: "{{ keypair.key.private_key }}"
+        dest: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
+    - file:
+        mode: 0600 # required by ssh
+        dest: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
+    - copy:
+        content: "{{ keypair.key.public_key }}"
+        dest: "{{ playbook_dir }}/{{ keypair.key.name }}.pub"
   
   # Servers
-  - name: Provision server
+  - name: Provision servers
+    async: 300 # max 5 minutes
+    poll: 0
+    register: servers_async
     with_items: "{{ topology.servers }}"
-    register: servers
     os_server:
-      name: "{{ topology.prefix }}-{{ item.name }}"
       state: present
-      key_name: clearwater
+      name: "{{ item.name }}.{{ topology.name }}"
       image: "{{ topology.image }}"
       flavor: "{{ item.flavor }}"
+      key_name: "{{ keypair.key.name }}"
       #network: public # Not currently supported in Rackspace
-  - name: Wait for server to be ready
-    with_items: "{{ servers.results }}"
-    register: result
-    until: result is success
-    retries: 30
-    delay: 5
-    command: /usr/bin/ssh
-      -i "{{ playbook_dir }}/{{ keypair.key.name }}.key"
-      -o StrictHostKeyChecking=no
-      -o BatchMode=yes
-       root@{{ item.server.public_v4 }} /bin/true
-  - name: Add server to group
+  - name: Wait for servers to become active
+    retries: 300 # delay is 5 seconds
+    register: servers
+    until: servers.finished
+    with_items: "{{ servers_async.results }}"
+    async_status:
+      jid: "{{ item.ansible_job_id }}"
+  - name: Add servers to group
     with_items: "{{ servers.results }}"
     add_host:
-      name: "{{ item.id }}"
+      name: "{{ item.server.name }}"
       groups: clearwater
+      server: "{{ item.server }}"
       ansible_ssh_host: "{{ item.server.public_v4 }}"
       ansible_ssh_user: root
       ansible_ssh_private_key_file: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
@@ -66,5 +63,21 @@
 - hosts: clearwater
   gather_facts: false
   tasks:
-    - name: Test
-      command: ls /etc
+  - name: Wait for servers to become available
+    command: /bin/true
+  - name: Generate /etc/hosts
+    template:
+      src: "{{ playbook_dir }}/hosts.j2"
+      dest: /etc/hosts
+      mode: 0644
+  - name: Generate Clearwater configuration
+    block:
+    - file:
+        path: /etc/clearwater
+        state: directory
+    - template:
+        src: "{{ playbook_dir }}/local_config.j2"
+        dest: /etc/clearwater/local_config
+    - template:
+        src: "{{ playbook_dir }}/shared_config.j2"
+        dest: /etc/clearwater/shared_config

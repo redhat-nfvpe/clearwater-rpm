@@ -1,6 +1,8 @@
 Deploy Clearwater on OpenStack Using Ansible
 ============================================
 
+The playbook could be easily adapted to support other clouds and also bare metal deployments.
+
 First, install Ansible and the requirements for the modules we will use. The least intrusive way is
 to use a Python virtualenv. You will also need SELinux extensions for Python. On Fedora:
 
@@ -17,10 +19,10 @@ also need:
 
     pip install rackspaceauth
 
-Finally, you will need to create a `topology.yaml`  file, using `topology.yaml.sample` as a template. The
-`prefix` will be prepended to all your server names, and will also be used as the keypair name.
-You can choose different prefixes to support multiple deployments.
-You can also choose the OpenStack image and flavors to use per server. (See Rackspace
+Finally, you will need to create a `topology.yaml` file, using `topology.yaml.sample` as a template. The
+topology `name` will be the domain of your server names and will also be used as the keypair name.
+You can choose different topology names to support multiple deployments in one cloud.
+In this file you can also choose the OpenStack image and flavors to use per server. (See Rackspace
 [flavors](https://developer.rackspace.com/docs/cloud-servers/v2/general-api-info/flavors/)).
 
 You can now deploy Clearwater:
@@ -28,7 +30,9 @@ You can now deploy Clearwater:
     ansible-playbook deploy.yaml
 
 The playbook will create a keypair for you and write keys to `.key` and `.pub` files. Note that the
-private key cannot be retrieved after creation, so make sure not to lose the private key file.
+private key cannot be retrieved after creation, so make sure not to lose the private key file. It
+will then provision the servers and install the necessary packages on them. It is safe to re-run
+the playbook: it will never create additional servers beyond those declared in `topology.yaml`.
 
 
 TODO

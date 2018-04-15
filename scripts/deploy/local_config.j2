@@ -1,0 +1,21 @@
+{% set server = hostvars[inventory_hostname].server %}
+# {{ ansible_managed }}
+
+# Local IP configuration
+local_ip={{ server.private_v4 }}
+public_ip={{ server.public_v4 }}
+public_hostname={{ inventory_hostname }}
+etcd_cluster=$ETCD_CLUSTER
+
+if [ "$MAX_LOG_DIRECTORY_SIZE" != 0 ]; then
+	max_log_directory_size=$MAX_LOG_DIRECTORY_SIZE
+fi
+
+if [ "$GEOGRAPHICALLY_REDUNDANT" = true ]; then
+	# Geographically redundant
+	local_site_name=$SITE_NAME
+
+	# On the first Vellum node in the second site, you should set remote_cassandra_seeds to the
+	# IP address of a Vellum node in the first site.
+	#remote_cassandra_seeds=
+fi
