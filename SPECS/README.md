@@ -20,7 +20,7 @@ Chronos is a distributed timer service with a HTTP API written in C++ based on
 
 ### clearwater-crest
 
-Contains Homer (XDMS) and Homestead's provisioning server (note that Homestead itself is in its own
+Contains Homer (XDMS) and Homestead's provisioning API (note that Homestead itself is in its own
 spec). Both are based on Crest: a custom, extensible HTTP-RESTful interface to
 [Cassandra](http://cassandra.apache.org/) written in Python 2, based on
 [Zope](http://www.zope.org/)/[Cyclone](http://cyclone.io/)/[Twisted](https://twistedmatrix.com/).

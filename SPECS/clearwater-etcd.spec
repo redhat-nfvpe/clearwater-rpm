@@ -15,37 +15,38 @@ Source7:       clearwater-queue-manager.sh
 Source8:       clearwater-config-manager.service
 Source9:       clearwater-config-manager.sh
 
-BuildRequires: make python-virtualenv git gcc-c++
+BuildRequires: make python-virtualenv git gcc-c++ ccache
 BuildRequires: libffi-devel
 BuildRequires: systemd
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - etcd
-Requires:      python2-pip libffi
-#Requires:      clearwater-infrastructure clearwater-monit clearwater-log-cleanup
+AutoReq:       no
 %{?systemd_requires}
+#Requires:      clearwater-infrastructure clearwater-monit clearwater-log-cleanup
 
 %package -n clearwater-cluster-manager
 Summary:       Clearwater - Cluster Manager
-Requires:      python-virtualenv python2-pip libffi
-#Requires:      clearwater-etcd clearwater-monit
+Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
+#Requires:      clearwater-etcd clearwater-monit
 
 %package -n clearwater-queue-manager
 Summary:       Clearwater - Queue Manager
-Requires:      python-virtualenv python2-pip libffi
-#Requires:      clearwater-etcd clearwater-monit
+Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
+#Requires:      clearwater-etcd clearwater-monit
 
 %package -n clearwater-config-manager
 Summary:       Clearwater - Config Manager
-Requires:      python-virtualenv python2-pip python2-requests python2-jsonschema libffi
-#Requires:      clearwater-etcd clearwater-queue-manager clearwater-monit
+Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
+#Requires:      python2-pip python2-requests python2-jsonschema
+#Requires:      clearwater-etcd clearwater-queue-manager clearwater-monit
 
 %description
 etcd configured for Clearwater
@@ -132,8 +133,8 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 /usr/share/clearwater/clearwater-etcd/3.1.7/etcd
 /usr/share/clearwater/infrastructure/alarms/clearwater_etcd_alarms.json
 /usr/share/clearwater/infrastructure/monit_uptime/check-etcd-uptime
-%config /usr/share/clearwater/conf/clearwater-etcd.monit
-%config /etc/logrotate.d/clearwater-etcd
+/usr/share/clearwater/conf/clearwater-etcd.monit
+/etc/logrotate.d/clearwater-etcd
 
 %files -n clearwater-cluster-manager
 %{_unitdir}/clearwater-cluster-manager.service
@@ -160,9 +161,10 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 /usr/share/clearwater/clearwater-cluster-manager/scripts/check_cluster_state
 /usr/share/clearwater/clearwater-cluster-manager/scripts/check_cluster_state.py*
 /usr/share/clearwater/clearwater-cluster-manager/scripts/force_etcd_state.py*
-%config /usr/share/clearwater/conf/clearwater-cluster-manager.monit
-%config /etc/logrotate.d/clearwater-cluster-manager
-%config /etc/cron.hourly/clearwater-cluster-manager-log-cleanup
+/usr/share/clearwater/conf/clearwater-cluster-manager.monit
+/etc/logrotate.d/clearwater-cluster-manager
+/etc/cron.hourly/clearwater-cluster-manager-log-cleanup
+%ghost /usr/share/clearwater/clearwater-cluster-manager/env/
 
 %files -n clearwater-queue-manager
 %{_unitdir}/clearwater-queue-manager.service
@@ -180,8 +182,9 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 /usr/share/clearwater/clearwater-queue-manager/scripts/check_node_health.py*
 /usr/share/clearwater/clearwater-queue-manager/scripts/check_queue_state.py*
 /usr/share/clearwater/clearwater-queue-manager/scripts/modify_nodes_in_queue.py*
-%config /usr/share/clearwater/conf/clearwater-queue-manager.monit
-%config /etc/cron.hourly/clearwater-queue-manager-log-cleanup
+/usr/share/clearwater/conf/clearwater-queue-manager.monit
+/etc/cron.hourly/clearwater-queue-manager-log-cleanup
+%ghost /usr/share/clearwater/clearwater-queue-manager/env/
 
 %files -n clearwater-config-manager
 %{_unitdir}/clearwater-config-manager.service
@@ -204,18 +207,19 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/dns_schema.json
 /usr/share/clearwater/clearwater-config-manager/scripts/print-s-cscf-configuration
 /usr/share/clearwater/clearwater-config-manager/scripts/print-enum-configuration
-%config /usr/share/clearwater/conf/clearwater-config-manager.monit
-%config /etc/rsyslog.d/35-config-manager.conf
-%config /etc/logrotate.d/clearwater-config-manager
-%config /etc/cron.hourly/clearwater-config-manager-log-cleanup
+/usr/share/clearwater/conf/clearwater-config-manager.monit
+/etc/rsyslog.d/35-config-manager.conf
+/etc/logrotate.d/clearwater-config-manager
+/etc/cron.hourly/clearwater-config-manager-log-cleanup
+%ghost /usr/share/clearwater/clearwater-config-manager/env/
 
 %post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-etcd.postinst
 cw-create-user clearwater-etcd
 cw-create-log-dir clearwater-etcd
-cw-start clearwater-etcd
 %systemd_post clearwater-etcd.service
+cw-start clearwater-etcd
 
 %preun -p /bin/bash
 %include %{SOURCE1}
@@ -241,8 +245,8 @@ ln --symbolic /usr/share/clearwater/clearwater-cluster-manager/scripts/mark_node
 cw-create-user clearwater-cluster-manager
 cw-create-log-dir clearwater-cluster-manager adm
 cw-create-virtualenv clearwater-cluster-manager
-cw-start clearwater-cluster-manager
 %systemd_post clearwater-cluster-manager.service
+cw-start clearwater-cluster-manager
 
 %preun -n clearwater-cluster-manager -p /bin/bash
 %include %{SOURCE1}
@@ -272,8 +276,8 @@ ln --symbolic /usr/share/clearwater/clearwater-queue-manager/scripts/check_resta
 cw-create-user clearwater-queue-manager
 cw-create-log-dir clearwater-queue-manager adm
 cw-create-virtualenv clearwater-queue-manager
-cw-start clearwater-queue-manager
 %systemd_post clearwater-queue-manager.service
+cw-start clearwater-queue-manager
 
 %preun -n clearwater-queue-manager -p /bin/bash
 %include %{SOURCE1}
@@ -305,8 +309,8 @@ ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/backup_con
 cw-create-user clearwater-config-manager
 cw-create-log-dir clearwater-config-manager adm
 cw-create-virtualenv clearwater-config-manager
-cw-start clearwater-config-manager
 %systemd_post clearwater-config-manager.service
+cw-start clearwater-config-manager
 
 %preun -n clearwater-config-manager -p /bin/bash
 %include %{SOURCE1}

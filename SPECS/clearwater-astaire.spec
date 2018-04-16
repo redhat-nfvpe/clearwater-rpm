@@ -11,7 +11,7 @@ Source3:       astaire.sh
 Source4:       rogers.service
 Source5:       rogers.sh
 
-BuildRequires: make libtool git gcc-c++
+BuildRequires: make libtool git gcc-c++ ccache
 BuildRequires: libevent-devel zeromq-devel zlib-devel boost-devel
 BuildRequires: systemd
 
@@ -21,37 +21,25 @@ BuildRequires: systemd
 
 Summary:       Clearwater - Astaire
 Requires:      zeromq zlib boost
-Requires:      clearwater-astaire-libs
-#Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup
-#Requires:      clearwater-monit clearwater-debian
-#Requires:      cpulimit
+AutoReq:       no
 %{?systemd_requires}
-
-%package libs
-Summary:       Clearwater - Astaire Libraries
+#Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup
+#Requires:      clearwater-monit
 
 %package -n clearwater-rogers
 Summary:       Clearwater - Rogers
 Requires:      zeromq zlib boost
 Requires:      clearwater-rogers-libs
-#Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup
-#Requires:      clearwater-monit clearwater-debian
+AutoReq:       no
 %{?systemd_requires}
-
-%package -n clearwater-rogers-libs
-Summary:       Clearwater - Rogers Libraries
+#Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup
+#Requires:      clearwater-monit
 
 %description
 memcached clustering
 
-%description libs
-Astaire libraries
-
 %description -n clearwater-rogers
 memcached proxy
-
-%description -n clearwater-rogers-libs
-Rogers libraries
 
 %prep
 %setup
@@ -98,31 +86,27 @@ cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/rogers/lib/
 /lib/systemd/scripts/astaire.sh
 /usr/share/clearwater/bin/astaire
 /usr/share/clearwater/astaire/bin/cw_stat
+/usr/share/clearwater/astaire/lib/
 /usr/share/clearwater/infrastructure/alarms/astaire_alarms.json
 /usr/share/clearwater/infrastructure/monit_uptime/check-astaire-uptime
 /usr/share/clearwater/infrastructure/scripts/reload/memcached/astaire_reload
 /usr/share/clearwater/infrastructure/scripts/restart/astaire_restart
 /usr/share/clearwater/infrastructure/scripts/astaire.monit
-%config /etc/cron.hourly/astaire-log-cleanup
-%config /etc/security/limits.conf.astaire
-
-%files libs
-/usr/share/clearwater/astaire/lib/
+/etc/cron.hourly/astaire-log-cleanup
+/etc/security/limits.conf.astaire
 
 %files -n clearwater-rogers
 %{_unitdir}/rogers.service
 /lib/systemd/scripts/rogers.sh
 /usr/share/clearwater/bin/rogers
+/usr/share/clearwater/rogers/lib/
 /usr/share/clearwater/infrastructure/alarms/rogers_alarms.json
 /usr/share/clearwater/infrastructure/monit_uptime/check-rogers-uptime
 /usr/share/clearwater/infrastructure/scripts/reload/memcached/rogers_reload
 /usr/share/clearwater/infrastructure/scripts/restart/rogers_restart
 /usr/share/clearwater/infrastructure/scripts/rogers.monit
-%config /etc/cron.hourly/rogers-log-cleanup
-%config /etc/security/limits.conf.rogers
-
-%files -n clearwater-rogers-libs
-/usr/share/clearwater/rogers/lib/
+/etc/cron.hourly/rogers-log-cleanup
+/etc/security/limits.conf.rogers
 
 %post -p /bin/bash
 %include %{SOURCE1}
@@ -131,8 +115,8 @@ cw-create-user astaire
 cw-create-log-dir astaire
 cw-add-security-limits astaire
 #service-action astaire-throttle start
-cw-start astaire
 %systemd_post astaire.service
+cw-start astaire
 
 %preun -p /bin/bash
 %include %{SOURCE1}
@@ -156,8 +140,8 @@ cw-remove-security-limits astaire
 cw-create-user rogers
 cw-create-log-dir rogers
 cw-add-security-limits rogers
-cw-start rogers
 %systemd_post rogers.service
+cw-start rogers
 
 %preun -n clearwater-rogers -p /bin/bash
 %include %{SOURCE1}

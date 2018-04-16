@@ -198,7 +198,7 @@ fi
 [ "$max_sproutlet_depth" = "" ]           || EXTRA_ARGS="$EXTRA_ARGS --max-sproutlet-depth=$max_sproutlet_depth"
 [ "$ralf_threads" = "" ]                  || EXTRA_ARGS="$EXTRA_ARGS --ralf-threads=$ralf_threads"
 [ "$non_register_authentication" = "" ]   || EXTRA_ARGS="$EXTRA_ARGS --non-register-authentication=$non_register_authentication"
-[ "$nonce_count_supported" != Y ]       || EXTRA_ARGS="$EXTRA_ARGS --nonce-count-supported"
+[ "$nonce_count_supported" != Y ]         || EXTRA_ARGS="$EXTRA_ARGS --nonce-count-supported"
 [ "$listen_port" = "" ]                   || EXTRA_ARGS="$EXTRA_ARGS --listen-port=$listen_port"
 [ "$blacklisted_scscf_uris" = "" ]        || EXTRA_ARGS="$EXTRA_ARGS --blacklisted-scscfs=$blacklisted_scscf_uris"
 

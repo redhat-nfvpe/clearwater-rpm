@@ -6,37 +6,41 @@ URL:           https://github.com/Metaswitch/memento
 
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
-BuildRequires: make cmake libtool gcc-c++ bison flex
-BuildRequires: libevent-devel boost-devel boost-static openssl-devel curl-devel zeromq-devel
+Source2:       memento.service
+Source3:       memento.sh
+
+BuildRequires: make cmake libtool gcc-c++ ccache bison flex
+BuildRequires: libevent-devel boost-devel boost-static curl-devel zeromq-devel openssl-devel
+BuildRequires: systemd
 
 # Note: zeromq-devel requires epel-release
+# Note: we need openssl-devel for libcrypto during build, but will actually be packaging our
+# own build
 
 %global debug_package %{nil}
 
-Summary:       Clearwater - Memento
-Requires:      clearwater-memento-libs
-Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup
-Requires:      clearwater-monit clearwater-socket-factory
-Requires:      openssl-libs libcurl zeromq
-
-%package libs
-Summary:       Clearwater - Memento Libraries
-Requires:      libevent
+Summary:       Clearwater - Memento Application Server
+Requires:      libevent libcurl zeromq
+AutoReq:       no
+%{?systemd_requires}
+#Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup
+#Requires:      clearwater-monit clearwater-socket-factory
 
 %package nginx
 Summary:       Clearwater - Nginx for Memento
-Requires:      clearwater-memento
-Requires:      clearwater-infrastructure clearwater-nginx
+Requires:      clearwater-nginx
+AutoReq:       no
+#Requires:      clearwater-memento
+#Requires:      clearwater-infrastructure clearwater-nginx
 
 %package cassandra
 Summary:       Clearwater - Cassandra for Memento
-Requires:      clearwater-infrastructure clearwater-cassandra
+Requires:      clearwater-cassandra
+AutoReq:       no
+#Requires:      clearwater-infrastructure clearwater-cassandra
 
 %description
 Application Server responsible for providing network-based call lists
-
-%description libs
-Memento libraries
 
 %description nginx
 Configure Nginx for Memento
@@ -48,13 +52,22 @@ Commission Cassandra for Memento
 %setup
 
 %build
+# Disable concurrent builds for non-supporting modules
+sed --in-place '1ioverride MAKE = make' modules/openssl/Makefile.org
+
 make MAKE="make --jobs=$(nproc)"
 
 %install
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/memento.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/memento.sh
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/memento.init.d %{buildroot}%{_initrddir}/memento
+
 # See: debian/memento.install
-mkdir --parents %{buildroot}%{_initrddir}/
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
-install --mode=755 debian/memento.init.d %{buildroot}%{_initrddir}/memento
 cp build/bin/memento %{buildroot}/usr/share/clearwater/bin/
 cp --recursive memento.root/* %{buildroot}/
 
@@ -70,12 +83,24 @@ cp --recursive memento-nginx.root/* %{buildroot}/
 cp --recursive memento-cassandra.root/* %{buildroot}/
 
 %files
-%{_initrddir}/memento
+%{_unitdir}/memento.service
+/lib/systemd/scripts/memento.sh
 /usr/share/clearwater/bin/memento
 /usr/share/clearwater/bin/poll_memento.sh
 /usr/share/clearwater/bin/memento-disk-usage-stats
 /usr/share/clearwater/bin/memento-disk-usage-functions
-/usr/share/clearwater/infrastructure/scripts/reload/memcached
+/usr/share/clearwater/lib/libcares.so*
+/usr/share/clearwater/lib/libcassandra.so
+/usr/share/clearwater/lib/libhashkit.so*
+/usr/share/clearwater/lib/libmemcached.so*
+/usr/share/clearwater/lib/libmemcachedprotocol.so*
+/usr/share/clearwater/lib/libmemcachedutil.so*
+/usr/share/clearwater/lib/libthrift.so
+/usr/share/clearwater/lib/libthrift-0.9.3.so
+/usr/share/clearwater/lib/libthriftnb.so
+/usr/share/clearwater/lib/libthriftnb-0.9.3.so
+/usr/share/clearwater/lib/libthriftz.so
+/usr/share/clearwater/lib/libthriftz-0.9.3.so
 /usr/share/clearwater/infrastructure/scripts/reload/memcached/memento_reload
 /usr/share/clearwater/infrastructure/scripts/restart/memento_restart
 /usr/share/clearwater/infrastructure/scripts/memento.monit
@@ -83,12 +108,9 @@ cp --recursive memento-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/monit_uptime/check-memento-uptime
 /usr/share/clearwater/node_type.d/80_memento
 /usr/share/clearwater/clearwater-diags-monitor/scripts/memento_diags
-%config /etc/security/limits.conf.memento
-%config /etc/cron.hourly/memento-log-cleanup
-%config /etc/cron.hourly/memento_disk_usage
-
-%files libs
-/usr/share/clearwater/lib/
+/etc/security/limits.conf.memento
+/etc/cron.hourly/memento-log-cleanup
+/etc/cron.hourly/memento_disk_usage
 
 %files nginx
 /usr/share/clearwater/infrastructure/scripts/create-memento-nginx-config
@@ -97,75 +119,46 @@ cp --recursive memento-cassandra.root/* %{buildroot}/
 %files cassandra
 /usr/share/clearwater/cassandra-schemas/memento.sh
 
-%post
+%post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento.postinst
 . /usr/share/clearwater/bin/memento-disk-usage-functions
-function add_section()
-{
-  local FILE=$1
-  local TAG=$2
-  local DELTA=$3
-  { echo "#+$TAG"
-    cat $DELTA
-    echo "#-$TAG" ; } >> $FILE
-}
-if ! grep -q "^memento:" /etc/passwd; then
-  useradd --system --no-create-home --home-dir /nonexistent --shell /bin/false memento
-fi
-mkdir --parents /var/log/memento/
-chown --recursive memento /var/log/memento/
-[ ! -x /usr/share/clearwater/bin/clearwater-logging-update ] || /usr/share/clearwater/bin/clearwater-logging-update
-add_section /etc/security/limits.conf memento /etc/security/limits.conf.memento
-service clearwater-infrastructure restart
+cw-create-user memento
+cw-create-log-dir memento
+cw-add-security-limits memtno
 memento_get_current_use > "$MEMENTO_DISK_USAGE_FILE"
-if [ -x /etc/init.d/clearwater-cluster-manager ]; then
-  service clearwater-cluster-manager stop || /bin/true
-fi
-service memento stop || /bin/true
+%systemd_post memento.service
+cw-start memento
 
-%preun
+%preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento.prerm
+%systemd_preun astaire.service
 . /usr/share/clearwater/bin/memento-disk-usage-functions
-function remove_section()
-{
-  local FILE=$1
-  local TAG=$2
-  awk '/^#\+'$TAG'$/,/^#-'$TAG'$/ {next} {print}' "$FILE" > "/tmp/$(basename "$FILE").$$"
-  mv "/tmp/$(basename "$FILE").$$" "$FILE"
-}
-rm --force /etc/monit/conf.d/memento.monit
-service clearwater-monit reload || /bin/true
-rm --force /usr/share/clearwater/clearwater-cluster-manager/plugins/memento*
-if [ -x /etc/init.d/clearwater-cluster-manager ]; then
-  service clearwater-cluster-manager stop || /bin/true
-fi
-service memento stop || /bin/true
+cw-stop astaire
 if [ "$1" = 0 ]; then # Uninstall
-  if grep -q "^memento:" /etc/passwd; then
-    userdel memento
-  fi
-  if [ -d /var/log/memento/ ]; then
-    rm --recursive /var/log/memento/
-  fi
-  rm --recursive --force /var/run/memento/
+  cw-remove-user memento
+  cw-remove-log-dir memento
+  cw-remove-run-dir memento
 fi
-remove_section /etc/security/limits.conf memento
+cw-remove-security-limits memento
 rm --force "$MEMENTO_DISK_USAGE_FILE"
 
-%post nginx
+%postun
+%systemd_postun_with_restart memento.service
+
+%post nginx -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento-nginx.postinst
-service clearwater-infrastructure restart
+service-action clearwater-infrastructure restart
 
-%preun nginx
+%preun nginx -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento-nginx.prerm
 nginx_dissite memento
-service nginx reload
+service-action nginx reload
 
-%post cassandra
+%post cassandra -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento-cassandra.postinst
-service clearwater-infrastructure restart
+service-action clearwater-infrastructure restart

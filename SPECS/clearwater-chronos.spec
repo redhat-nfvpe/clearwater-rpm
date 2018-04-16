@@ -9,7 +9,7 @@ Source1:       common.sh
 Source2:       chronos.service
 Source3:       chronos.sh
 
-BuildRequires: make cmake libtool gcc-c++
+BuildRequires: make cmake libtool gcc-c++ ccache
 BuildRequires: libevent-devel openssl-devel zlib-devel zeromq-devel boost-devel net-snmp-devel
 BuildRequires: systemd
 
@@ -18,10 +18,11 @@ BuildRequires: systemd
 %global debug_package %{nil}
 
 Summary:       Clearwater - Chronos
+Requires:      openssl-libs zlib zeromq boost net-snmp-libs
+AutoReq:       no
+%{?systemd_requires}
 #Requires:      clearwater-infrastructure clearwater-snmpd clearwater-monit clearwater-queue-manager
 #Requires:      clearwater-config-manager
-Requires:      openssl-libs zlib zeromq boost net-snmp-libs
-%{?systemd_requires}
 
 %description
 distributed timer service
@@ -85,8 +86,9 @@ cp modules/clearwater-etcd-plugins/chronos/scripts/upload_chronos_shared_config 
 /usr/share/clearwater/infrastructure/scripts/reload/dns_json/chronos_reload
 /usr/share/clearwater/infrastructure/scripts/chronos
 /usr/share/clearwater/node_type.d/90_chronos
-%config /etc/chronos/chronos.conf.sample
-%config /etc/cron.hourly/chronos-log-cleanup
+/etc/cron.hourly/chronos-log-cleanup
+/etc/chronos/chronos.conf.sample
+%ghost /etc/chronos/chronos.conf
 
 %post -p /bin/bash
 %include %{SOURCE1}
@@ -98,8 +100,8 @@ ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_chr
 # See: debian/chronos.postinst
 cw-create-user chronos
 cw-create-log-dir chronos
-cw-start chronos
 %systemd_post chronos.service
+cw-start chronos
 
 %preun -p /bin/bash
 %include %{SOURCE1}

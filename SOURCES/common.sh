@@ -1,7 +1,7 @@
 #
 # RPM spec scriptlet utility functions
 #
-# For use by %post and %preun scriptlets in Clearwater components.
+# For use by %%post and %%preun scriptlets in Clearwater components.
 #
 
 #set -x
@@ -127,7 +127,11 @@ function cw-stop {
   service-action "$NAME" stop # monit will *not* restart it
 }
 
-# If you use this in %post you want to set "Requires: python-virtualenv" and also "AutoReq: no" so
+# TODO: Why does the original Clearwater packaging create the virtualenv during the %%post
+# scriptlet? It seems that this should all have been done during %%install and packaged into the
+# RPM. For now, we'll keep this odd solution for consistency. 
+
+# If you use this in %%post you want to set "Requires: python-virtualenv" and also "AutoReq: no" so
 # that rpmbuild won't automatically add an un-fulfillable dependency for our env/bin/python
 function cw-create-virtualenv {
   local NAME=$1

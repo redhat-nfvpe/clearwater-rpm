@@ -9,7 +9,7 @@ Source1:       common.sh
 Source2:       ralf.service
 Source3:       ralf.sh
 
-BuildRequires: make cmake libtool gcc-c++ bison flex
+BuildRequires: make cmake libtool gcc-c++ ccache bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: boost-devel zeromq-devel libcurl-devel
 BuildRequires: systemd
@@ -19,21 +19,14 @@ BuildRequires: systemd
 %global debug_package %{nil}
 
 Summary:       Clearwater - Ralf
-Requires:      clearwater-ralf-libs
 Requires:      libidn libgcrypt gnutls boost zeromq libcurl
+AutoReq:       no
+%{?systemd_requires}
 #Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-socket-factory
 #Requires:      clearwater-log-cleanup clearwater-monit
-%{?systemd_requires}
-
-%package libs
-Summary:       Clearwater - Ralf Libraries
-Requires:      libevent lksctp-tools
 
 %description
 CTF
-
-%description libs
-Ralf libraries
 
 %prep
 %setup
@@ -66,6 +59,7 @@ cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/ralf/lib/freeDia
 /lib/systemd/scripts/ralf.sh
 /usr/share/clearwater/bin/ralf
 /usr/share/clearwater/bin/poll_ralf.sh
+/usr/share/clearwater/ralf/lib/
 /usr/share/clearwater/clearwater-diags-monitor/scripts/ralf_diags
 /usr/share/clearwater/infrastructure/alarms/ralf_alarms.json
 /usr/share/clearwater/infrastructure/monit_stability/ralf-stability
@@ -75,11 +69,8 @@ cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/ralf/lib/freeDia
 /usr/share/clearwater/infrastructure/scripts/ralf
 /usr/share/clearwater/infrastructure/scripts/ralf.monit
 /usr/share/clearwater/node_type.d/20_ralf
-%config /etc/cron.hourly/ralf-log-cleanup
-%config /etc/security/limits.conf.ralf
-
-%files libs
-/usr/share/clearwater/ralf/lib/
+/etc/cron.hourly/ralf-log-cleanup
+/etc/security/limits.conf.ralf
 
 %post -p /bin/bash
 %include %{SOURCE1}

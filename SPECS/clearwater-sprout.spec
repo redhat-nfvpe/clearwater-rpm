@@ -19,8 +19,8 @@ Source11:      clearwater-sip-stress-stats.sh
 Source12:      clearwater-sip-perf.service
 Source13:      clearwater-sip-perf.sh
 
-BuildRequires: make cmake libtool gcc-c++ byacc flex rubygems rsync
-BuildRequires: libevent-devel boost-devel boost-static openssl-devel ncurses-devel zeromq-devel
+BuildRequires: make cmake libtool gcc-c++ ccache byacc flex rubygems rsync
+BuildRequires: libevent-devel boost-devel boost-static ncurses-devel zeromq-devel
 BuildRequires: net-snmp-devel
 BuildRequires: systemd
 
@@ -34,57 +34,74 @@ BuildRequires: systemd
 
 Summary:       Clearwater - Sprout
 Requires:      clearwater-sprout-libs
-Requires:      libevent openssl-libs ncurses zeromq net-snmp-libs
+AutoReq:       no
 %{?systemd_requires}
 
 %package libs
 Summary:       Clearwater - Sprout Libraries
-
-%package plugin-scscf
-Summary: Clearwater - Sprout S-CSCF Plugin
-
-%package plugin-icscf
-Summary: Clearwater - Sprout I-CSCF Plugin
-
-%package plugin-bgcf
-Summary: Clearwater - Sprout BGCF Plugin
-
-%package as-plugin-mmtel
-Summary: Clearwater - Sprout MMTEL Application Server Plugin
-
-%package as-plugin-gemini
-Summary: Clearwater - Sprout Gemini Application Server Plugin
-
-%package as-plugin-memento
-Summary: Clearwater - Sprout Memento Application Server Plugin
-
-%package as-plugin-call-diversion
-Summary: Clearwater - Sprout Call Diversion Application Server Plugin
-
-%package as-plugin-mangelwurzel
-Summary: Clearwater - Sprout Mangelwurzel Application Server Plugin
+Requires:      libevent ncurses zeromq net-snmp-libs
+AutoReq:       no
 
 %package -n clearwater-bono
-Summary: Clearwater - Bono
+Summary:       Clearwater - Bono
+Requires:      clearwater-sprout-libs
+AutoReq:       no
 %{?systemd_requires}
 
 %package -n clearwater-restund
-Summary: Clearwater - restund
+Summary:       Clearwater - restund
+AutoReq:       no
 %{?systemd_requires}
 
+%package plugin-scscf
+Summary:       Clearwater - Sprout S-CSCF Plugin
+AutoReq:       no
+
+%package plugin-icscf
+Summary:       Clearwater - Sprout I-CSCF Plugin
+AutoReq:       no
+
+%package plugin-bgcf
+Summary:       Clearwater - Sprout BGCF Plugin
+AutoReq:       no
+
+%package as-plugin-mmtel
+Summary:       Clearwater - Sprout MMTEL Application Server Plugin
+AutoReq:       no
+
+%package as-plugin-gemini
+Summary:       Clearwater - Sprout Gemini Application Server Plugin
+AutoReq:       no
+
+%package as-plugin-memento
+Summary:       Clearwater - Sprout Memento Application Server Plugin
+AutoReq:       no
+
+%package as-plugin-call-diversion
+Summary:       Clearwater - Sprout Call Diversion Application Server Plugin
+AutoReq:       no
+
+%package as-plugin-mangelwurzel
+Summary:       Clearwater - Sprout Mangelwurzel Application Server Plugin
+AutoReq:       no
+
 %package -n clearwater-sipp
-Summary: Clearwater - SIPp
+Summary:       Clearwater - SIPp
+AutoReq:       no
 
 %package -n clearwater-sip-stress
-Summary: Clearwater - SIP Stress Tests
+Summary:       Clearwater - SIP Stress Tests
+AutoReq:       no
 %{?systemd_requires}
 
 %package -n clearwater-sip-stress-stats
-Summary: Clearwater - SPI Stress Tests Statistics
+Summary:       Clearwater - SPI Stress Tests Statistics
+AutoReq:       no
 %{?systemd_requires}
 
 %package -n clearwater-sip-perf
-Summary: Clearwater - SIP Performance Tests
+Summary:       Clearwater - SIP Performance Tests
+AutoReq:       no
 %{?systemd_requires}
 
 %description
@@ -92,6 +109,12 @@ SIP router
 
 %description libs
 Sprout libraries
+
+%description -n clearwater-bono
+SIP edge proxy
+
+%description -n clearwater-restund
+STUN/TURN server
 
 %description plugin-scscf
 SIP router S-CSCF plugin
@@ -117,12 +140,6 @@ Call diversion application server plugin
 %description as-plugin-mangelwurzel
 B2BUA and SCC-AS emulator application server plugin
 
-%description -n clearwater-bono
-SIP edge proxy
-
-%description -n clearwater-restund
-STUN/TURN server
-
 %description -n clearwater-sipp
 Clearwater build of SIPp, used for running SIP stress and performance tests
 
@@ -139,8 +156,9 @@ Runs SIP performance tests against Clearwater
 %setup
 
 %build
-# pjsip fails to build in concurrent mode, so override
+# Disable concurrent builds for non-supporting modules
 sed --in-place '1ioverride MAKE = make' modules/pjsip/Makefile
+sed --in-place '1ioverride MAKE = make' modules/openssl/Makefile.org
 
 make MAKE="make --jobs=$(nproc)"
 
@@ -189,6 +207,18 @@ mkdir --parents %{buildroot}/usr/share/clearwater/sprout/lib/
 cp usr/lib/*.so %{buildroot}/usr/share/clearwater/sprout/lib/
 cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/sprout/lib/
 
+# See: debian/bono.install
+cp build/bin/sprout %{buildroot}/usr/share/clearwater/bin/bono
+cp --recursive bono.root/* %{buildroot}/
+cp scripts/bono-log-cleanup %{buildroot}/etc/cron.hourly/
+
+# See: debian/restund.install
+mkdir --parents %{buildroot}/usr/share/clearwater/restund/lib/
+cp usr/sbin/restund %{buildroot}/usr/share/clearwater/bin/
+cp usr/lib/libre.* %{buildroot}/usr/share/clearwater/restund/lib/
+cp usr/lib/restund/modules/* %{buildroot}/usr/share/clearwater/restund/lib/
+cp --recursive restund.root/* %{buildroot}/
+
 # See: debian/sprout-scscf.install
 mkdir --parents %{buildroot}/usr/share/clearwater/sprout/plugins
 cp build/bin/sprout_scscf.so %{buildroot}/usr/share/clearwater/sprout/plugins/
@@ -229,18 +259,6 @@ cp build/bin/call-diversion-as.so %{buildroot}/usr/share/clearwater/sprout/plugi
 
 # See: debian/mangelwurzel-as.install
 cp build/bin/mangelwurzel-as.so %{buildroot}/usr/share/clearwater/sprout/plugins/
-
-# See: debian/bono.install
-cp build/bin/sprout %{buildroot}/usr/share/clearwater/bin/bono
-cp --recursive bono.root/* %{buildroot}/
-cp scripts/bono-log-cleanup %{buildroot}/etc/cron.hourly/
-
-# See: debian/restund.install
-mkdir --parents %{buildroot}/usr/share/clearwater/restund/lib/
-cp usr/sbin/restund %{buildroot}/usr/share/clearwater/bin/
-cp usr/lib/libre.* %{buildroot}/usr/share/clearwater/restund/lib/
-cp usr/lib/restund/modules/* %{buildroot}/usr/share/clearwater/restund/lib/
-cp --recursive restund.root/* %{buildroot}/
 
 # See: debian/clearwater-sipp.install
 cp --recursive clearwater-sipp.root/* %{buildroot}/
@@ -285,13 +303,35 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/clearwater-config-access/plugins/scscf_json_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/enum_json_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/rph_json_config_plugin.py*
-%config /etc/clearwater/logging/sprout
-%config /etc/logrotate.d/sproutanalytics
-%config /etc/security/limits.conf.sprout
-%config /etc/cron.hourly/sprout-log-cleanup
+/etc/clearwater/logging/sprout
+/etc/logrotate.d/sproutanalytics
+/etc/security/limits.conf.sprout
+/etc/cron.hourly/sprout-log-cleanup
 
 %files libs
 /usr/share/clearwater/sprout/lib/
+
+%files -n clearwater-bono
+%{_unitdir}/bono.service
+/lib/systemd/scripts/bono.sh
+/usr/share/clearwater/bin/bono
+/usr/share/clearwater/bin/poll_bono.sh
+/usr/share/clearwater/clearwater-diags-monitor/scripts/bono_diags
+/usr/share/clearwater/infrastructure/scripts/restart/bono_restart
+/usr/share/clearwater/infrastructure/scripts/bono.monit
+/usr/share/clearwater/node_type.d/20_bono
+/etc/clearwater/logging/bono
+/etc/security/limits.conf.bono
+/etc/cron.hourly/bono-log-cleanup
+
+%files -n clearwater-restund
+%{_unitdir}/restund.service
+/lib/systemd/scripts/restund.sh
+/usr/share/clearwater/bin/restund
+/usr/share/clearwater/restund/lib/
+/usr/share/clearwater/bin/poll_restund.sh
+/usr/share/clearwater/infrastructure/scripts/restund
+/etc/security/limits.conf.restund
 
 %files plugin-scscf
 /usr/share/clearwater/sprout/plugins/sprout_scscf.so
@@ -335,28 +375,6 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 %files as-plugin-mangelwurzel
 /usr/share/clearwater/sprout/plugins/mangelwurzel-as.so
 
-%files -n clearwater-bono
-%{_unitdir}/bono.service
-/lib/systemd/scripts/bono.sh
-/usr/share/clearwater/bin/bono
-/usr/share/clearwater/bin/poll_bono.sh
-/usr/share/clearwater/clearwater-diags-monitor/scripts/bono_diags
-/usr/share/clearwater/infrastructure/scripts/restart/bono_restart
-/usr/share/clearwater/infrastructure/scripts/bono.monit
-/usr/share/clearwater/node_type.d/20_bono
-%config /etc/clearwater/logging/bono
-%config /etc/security/limits.conf.bono
-%config /etc/cron.hourly/bono-log-cleanup
-
-%files -n clearwater-restund
-%{_unitdir}/restund.service
-/lib/systemd/scripts/restund.sh
-/usr/share/clearwater/bin/restund
-/usr/share/clearwater/restund/lib/
-/usr/share/clearwater/bin/poll_restund.sh
-/usr/share/clearwater/infrastructure/scripts/restund
-%config /etc/security/limits.conf.restund
-
 %files -n clearwater-sipp
 /etc/sysctl.conf.clearwater-sipp
 /usr/share/clearwater/bin/sipp
@@ -387,8 +405,8 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 cw-create-user sprout
 cw-create-log-dir sprout
 cw-add-security-limits sprout
-cw-start sprout
 %systemd_post sprout.service
+cw-start sprout
 
 %preun -p /bin/bash
 %include %{SOURCE1}
@@ -404,6 +422,54 @@ cw-remove-security-limits sprout
 
 %postun
 %systemd_postun_with_restart sprout.service
+
+%post -n clearwater-bono -p /bin/bash
+%include %{SOURCE1}
+# See: debian/bono.postinst
+cw-create-user bono
+cw-create-log-dir bono
+cw-add-security-limits bono
+%systemd_post bono.service
+cw-start bono
+
+%preun -n clearwater-bono -p /bin/bash
+%include %{SOURCE1}
+# See: debian/bono.prerm
+%systemd_preun bono.service
+cw-stop bono
+if [ "$1" = 0 ]; then # Uninstall
+  cw-remove-user bono
+  cw-remove-log-dir bono
+  cw-remove-run-dir bono
+fi
+cw-remove-security-limits bono
+
+%postun -n clearwater-bono
+%systemd_postun_with_restart bono.service
+
+%post -n clearwater-restund -p /bin/bash
+%include %{SOURCE1}
+# See: debian/restund.postinst
+cw-create-user restund
+cw-create-log-dir restund
+cw-add-security-limits restund
+%systemd_post restund.service
+cw-start restund
+
+%preun -n clearwater-restund -p /bin/bash
+%include %{SOURCE1}
+# See: debian/restund.prerm
+%systemd_preun restund.service
+cw-stop restund
+if [ "$1" = 0 ]; then # Uninstall
+  cw-remove-user restund
+  cw-remove-log-dir restund
+  cw-remove-run-dir restund
+fi
+cw-remove-security-limits restund
+
+%postun -n clearwater-restund
+%systemd_postun_with_restart restund.service
 
 %post plugin-scscf
 # See: debian/scsf-bgcf.links
@@ -428,54 +494,6 @@ ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_bgc
 
 %preun plugin-bgcf
 rm --force /usr/bin/cw-upload_bgcf_json
-
-%post -n clearwater-bono -p /bin/bash
-%include %{SOURCE1}
-# See: debian/bono.postinst
-cw-create-user bono
-cw-create-log-dir bono
-cw-add-security-limits bono
-cw-start bono
-%systemd_post bono.service
-
-%preun -n clearwater-bono -p /bin/bash
-%include %{SOURCE1}
-# See: debian/bono.prerm
-%systemd_preun bono.service
-cw-stop bono
-if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user bono
-  cw-remove-log-dir bono
-  cw-remove-run-dir bono
-fi
-cw-remove-security-limits bono
-
-%postun -n clearwater-bono
-%systemd_postun_with_restart bono.service
-
-%post -n clearwater-restund -p /bin/bash
-%include %{SOURCE1}
-# See: debian/restund.postinst
-cw-create-user restund
-cw-create-log-dir restund
-cw-add-security-limits restund
-cw-start restund
-%systemd_post restund.service
-
-%preun -n clearwater-restund -p /bin/bash
-%include %{SOURCE1}
-# See: debian/restund.prerm
-%systemd_preun restund.service
-cw-stop restund
-if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user restund
-  cw-remove-log-dir restund
-  cw-remove-run-dir restund
-fi
-cw-remove-security-limits restund
-
-%postun -n clearwater-restund
-%systemd_postun_with_restart restund.service
 
 %post -n clearwater-sip-stress -p /bin/bash
 %include %{SOURCE1}

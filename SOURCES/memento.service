@@ -1,0 +1,14 @@
+[Unit]
+Description=Clearwater Memento call-list application server
+
+[Service]
+User=memento
+RuntimeDirectory=memento
+PIDFile=/var/run/memento/memento.pid
+WorkingDirectory=/etc/clearwater
+ExecStart=/lib/systemd/scripts/memento.sh
+LimitNOFILE=1000000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

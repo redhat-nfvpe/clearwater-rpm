@@ -1,5 +1,5 @@
 zone: example.org
-site_name: clearwater
+site_name: site-1
 image: CentOS 7 (PVHVM)
 servers:
 - type: vellum

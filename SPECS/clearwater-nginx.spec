@@ -10,8 +10,9 @@ Source1:       common.sh
 %global debug_package %{nil}
 
 Summary:       Clearwater - Nginx
-Requires:      clearwater-infrastructure clearwater-monit
 Requires:      nginx openssl
+AutoReq:       no
+#Requires:      clearwater-infrastructure clearwater-monit
 
 %description
 Nginx configured for Clearwater
@@ -34,8 +35,11 @@ cp nginx-ensite/nginx_dissite %{buildroot}/usr/bin/
 /usr/share/clearwater-nginx/nginx_ping
 /usr/share/clearwater-nginx/nginx.monit
 /usr/share/clearwater-nginx/run-in-nginx-namespace
-%config /etc/nginx/sites-available/ping
-%config /etc/nginx/ssl/nginx_openssl_config
+/etc/nginx/sites-available/ping
+/etc/nginx/ssl/nginx_openssl_config
+%ghost /etc/nginx/ssl/nginx.crt
+%ghost /etc/nginx/ssl/nginx.csr
+%ghost /etc/nginx/ssl/nginx.key
 
 %post -p /bin/bash
 %include %{SOURCE1}

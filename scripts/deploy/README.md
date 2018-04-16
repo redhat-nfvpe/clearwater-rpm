@@ -1,8 +1,8 @@
 Deploy Clearwater on OpenStack Using Ansible
 ============================================
 
-The playbook is under `scripts/deploy`. It can be easily adapted to support other clouds and also bare
-metal deployments.
+The playbook is under `scripts/deploy`. It can be easily adapted to support other clouds and also
+bare metal deployments. Tested with Ansible 2.5.
 
 First, install Ansible and the requirements for the modules we will use. The least intrusive way is
 to use a Python virtualenv. You will also need SELinux extensions for Python. On Fedora:

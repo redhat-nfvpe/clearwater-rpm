@@ -8,7 +8,8 @@ Source0:       %{name}-%{version}.tar.bz2
 Source1:       common.sh
 Source2:       ellis.service
 Source3:       ellis.sh
-BuildRequires: make python-virtualenv gcc-c++
+
+BuildRequires: make python-virtualenv gcc-c++ ccache
 BuildRequires: python-devel mysql-devel curl-devel libffi-devel
 BuildRequires: systemd
 
@@ -17,17 +18,15 @@ BuildRequires: systemd
 Summary:       Clearwater - Ellis
 Requires:      python-virtualenv python2-pip libffi
 Requires:      mariadb-server
-#Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
-#Requires:      clearwater-debian
 AutoReq:       no
-
 %{?systemd_requires}
+#Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
 
 %package -n clearwater-prov-tools
 Summary:       Clearwater - Provisioning Tools
 Requires:      python-virtualenv
-#Requires:      clearwater-infrastructure
 AutoReq:       no
+#Requires:      clearwater-infrastructure
 
 %description
 user/number provisioning portal
@@ -50,7 +49,7 @@ install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/ellis.sh
 #mkdir --parents %{buildroot}%{_initrddir}/
 #install --mode=755 debian/ellis.init.d %{buildroot}%{_initrddir}/ellis.service
 
-# See: debian/ellis.install
+# TODO: this should be in build, not install
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
 cp ellis_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
@@ -132,8 +131,6 @@ cp --recursive clearwater-prov-tools.root/* %{buildroot}/
 %config /usr/share/clearwater/ellis/local_settings.pyc
 %config /usr/share/clearwater/ellis/web-content/js/app-servers.json
 %ghost /usr/share/clearwater/ellis/env/
-%ghost /var/log/ellis/
-# TODO: %ghost /etc/monit/conf.d/*.monit
 
 %files -n clearwater-prov-tools
 /usr/share/clearwater/bin/update_user
@@ -144,7 +141,6 @@ cp --recursive clearwater-prov-tools.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/clearwater-prov-tools
 /usr/share/clearwater/clearwater-prov-tools/
 %ghost /usr/share/clearwater/clearwater-prov-tools/env/
-%ghost /var/log/clearwater-prov-tools/
 
 %post -p /bin/bash
 %include %{SOURCE1}
@@ -157,8 +153,8 @@ cw-create-user ellis
 cw-create-log-dir ellis
 cw-create-virtualenv ellis
 chown --recursive ellis:root /usr/share/clearwater/ellis/
-cw-start ellis
 %systemd_post ellis.service
+cw-start ellis
 
 %preun -p /bin/bash
 %include %{SOURCE1}

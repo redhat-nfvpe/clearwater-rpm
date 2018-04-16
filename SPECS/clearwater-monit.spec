@@ -5,15 +5,18 @@ License:       AGPLv3+
 URL:           https://github.com/Metaswitch/clearwater-monit
 
 Source0:       %{name}-%{version}.tar.bz2
-BuildRequires: make libtool gcc-c++ bison flex
+
+BuildRequires: make libtool gcc-c++ ccache bison flex
 BuildRequires: pam-devel openssl-devel
 BuildRequires: systemd
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - Monit
-Requires:      clearwater-infrastructure
 Requires:      pam openssl-libs
+AutoReq:       no
+%{?systemd_requires}
+#Requires:      clearwater-infrastructure
 
 %description
 utility for managing and monitoring processes, files, directories, and filesystems
@@ -27,6 +30,9 @@ utility for managing and monitoring processes, files, directories, and filesyste
 make all MAKE="make --jobs=$(nproc)"
 
 %install
+mkdir --parents %{buildroot}%{_unitdir}/
+install --mode=644 debian/clearwater-monit.service %{buildroot}%{_unitdir}/
+
 # See: debian/clearwater-monit.install
 mkdir --parents %{buildroot}/etc/monit/
 mkdir --parents %{buildroot}/usr/bin
@@ -34,19 +40,15 @@ install --mode=700 debian/monitrc %{buildroot}/etc/monit/
 cp monit %{buildroot}/usr/bin/
 cp --recursive clearwater-monit.root/* %{buildroot}/
 
-mkdir --parents %{buildroot}%{_unitdir}/
-cp debian/clearwater-monit.service %{buildroot}%{_unitdir}/
-
 %files
+%{_unitdir}/clearwater-monit.service
 /usr/bin/monit
 /usr/share/clearwater/clearwater-monit/install/clearwater-monit.postinst
 /usr/share/clearwater/infrastructure/alarms/monit_alarms.json
 /usr/share/clearwater/infrastructure/monit_uptime/check-monit-uptime
-%{_unitdir}/clearwater-monit.service
-%config /etc/monit/monitrc
-%config /etc/monit/conf.d/monit.monit
-%config /etc/monit/conf.d/ntp.monit
-%ghost /var/log/monit.log
+/etc/monit/monitrc
+/etc/monit/conf.d/monit.monit
+/etc/monit/conf.d/ntp.monit
 %ghost /var/lib/monit/state
 %ghost /var/lib/monit/id
 
@@ -61,14 +63,12 @@ mkdir --parents /var/lib/monit/ # this was missing!
 # See: debian/clearwater-monit.prerm
 set -e
 %systemd_preun clearwater-monit.service
-rm --force /etc/monit/conf.d/mmonit.monit
+rm --force /etc/monit/conf.d/mmonit.monit # what's this?
 
 %postun
 # See: debian/clearwater-monit.postrm
 set -e
 if [ "$1" = 0 ]; then # Uninstall
-  rm --force /var/log/monit.log
-  rm --force /var/lib/monit/state /var/lib/monit/id
   if [ -f /etc/aliases ] || [ -L /etc/aliases ]; then
     if grep -qi "^monit[[:space:]]*:" /etc/aliases
     then

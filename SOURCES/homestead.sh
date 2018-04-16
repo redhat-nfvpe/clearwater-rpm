@@ -86,6 +86,7 @@ EXTRA_ARGS=
 [ "$dns_timeout" = "" ]                 || EXTRA_ARGS="$EXTRA_ARGS --dns-timeout=\"$dns_timeout\""
 [ "$astaire_blacklist_duration" = "" ]  || EXTRA_ARGS="$EXTRA_ARGS --astaire-blacklist-duration=\"$astaire_blacklist_duration\""
 
+$namespace_prefix \
 "/usr/share/clearwater/bin/$NAME" \
   --localhost="$local_ip" \
   --home-domain="$home_domain" \

@@ -9,7 +9,7 @@ Source1:       common.sh
 Source2:       homestead.service
 Source3:       homestead.sh
 
-BuildRequires: make cmake libtool git gcc-c++ bison flex
+BuildRequires: make cmake libtool git gcc-c++ ccache bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: openssl-devel boost-devel boost-static zeromq-devel libcurl-devel net-snmp-devel
 BuildRequires: systemd
@@ -19,25 +19,21 @@ BuildRequires: systemd
 %global debug_package %{nil}
 
 Summary:       Clearwater - Homestead
-Requires:      clearwater-homestead-libs
-Requires:      libidn libgcrypt gnutls openssl-libs zeromq libcurl net-snmp-libs
+Requires:      libevent lksctp-tools libidn libgcrypt gnutls openssl-libs zeromq libcurl
+Requires:      net-snmp-libs
+AutoReq:       no
+%{?systemd_requires}
 #Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
 #Requires:      clearwater-tcp-scalability clearwater-snmpd
-%{?systemd_requires}
-
-%package libs
-Summary:       Clearwater - Homestead Libraries
-Requires:      libevent lksctp-tools
 
 %package cassandra
 Summary:       Clearwater - Cassandra for Homestead
+Requires:      clearwater-cassandra
+AutoReq:       no
 #Requires:      clearwater-infrastructure clearwater-cassandra
 
 %description
 HSS cache/gateway
-
-%description libs
-Homestead libraries
 
 %description cassandra
 Commission Cassandra for Homestead
@@ -78,6 +74,7 @@ cp --recursive homestead-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/bin/check_cx_health
 /usr/share/clearwater/bin/check_cx_health.py*
 /usr/share/clearwater/bin/poll_homestead.sh
+/usr/share/clearwater/homestead/lib/
 /usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_diags
 /usr/share/clearwater/infrastructure/alarms/homestead_alarms.json
 /usr/share/clearwater/infrastructure/monit_stability/homestead-stability
@@ -87,12 +84,8 @@ cp --recursive homestead-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/homestead
 /usr/share/clearwater/infrastructure/scripts/homestead.monit
 /usr/share/clearwater/node_type.d/20_homestead
-%config /etc/cron.hourly/homestead-log-cleanup
-%config /etc/security/limits.conf.homestead
-%ghost /var/log/homestead/
-
-%files libs
-/usr/share/clearwater/homestead/lib/
+/etc/cron.hourly/homestead-log-cleanup
+/etc/security/limits.conf.homestead
 
 %files cassandra
 /usr/share/clearwater/cassandra-schemas/homestead_cache.sh
@@ -103,8 +96,8 @@ cp --recursive homestead-cassandra.root/* %{buildroot}/
 cw-create-user homestead
 cw-create-log-dir homestead
 cw-add-security-limits homestead
-cw-start homestead
 %systemd_post homestead.service
+cw-start homestead
 
 %preun -p /bin/bash
 %include %{SOURCE1}
