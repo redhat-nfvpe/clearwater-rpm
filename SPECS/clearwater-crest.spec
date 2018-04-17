@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/crest
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       homer.service
 Source3:       homer.sh
 Source4:       homestead-prov.service

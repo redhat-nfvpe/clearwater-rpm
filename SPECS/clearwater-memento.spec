@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/memento
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       memento.service
 Source3:       memento.sh
 
@@ -139,7 +139,6 @@ cw-stop astaire
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user memento
   cw-remove-log-dir memento
-  cw-remove-run-dir memento
 fi
 cw-remove-security-limits memento
 rm --force "$MEMENTO_DISK_USAGE_FILE"

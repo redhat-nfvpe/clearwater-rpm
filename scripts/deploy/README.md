@@ -99,3 +99,4 @@ https://github.com/msolberg/openstack-ansible-demo/tree/master/tutorial
 https://dmsimard.com/2016/01/08/selinux-python-virtualenv-chroot-and-ansible-dont-play-nice/
 
 
+sudo htpasswd /etc/nagios/passwd nagiosadmin

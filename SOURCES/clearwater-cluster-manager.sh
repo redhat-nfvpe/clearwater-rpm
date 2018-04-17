@@ -25,7 +25,8 @@ cluster_manager_enabled=Y
 # This sets up $uuid - it's created by /usr/share/clearwater/infrastructure/scripts/node_identity
 . /etc/clearwater/node_identity
 
-has_content () {
+has-content ()
+{
  if [ -d "$1" ]; then
    find "$1" -mindepth 1 -print -quit | grep -q .
    return $?
@@ -33,7 +34,7 @@ has_content () {
  return 1
 }
 
-if has_content /usr/share/clearwater/node_type.d; then
+if has-content /usr/share/clearwater/node_type.d/; then
   . "/usr/share/clearwater/node_type.d/$(ls /usr/share/clearwater/node_type.d | head -n 1)"
 fi
 

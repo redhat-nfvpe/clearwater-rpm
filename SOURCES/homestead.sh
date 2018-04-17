@@ -45,7 +45,8 @@ fi
 
 sprout_http_name="$(/usr/share/clearwater/bin/bracket-ipv6-address "$sprout_hostname"):9888"
 
-has_content () {
+has-content ()
+{
  if [ -d "$1" ]; then
    find "$1" -mindepth 1 -print -quit | grep -q .
    return $?
@@ -54,8 +55,8 @@ has_content () {
 }
 
 # Work out which features are enabled
-if has_content /etc/clearwater/features.d; then
-  for file in $(find /etc/clearwater/features.d -type f); do
+if has-content /etc/clearwater/features.d/; then
+  for file in $(find /etc/clearwater/features.d/ -type f); do
     [ -r "$file" ] && . "$file"
   done
 fi

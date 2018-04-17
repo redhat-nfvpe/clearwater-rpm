@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ralf
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       ralf.service
 Source3:       ralf.sh
 
@@ -89,7 +89,6 @@ cw-stop ralf
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user ralf
   cw-remove-log-dir ralf
-  cw-remove-run-dir ralf
 fi
 cw-remove-security-limits ralf
 rm --force /var/lib/ralf/ralf.conf

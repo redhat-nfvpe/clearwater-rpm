@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       sprout.service
 Source3:       sprout.sh
 Source4:       bono.service
@@ -416,7 +416,6 @@ cw-stop sprout
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user sprout
   cw-remove-log-dir sprout
-  cw-remove-run-dir sprout
 fi
 cw-remove-security-limits sprout
 
@@ -440,7 +439,6 @@ cw-stop bono
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user bono
   cw-remove-log-dir bono
-  cw-remove-run-dir bono
 fi
 cw-remove-security-limits bono
 
@@ -464,7 +462,6 @@ cw-stop restund
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user restund
   cw-remove-log-dir restund
-  cw-remove-run-dir restund
 fi
 cw-remove-security-limits restund
 

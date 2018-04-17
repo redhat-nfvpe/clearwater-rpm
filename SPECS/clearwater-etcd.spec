@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/clearwater-etcd
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       clearwater-etcd.service
 Source3:       clearwater-etcd.sh
 Source4:       clearwater-cluster-manager.service
@@ -229,7 +229,6 @@ cw-stop clearwater-etcd
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user clearwater-etcd
   cw-remove-log-dir clearwater-etcd
-  cw-remove-run-dir clearwater-etcd
 fi
 
 %postun
@@ -257,7 +256,6 @@ cw-remove-virtualenv clearwater-cluster-manager
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user clearwater-cluster-manager
   cw-remove-log-dir clearwater-cluster-manager
-  cw-remove-run-dir clearwater-cluster-manager
 fi
 
 # See: debian/clearwater-cluster-manager.links
@@ -288,7 +286,6 @@ cw-remove-virtualenv clearwater-queue-manager
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user clearwater-queue-manager
   cw-remove-log-dir clearwater-queue-manager
-  cw-remove-run-dir clearwater-queue-manager
 fi
 
 # See: debian/clearwater-queue-manager.links
@@ -321,7 +318,6 @@ cw-remove-virtualenv clearwater-config-manager
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user clearwater-config-manager
   cw-remove-log-dir clearwater-config-manager
-  cw-remove-run-dir clearwater-config-manager
 fi
 
 # See: debian/clearwater-config-manager.links

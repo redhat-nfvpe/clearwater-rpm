@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/chronos
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       chronos.service
 Source3:       chronos.sh
 
@@ -111,7 +111,6 @@ cw-stop chronos
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user chronos
   cw-remove-log-dir chronos
-  cw-remove-run-dir chronos
 fi
 
 # See: debian/chronos.links

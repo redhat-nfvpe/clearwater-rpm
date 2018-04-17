@@ -5,7 +5,7 @@ License:       AGPLv3+
 URL:           https://github.com/Metaswitch/clearwater-nginx
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 
 %global debug_package %{nil}
 

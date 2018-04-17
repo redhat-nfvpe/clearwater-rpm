@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/homestead
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       homestead.service
 Source3:       homestead.sh
 
@@ -107,7 +107,6 @@ cw-stop homestead
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user homestead
   cw-remove-log-dir homestead
-  cw-remove-run-dir homestead
 fi
 cw-remove-security-limits homestead
 rm --force /var/lib/homestead/homestead.conf

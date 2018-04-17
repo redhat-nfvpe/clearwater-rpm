@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/astaire
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       astaire.service
 Source3:       astaire.sh
 Source4:       rogers.service
@@ -127,7 +127,6 @@ service-action astaire-throttle stop
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user astaire
   cw-remove-log-dir astaire
-  cw-remove-run-dir astaire
 fi
 cw-remove-security-limits astaire
 
@@ -151,7 +150,6 @@ cw-stop rogers stop
 if [ "$1" = 0 ]; then # Uninstall
   cw-remove-user rogers
   cw-remove-log-dir rogers
-  cw-remove-run-dir rogers
 fi
 cw-remove-security-limits rogers
 

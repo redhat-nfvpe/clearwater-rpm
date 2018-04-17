@@ -14,12 +14,13 @@ log_level=3
 log_directory="/var/log/$NAME"
 wait_plugin_complete=Y
 
-has_content () {
+has-content ()
+{
  find "$1" -mindepth 1 -print -quit | grep -q .
  return $?
 }
 
-if has_content /usr/share/clearwater/node_type.d; then
+if has-content /usr/share/clearwater/node_type.d/; then
   . "/usr/share/clearwater/node_type.d/$(ls /usr/share/clearwater/node_type.d | head -n 1)"
 fi
 

@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ellis
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       common.sh
+Source1:       scriptlet-util.sh
 Source2:       ellis.service
 Source3:       ellis.sh
 
@@ -166,7 +166,6 @@ if [ "$1" = 0 ]; then # Uninstall
   rm --force /tmp/.ellis-sock*
   cw-remove-user ellis
   cw-remove-log-dir ellis
-  cw-remove-run-dir ellis
 fi
 
 %postun
