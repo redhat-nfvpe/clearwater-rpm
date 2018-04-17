@@ -1,0 +1,26 @@
+
+- name: Provision keypair
+  register: keypair
+  os_keypair:
+    state: present
+    name: "{{ topology.site_name }}"
+
+- name: Write keys
+  when: keypair.key.private_key is not none # will only be available when keypair is created
+  block:
+
+  - file:
+      path: "{{ playbook_dir }}/keys"
+      state: directory
+
+  - copy:
+      content: "{{ keypair.key.private_key }}"
+      dest: "{{ playbook_dir }}/keys/{{ keypair.key.name }}"
+
+  - file:
+      mode: 0600 # required by ssh
+      dest: "{{ playbook_dir }}/keys/{{ keypair.key.name }}"
+
+  - copy:
+      content: "{{ keypair.key.public_key }}"
+      dest: "{{ playbook_dir }}/keys/{{ keypair.key.name }}.pub"

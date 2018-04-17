@@ -1,7 +1,7 @@
 env/
-repository/
-clouds.yaml
-topology.yaml
+keys/
 *.retry
-*.key
-*.pub
+clouds.yaml
+vars/topology.yaml
+roles/clearwater-repository/files/clearwater-repository/
+*.retry

@@ -1,0 +1,15 @@
+
+- name: Generate Clearwater configuration
+  block:
+
+  - file:
+      path: /etc/clearwater
+      state: directory
+
+  - template:
+      src: local_config.j2
+      dest: /etc/clearwater/local_config
+
+  - template:
+      src: shared_config.j2
+      dest: /etc/clearwater/shared_config

@@ -9,66 +9,17 @@
   # Configuration
   - name: Configure OpenStack
     os_client_config:
+
   - name: Import topology.yaml
     include_vars:
       name: topology
       file: topology.yaml
-  
-  # Keypair
-  - name: Provision keypair
-    register: keypair
-    os_keypair:
-      state: present
-      name: "{{ topology.site_name }}"
-  - name: Write keys
-    when: keypair.key.private_key is not none # will only be available when keypair is created
-    block:
-    - copy:
-        content: "{{ keypair.key.private_key }}"
-        dest: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
-    - file:
-        mode: 0600 # required by ssh
-        dest: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
-    - copy:
-        content: "{{ keypair.key.public_key }}"
-        dest: "{{ playbook_dir }}/{{ keypair.key.name }}.pub"
-  
-  # Servers
-  - name: Provision servers
-    async: 300 # max 5 minutes
-    poll: 0
-    register: servers_async
-    with_items: "{{ topology.servers }}"
-    os_server:
-      state: present
-      name: "{{ item.type }}-{{ item.index }}.{{ topology.site_name }}.{{ topology.zone }}"
-      image: "{{ topology.image }}"
-      flavor: "{{ item.flavor }}"
-      key_name: "{{ keypair.key.name }}"
-      #network: public # not currently supported in Rackspace
-      meta:
-        clearwater.zone: "{{ topology.zone }}"
-        clearwater.site_name: "{{ topology.site_name }}"
-        clearwater.type: "{{ item.type }}"
-        clearwater.index: "{{ item.index }}"
-  - name: Wait for servers to become active
-    retries: 300 # delay is 5 seconds
-    register: servers
-    until: servers.finished
-    with_items: "{{ servers_async.results }}"
-    async_status:
-      jid: "{{ item.ansible_job_id }}"
-  - name: Add servers to group
-    with_items: "{{ servers.results }}"
-    add_host:
-      name: "{{ item.server.name }}"
-      groups: clearwater
-      # Custom attribute:
-      server: "{{ item.server }}"
-      # Ansible attributes:
-      ansible_ssh_host: "{{ item.server.public_v4 }}"
-      ansible_ssh_user: root
-      ansible_ssh_private_key_file: "{{ playbook_dir }}/{{ keypair.key.name }}.key"
+
+  - include_role:
+      name: keypair
+
+  - include_role:
+      name: servers
 
 #
 # Phase 2: Configuration
@@ -77,71 +28,22 @@
 - hosts: clearwater
   gather_facts: false
   tasks:
+
   - name: Wait for servers to become available
     command: /bin/true
-  - name: Generate /etc/hosts
-    template:
-      src: "{{ playbook_dir }}/hosts.j2"
-      dest: /etc/hosts
-      mode: 0644
-  - name: Enable dnsmasq # round-robin DNS on /etc/hosts
-    block:
-    - lineinfile:
-        path: /etc/resolv.conf
-        line: nameserver 127.0.0.1
-        regexp: ^nameserver 127\.0\.0\.1$
-        insertbefore: BOF
-        state: present
-    - yum:
-        name: dnsmasq
-        state: present
-    - systemd:
-        name: dnsmasq
-        enabled: true
-        state: restarted
-  - name: Generate Clearwater configuration
-    block:
-    - file:
-        path: /etc/clearwater
-        state: directory
-    - template:
-        src: "{{ playbook_dir }}/local_config.j2"
-        dest: /etc/clearwater/local_config
-    - template:
-        src: "{{ playbook_dir }}/shared_config.j2"
-        dest: /etc/clearwater/shared_config
+
+  - include_role:
+      name: hosts
+
+  - include_role:
+      name: dnsmasq
+
+  - include_role:
+      name: clearwater-configuration
 
 #
 # Phase 3: Installation
 #
 
-- hosts: localhost
-  gather_facts: false
-  tasks:
-  - name: Gather packages
-    shell: >
-      mkdir --parents "{{ playbook_dir }}/repository/" &&
-      rsync "{{ playbook_dir }}/../../RPMS/x86_64/"*.rpm "{{ playbook_dir }}/repository/"
-
-- hosts: clearwater
-  gather_facts: false
-  tasks:
-  - name: Check if package repository exists
-    register: repository
-    stat:
-      path: /opt/clearwater-repository
-  - name: Create package repository
-    when: not repository.stat.exists
-    block:
-    - copy:
-        src: "{{ playbook_dir }}/repository/"
-        dest: /opt/clearwater-repository
-    - yum:
-        name: createrepo
-        state: present
-    - command: createrepo /opt/clearwater-repository
-    - yum_repository:
-        name: Clearwater-Local
-        description: Clearwater Local
-        baseurl: file:///opt/clearwater-repository/
-        gpgcheck: false
+  - include_role:
+      name: clearwater-repository

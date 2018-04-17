@@ -1,0 +1,21 @@
+
+# Round-robin DNS on /etc/hosts
+
+- name: Enable dnsmasq
+  block:
+
+  - lineinfile:
+      path: /etc/resolv.conf
+      line: nameserver 127.0.0.1
+      regexp: ^nameserver 127\.0\.0\.1$
+      insertbefore: BOF
+      state: present
+
+  - yum:
+      name: dnsmasq
+      state: present
+
+  - systemd:
+      name: dnsmasq
+      enabled: true
+      state: restarted

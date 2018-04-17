@@ -1,5 +1,3 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
 
 require "etc"
 
@@ -16,7 +14,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: "sudo yum install --assumeyes rpm-build yum-utils epel-release"
 
   config.vm.provider "virtualbox" do |virtualbox, override|
-    virtualbox.memory = 8192
+    virtualbox.memory = 6144
     virtualbox.cpus = Etc.nprocessors
   end
 
