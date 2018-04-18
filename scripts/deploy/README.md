@@ -20,7 +20,7 @@ also need:
 
     pip install rackspaceauth
 
-Finally, you will need to create a `vars/topology.yaml` file, using `vars/topology.yaml.sample` as a
+Next, you will need to create a `vars/topology.yaml` file, using `vars/topology.yaml.sample` as a
 template. Multiple deployments in the same zone should each have their own unique `site_name`, and
 each will get its own keypair with that name. In this file you can also choose the OpenStack image
 and flavors to use per server. (See Rackspace
@@ -30,12 +30,12 @@ You can now deploy Clearwater:
 
     ansible-playbook deploy.yaml
 
-The play will create a keypair for you and write the private and public (`.pub`) key files in
-`keys/`. Note that the private key cannot be retrieved after creation, so make sure not to lose the
-private key file. It will then provision the servers and install the necessary packages on them.
+The play will provision a keypair for you and write the private and public (`.pub`) key files in
+`keys/`. Note that the private key cannot be retrieved after creation, so make sure not to lose
+these files. The play will then provision the servers and install the necessary packages on them.
 
-It is safe to replay the playbook: it will never create additional servers beyond those declared in
-`topology.yaml`.
+It is safe to replay the playbook, as it will never create additional servers beyond those declared
+in `topology.yaml`.
 
 To manually login to the servers use the private key and disable host key checking (something you
 always want to do when dealing we cloud IP addresses, which might be reused), for example:

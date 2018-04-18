@@ -9,7 +9,7 @@ Source1:       scriptlet-util.sh
 Source2:       homestead.service
 Source3:       homestead.sh
 
-BuildRequires: make cmake libtool git gcc-c++ ccache bison flex
+BuildRequires: make cmake libtool gcc-c++ ccache bison flex
 BuildRequires: libevent-devel lksctp-tools-devel libidn-devel libgcrypt-devel gnutls-devel
 BuildRequires: openssl-devel boost-devel boost-static zeromq-devel libcurl-devel net-snmp-devel
 BuildRequires: systemd

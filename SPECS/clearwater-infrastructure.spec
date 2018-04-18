@@ -140,7 +140,7 @@ HTTP-to-Rf/Cx gateway node
 
 %build
 # CentOS's virtualenv requires a newer version of setuptools
-sed --in-place 's/"setuptools==24"/"setuptools==39.0.1"/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place 's/"setuptools==24"/"setuptools==39.0.1"/' clearwater-infrastructure/PyZMQ/Makefile
 
 make MAKE="make --jobs=$(nproc)"
 
@@ -393,7 +393,6 @@ cp --recursive dime/* %{buildroot}/
 
 %post
 # See: debian/clearwater-infrastructure.links
-set -e
 ln --symbolic /usr/share/clearwater/bin/gather_diags /usr/bin/cw-gather_diags
 ln --symbolic /usr/share/clearwater/bin/gather_diags_and_report_location /usr/bin/cw-gather_diags_and_report_location
 ln --symbolic /usr/share/clearwater/bin/sync_alarms.py /usr/bin/cw-sync_alarms
@@ -412,7 +411,6 @@ sudo -H easy_install virtualenv
 
 %preun
 # See: debian/clearwater-infrastructure.prerm
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-infrastructure.prerm
 
 rm --force /usr/bin/cw-gather_diags
@@ -429,61 +427,50 @@ rm --force /usr/sbin/clearwater-show-config
 
 %post -n clearwater-memcached
 # See: debian/clearwater-memached.postinst
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst
 
 %preun -n clearwater-memcached
 # See: debian/clearwater-memached.prerm
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-memcached.prerm
 
 %post -n clearwater-tcp-scalability
 # See: debian/clearwater-tcp-scalability.postinst
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.postinst
 
 %preun -n clearwater-tcp-scalability
 # See: debian/clearwater-tcp-scalability.prerm
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.prerm
 
 %post -n clearwater-secure-connections
 # See: debian/clearwater-secure-connections.postinst
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.postinst
 
 %preun -n clearwater-secure-connections
 # See: debian/clearwater-secure-connections.prerm
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.prerm
 
 %post -n clearwater-snmpd
 # See: debian/clearwater-snmpd.postinst
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-snmpd.postinst
 
 %preun -n clearwater-snmpd
 # See: debian/clearwater-snmpd.prerm
-set -e
 /usr/share/clearwater/infrastructure/install/clearwater-snmpd.prerm
 
 %post -n clearwater-diags-monitor
 # See: debian/clearwater-diags-monitor.postinst
-set -e
 cp --preserve /etc/default/sysstat /etc/clearwater/diags-monitor/sysstat.old
 sed --in-place 's/ENABLED=.*/ENABLED="true"/g' /etc/default/sysstat
 /usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.postinst
 
 %preun -n clearwater-diags-monitor
 # See: debian/clearwater-diags-monitor.prerm
-set -e
 [ ! -f /etc/clearwater/diags-monitor/sysstat.old ] || cp --preserve /etc/clearwater/diags-monitor/sysstat.old /etc/default/sysstat
 rm --force /etc/clearwater/diags-monitor/sysstat.old
 /usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.prerm
 
 %post -n clearwater-socket-factory
 # See: debian/clearwater-socket-factory.postinst
-set -e
 service clearwater-socket-factory-mgmt start || /bin/true
 service clearwater-socket-factory-sig start || /bin/true
 %systemd_post socket-factory-mgmt.service
@@ -491,7 +478,6 @@ service clearwater-socket-factory-sig start || /bin/true
 
 %preun -n clearwater-socket-factory
 # See: debian/clearwater-socket-factory.prerm
-set -e
 service clearwater-socket-factory-mgmt stop || /bin/true
 service clearwater-socket-factory-sig stop || /bin/true
 rm --force /tmp/clearwater_mgmt_namespace_socket

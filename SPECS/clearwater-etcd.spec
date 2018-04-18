@@ -15,7 +15,7 @@ Source7:       clearwater-queue-manager.sh
 Source8:       clearwater-config-manager.service
 Source9:       clearwater-config-manager.sh
 
-BuildRequires: make python-virtualenv git gcc-c++ ccache
+BuildRequires: make python-virtualenv gcc-c++ ccache
 BuildRequires: libffi-devel
 BuildRequires: systemd
 

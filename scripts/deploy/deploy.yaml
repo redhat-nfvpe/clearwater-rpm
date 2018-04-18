@@ -16,10 +16,10 @@
       file: topology.yaml
 
   - include_role:
-      name: keypair
+      name: openstack-keypair
 
   - include_role:
-      name: servers
+      name: openstack-servers
 
 #
 # Phase 2: Configuration

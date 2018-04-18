@@ -11,7 +11,7 @@ Source3:       astaire.sh
 Source4:       rogers.service
 Source5:       rogers.sh
 
-BuildRequires: make libtool git gcc-c++ ccache
+BuildRequires: make libtool gcc-c++ ccache
 BuildRequires: libevent-devel zeromq-devel zlib-devel boost-devel
 BuildRequires: systemd
 
