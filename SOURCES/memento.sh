@@ -77,5 +77,6 @@ $namespace_prefix \
   --sas "$sas_server,$NAME@$public_hostname" \
   "$api_key_arg" \
   $EXTRA_ARGS \
-  --daemon \
   --pidfile="$PIDFILE"
+
+# Note: --daemon is supported but not needed here

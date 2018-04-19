@@ -102,5 +102,6 @@ EXTRA_ARGS=
   "$billing_cdf_arg" \
   "$exception_max_ttl_arg" \
   $EXTRA_ARGS \
-  --daemon \
   --pidfile="$PIDFILE"
+
+# Note: --daemon is supported but not needed here

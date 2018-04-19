@@ -126,5 +126,6 @@ $namespace_prefix \
   --log-level="$log_level" \
   --sas="$sas_server,$NAME@$public_hostname" \
    $EXTRA_ARGS \
-  --pidfile="$PIDFILE" \
-  --daemon
+  --pidfile="$PIDFILE"
+
+# Note: --daemon is supported but not needed here

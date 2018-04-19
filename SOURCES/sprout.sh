@@ -266,5 +266,6 @@ done
   --alias="$public_ip,$public_hostname,$alias_list" \
   --homestead-timeout="$sprout_homestead_timeout_ms" \
   $EXTRA_ARGS \
-  --daemon \
   --pidfile="$PIDFILE"
+
+# Note: --daemon is supported but not needed here

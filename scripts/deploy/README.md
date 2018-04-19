@@ -63,7 +63,7 @@ nodes:
 2. chronos (timer)
 3. smtp
 4. bono (sip edge proxy)
-5. sprout (sip router)
+5. sprout (sip router) - requires homestead, ralf is optional
 6. homestead (hss cache)
 7. ralf (ctf)
 8. homer (xdms)

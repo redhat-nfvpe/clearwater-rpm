@@ -5,6 +5,7 @@ License:       GPLv3+
 URL:           https:/github.com/Metaswitch/clearwater-infrastructure
 
 Source0:       %{name}-%{version}.tar.bz2
+
 BuildRequires: make python-virtualenv
 BuildRequires: zeromq-devel boost-devel
 BuildRequires: systemd
@@ -14,11 +15,12 @@ BuildRequires: systemd
 %global debug_package %{nil}
 
 Summary:       Clearwater - Infrastructure
-Requires:      zeromq python-setuptools
+Requires:      zeromq python-virtualenv
 Requires:      dnsmasq ntp gnutls-utils curl redhat-lsb-core
 AutoReq:       no
 %{?systemd_requires}
 
+# TODO
 # Note: We actually require python-virtualenv, too, but unfortunately the version in epel-7 is too
 # old (its included pip is too old), so we will install it manually in the postinst scriptlet,
 # which is why we are requiring python-setuptools here instead
@@ -139,8 +141,22 @@ HTTP-to-Rf/Cx gateway node
 %setup
 
 %build
-# CentOS's virtualenv requires a newer version of setuptools
-#sed --in-place 's/"setuptools==24"/"setuptools==39.0.1"/' clearwater-infrastructure/PyZMQ/Makefile
+# TODO: breaks for mock ... ?
+#sed --in-place 's/"setuptools==24"/"pip==10.0.0"/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place 's/ --setuptools/ --no-setuptools/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place 's/"setuptools==24"/setuptools==39.0.1/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place 's/distribute/pip==10.0.0/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place 's/${ENV_DIR}\/bin\/easy_install "setuptools==24"/# ${ENV_DIR}\/bin\/easy_install "setuptools==24"/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place 's/${ENV_DIR}\/bin\/easy_install distribute/# ${ENV_DIR}\/bin\/easy_install distribute/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place 's/"setuptools==24"/setuptools==39.0.1/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place 's/${ENV_DIR}\/bin\/easy_install distribute/# ${ENV_DIR}\/bin\/easy_install distribute/' clearwater-infrastructure/PyZMQ/Makefile
+#sed --in-place '19i\	${ENV_DIR}\/bin\/easy_install pip==10.0.0' clearwater-infrastructure/PyZMQ/Makefile
+
+# CentOS's virtualenv has an old and broken version of easy_install (setuptools)
+sed --in-place 's/easy_install/pip install/g' clearwater-infrastructure/PyZMQ/Makefile
+
+#easy_install --user virtualenv
+#export PATH="~/.local/bin:$PATH"
 
 make MAKE="make --jobs=$(nproc)"
 
@@ -161,6 +177,9 @@ cp build/bin/ipv6-to-hostname %{buildroot}/usr/share/clearwater/bin/
 cp build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/bin/
 cp build/bin/issue-alarm %{buildroot}/usr/share/clearwater/bin/
 cp .wheelhouse/* %{buildroot}/usr/share/clearwater/infrastructure/.wheelhouse/
+
+# We want to use ".wheelhouse" for more consistency with other Clearwater packages
+sed --in-place 's/\/wheelhouse\//\/.wheelhouse\//g' %{buildroot}/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
 
 # See: debian/clearwater-memcached.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
@@ -340,12 +359,12 @@ cp --recursive dime/* %{buildroot}/
 /etc/logrotate.d/clearwater-iotop
 
 %files -n clearwater-socket-factory
+%{_unitdir}/clearwater-socket-factory-mgmt.service
+%{_unitdir}/clearwater-socket-factory-sig.service
 /usr/share/clearwater/bin/clearwater_socket_factory
 /usr/share/clearwater/bin/clearwater-socket-factory-common
 /usr/share/clearwater/bin/clearwater-socket-factory-mgmt-wrapper
 /usr/share/clearwater/bin/clearwater-socket-factory-sig-wrapper
-%{_unitdir}/clearwater-socket-factory-mgmt.service
-%{_unitdir}/clearwater-socket-factory-sig.service
 /etc/init/clearwater-socket-factory-mgmt.conf
 /etc/init/clearwater-socket-factory-sig.conf
 
@@ -406,7 +425,7 @@ ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/cw-show
 ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/clearwater-show-config
 
 # See: debian/clearwater-infrastructure.postinst
-sudo -H easy_install virtualenv
+#easy_install virtualenv
 /usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
 
 %preun

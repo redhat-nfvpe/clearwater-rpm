@@ -21,5 +21,6 @@ $namespace_prefix \
   --cluster-settings-file=/etc/clearwater/cluster_settings \
   --log-file="/var/log/$NAME" \
   --log-level="$log_level" \
-  --daemon \
   --pidfile="$PIDFILE"
+
+# Note: --daemon is supported but not needed here

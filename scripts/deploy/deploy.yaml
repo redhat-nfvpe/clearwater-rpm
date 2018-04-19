@@ -47,3 +47,13 @@
 
   - include_role:
       name: clearwater-repository
+
+  - name: Install Clearwater Infrastructure
+    yum:
+      name: clearwater-infrastructure
+      state: present
+  - name: Install Clearwater Node
+    yum:
+      name: clearwater-node-{{ hostvars[inventory_hostname].server.metadata['clearwater.type'] }}
+      state: present
+      

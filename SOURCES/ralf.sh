@@ -90,5 +90,6 @@ $namespace_prefix \
   "$sas_signaling_if_arg" \
   --sas="$sas_server,$NAME@$public_hostname" \
   $EXTRA_ARGS \
-  --pidfile="$PIDFILE" \
-  --daemon
+  --pidfile="$PIDFILE"
+
+# Note: --daemon is supported but not needed here
