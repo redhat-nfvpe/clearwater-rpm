@@ -24,8 +24,16 @@ AutoReq:       no
 #Requires:      clearwater-infrastructure clearwater-snmpd clearwater-monit clearwater-queue-manager
 #Requires:      clearwater-config-manager
 
+%package -n clearwater-node-chronos
+Summary:       Clearwater Node - Chronos
+Requires:      clearwater-chronos clearwater-infrastructure
+AutoReq:       no
+
 %description
 distributed timer service
+
+%description -n clearwater-node-chronos
+Clearwater Chronos node
 
 %prep
 %setup
@@ -85,10 +93,12 @@ cp modules/clearwater-etcd-plugins/chronos/scripts/upload_chronos_shared_config 
 /usr/share/clearwater/infrastructure/monit_uptime/check-chronos-uptime
 /usr/share/clearwater/infrastructure/scripts/reload/dns_json/chronos_reload
 /usr/share/clearwater/infrastructure/scripts/chronos
-/usr/share/clearwater/node_type.d/90_chronos
 /etc/cron.hourly/chronos-log-cleanup
 /etc/chronos/chronos.conf.sample
 %ghost /etc/chronos/chronos.conf
+
+%files -n clearwater-node-chronos
+/usr/share/clearwater/node_type.d/90_chronos
 
 %post -p /bin/bash
 %include %{SOURCE1}

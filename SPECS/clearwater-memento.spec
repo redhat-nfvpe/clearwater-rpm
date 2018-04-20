@@ -39,6 +39,11 @@ Requires:      clearwater-cassandra
 AutoReq:       no
 #Requires:      clearwater-infrastructure clearwater-cassandra
 
+%package -n clearwater-node-memento
+Summary:       Clearwater Node - Memento
+Requires:      clearwater-memento clearwater-infrastructure
+AutoReq:       no
+
 %description
 Application Server responsible for providing network-based call lists
 
@@ -47,6 +52,9 @@ Configure Nginx for Memento
 
 %description cassandra
 Commission Cassandra for Memento
+
+%description -n clearwater-node-memento
+Clearwater Memento node
 
 %prep
 %setup
@@ -106,7 +114,6 @@ cp --recursive memento-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/memento.monit
 /usr/share/clearwater/infrastructure/alarms/memento_alarms.json
 /usr/share/clearwater/infrastructure/monit_uptime/check-memento-uptime
-/usr/share/clearwater/node_type.d/80_memento
 /usr/share/clearwater/clearwater-diags-monitor/scripts/memento_diags
 /etc/security/limits.conf.memento
 /etc/cron.hourly/memento-log-cleanup
@@ -118,6 +125,9 @@ cp --recursive memento-cassandra.root/* %{buildroot}/
 
 %files cassandra
 /usr/share/clearwater/cassandra-schemas/memento.sh
+
+%files -n clearwater-node-memento
+/usr/share/clearwater/node_type.d/80_memento
 
 %post -p /bin/bash
 %include %{SOURCE1}

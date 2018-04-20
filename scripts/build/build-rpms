@@ -22,7 +22,7 @@ LOGS="$TOPDIR/logs"
 . "$HERE/version"
 
 # clearwater-sprout will fail to build if bison is installed (it uses byacc instead)
-sudo yum remove --assumeyes bison
+#sudo yum remove --assumeyes bison
 
 if [ "$SPEC" = '*' ]; then
 	sudo yum-builddep --assumeyes "$SRPMS/"*.src.rpm

@@ -25,8 +25,16 @@ AutoReq:       no
 #Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-socket-factory
 #Requires:      clearwater-log-cleanup clearwater-monit
 
+%package -n clearwater-node-ralf
+Summary:       Clearwater Node - Ralf
+Requires:      clearwater-ralf clearwater-infrastructure
+AutoReq:       no
+
 %description
 CTF
+
+%description -n clearwater-node-ralf
+Clearwater Ralf node
 
 %prep
 %setup
@@ -68,9 +76,11 @@ cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/ralf/lib/freeDia
 /usr/share/clearwater/infrastructure/scripts/restart/ralf_restart
 /usr/share/clearwater/infrastructure/scripts/ralf
 /usr/share/clearwater/infrastructure/scripts/ralf.monit
-/usr/share/clearwater/node_type.d/20_ralf
 /etc/cron.hourly/ralf-log-cleanup
 /etc/security/limits.conf.ralf
+
+%files -n clearwater-node-ralf
+/usr/share/clearwater/node_type.d/20_ralf
 
 %post -p /bin/bash
 %include %{SOURCE1}

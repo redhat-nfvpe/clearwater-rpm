@@ -50,6 +50,11 @@ Requires:      clearwater-cassandra clearwater-homestead-cassandra
 AutoReq:       no
 #Requires:      clearwater-infrastructure
 
+%package -n clearwater-node-homer
+Summary:       Clearwater Node - Homer
+Requires:      clearwater-homer clearwater-infrastructure
+AutoReq:       no
+
 %description
 Cassandra-powered generic RESTful HTTP server platform
 
@@ -67,6 +72,9 @@ Homestead provisioning API
 
 %description -n clearwater-homestead-prov-cassandra
 Commission Cassandra for Homestead Provisioning API
+
+%description -n clearwater-node-homer
+Clearwater Homer node
 
 %prep
 %setup
@@ -141,12 +149,11 @@ cp --recursive homestead-prov-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/restart/homer_restart
 /usr/share/clearwater/infrastructure/scripts/create-homer-nginx-config
 /usr/share/clearwater/infrastructure/scripts/homer
-/usr/share/clearwater/node_type.d/20_homer
 /etc/clearwater/secure-connections/homer.conf
 /etc/cron.hourly/homer-log-cleanup
 %config /usr/share/clearwater/homer/templates/local_settings.py
-%config /usr/share/clearwater/homer/templates/local_settings.pyc
-%config /usr/share/clearwater/homer/templates/local_settings.pyo
+/usr/share/clearwater/homer/templates/local_settings.pyc
+/usr/share/clearwater/homer/templates/local_settings.pyo
 
 %files -n clearwater-homer-cassandra
 /usr/share/clearwater/cassandra/users/homer
@@ -168,6 +175,9 @@ cp --recursive homestead-prov-cassandra.root/* %{buildroot}/
 %files -n clearwater-homestead-prov-cassandra
 /usr/share/clearwater/cassandra/users/homestead-prov
 /usr/share/clearwater/cassandra-schemas/homestead_provisioning.sh
+
+%files -n clearwater-node-homer
+/usr/share/clearwater/node_type.d/20_homer
 
 %post -p /bin/bash
 %include %{SOURCE1}

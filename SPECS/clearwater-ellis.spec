@@ -28,11 +28,19 @@ Requires:      python-virtualenv
 AutoReq:       no
 #Requires:      clearwater-infrastructure
 
+%package -n clearwater-node-ellis
+Summary:       Clearwater Node - Ellis
+Requires:      clearwater-ellis clearwater-infrastructure
+AutoReq:       no
+
 %description
 user/number provisioning portal
 
 %description -n clearwater-prov-tools
 provisioning tools
+
+%description -n clearwater-node-ellis
+Clearwater Ellis node
 
 %prep
 %setup
@@ -77,7 +85,6 @@ cp --recursive clearwater-prov-tools.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/ellis
 /usr/share/clearwater/infrastructure/scripts/restart/ellis_restart
 /usr/share/clearwater/infrastructure/scripts/create-ellis-nginx-config
-/usr/share/clearwater/node_type.d/20_ellis
 /usr/share/clearwater/ellis/.wheelhouse
 /usr/share/clearwater/ellis/apply_db_updates.sql
 /usr/share/clearwater/ellis/backup/do_backup.sh
@@ -141,6 +148,9 @@ cp --recursive clearwater-prov-tools.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/clearwater-prov-tools
 /usr/share/clearwater/clearwater-prov-tools/
 %ghost /usr/share/clearwater/clearwater-prov-tools/env/
+
+%files -n clearwater-node-ellis
+/usr/share/clearwater/node_type.d/20_ellis
 
 %post -p /bin/bash
 %include %{SOURCE1}

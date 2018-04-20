@@ -19,14 +19,10 @@ Source11:      clearwater-sip-stress-stats.sh
 Source12:      clearwater-sip-perf.service
 Source13:      clearwater-sip-perf.sh
 
-BuildRequires: make cmake libtool gcc-c++ ccache byacc flex rubygems rsync
+BuildRequires: make cmake libtool gcc-c++ ccache bison flex rubygems rsync
 BuildRequires: libevent-devel boost-devel boost-static ncurses-devel zeromq-devel
 BuildRequires: net-snmp-devel
 BuildRequires: systemd
-
-# Note: Why byacc and not bison? Because libmemached for some reason breaks with our version of
-# bison, but is OK with byacc. (Why, then, do other specs (ralf, homestead) that have libmemcached
-# build fine with bison?)
 
 # Note: zeromq-devel requires epel-release
 
@@ -104,6 +100,16 @@ Summary:       Clearwater - SIP Performance Tests
 AutoReq:       no
 %{?systemd_requires}
 
+%package -n clearwater-node-sprout
+Summary:       Clearwater Node - Sprout
+Requires:      clearwater-sprout clearwater-infrastructure
+AutoReq:       no
+
+%package -n clearwater-node-bono
+Summary:       Clearwater Node - Bono
+Requires:      clearwater-bono clearwater-infrastructure
+AutoReq:       no
+
 %description
 SIP router
 
@@ -152,13 +158,24 @@ Exposes SIP stress statistics over the Clearwater statistics interface.
 %description -n clearwater-sip-perf
 Runs SIP performance tests against Clearwater
 
+%description -n clearwater-node-sprout
+Clearwater Sprout node
+
+%description -n clearwater-node-bono
+Clearwater Bono node
+
 %prep
 %setup
 
 %build
-# Disable concurrent builds for non-supporting modules
+# Disable concurrent builds for some modules
 sed --in-place '1ioverride MAKE = make' modules/pjsip/Makefile
 sed --in-place '1ioverride MAKE = make' modules/openssl/Makefile.org
+
+# Make sure that we don't run bison for libmemached
+# (in CentOS it is too new and will generate broken source)
+# (also note that using byacc instead introduces problems with other moduels)
+sed --in-place 's/include libmemcached\/csl\/parser.am//' modules/libmemcached/libmemcached/csl/include.am
 
 make MAKE="make --jobs=$(nproc)"
 
@@ -295,7 +312,6 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/create-analytics-syslog-config
 /usr/share/clearwater/infrastructure/scripts/create-sprout-nginx-config
 /usr/share/clearwater/infrastructure/scripts/sprout.monit
-/usr/share/clearwater/node_type.d/20_sprout
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_json_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_scscf_json_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_enum_json_plugin.py*
@@ -319,7 +335,6 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/clearwater-diags-monitor/scripts/bono_diags
 /usr/share/clearwater/infrastructure/scripts/restart/bono_restart
 /usr/share/clearwater/infrastructure/scripts/bono.monit
-/usr/share/clearwater/node_type.d/20_bono
 /etc/clearwater/logging/bono
 /etc/security/limits.conf.bono
 /etc/cron.hourly/bono-log-cleanup
@@ -398,6 +413,12 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 /usr/share/clearwater/bin/sip-perf
 /usr/share/clearwater/infrastructure/scripts/sip-perf
 /usr/share/clearwater/sip-perf/sip-perf.xml
+
+%files -n clearwater-node-sprout
+/usr/share/clearwater/node_type.d/20_sprout
+
+%files -n clearwater-node-bono
+/usr/share/clearwater/node_type.d/20_bono
 
 %post -p /bin/bash
 %include %{SOURCE1}

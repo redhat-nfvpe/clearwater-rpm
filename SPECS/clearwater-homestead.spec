@@ -32,11 +32,19 @@ Requires:      clearwater-cassandra
 AutoReq:       no
 #Requires:      clearwater-infrastructure clearwater-cassandra
 
+%package -n clearwater-node-homestead
+Summary:       Clearwater Node - Homestead
+Requires:      clearwater-homestead clearwater-infrastructure
+AutoReq:       no
+
 %description
 HSS cache/gateway
 
 %description cassandra
 Commission Cassandra for Homestead
+
+%description -n clearwater-node-homestead
+Clearwater Homestead node
 
 %prep
 %setup
@@ -83,12 +91,14 @@ cp --recursive homestead-cassandra.root/* %{buildroot}/
 /usr/share/clearwater/infrastructure/scripts/create-homestead-nginx-config
 /usr/share/clearwater/infrastructure/scripts/homestead
 /usr/share/clearwater/infrastructure/scripts/homestead.monit
-/usr/share/clearwater/node_type.d/20_homestead
 /etc/cron.hourly/homestead-log-cleanup
 /etc/security/limits.conf.homestead
 
 %files cassandra
 /usr/share/clearwater/cassandra-schemas/homestead_cache.sh
+
+%files -n clearwater-node-homestead
+/usr/share/clearwater/node_type.d/20_homestead
 
 %post -p /bin/bash
 %include %{SOURCE1}

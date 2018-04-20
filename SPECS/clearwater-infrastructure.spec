@@ -20,11 +20,6 @@ Requires:      dnsmasq ntp gnutls-utils curl redhat-lsb-core
 AutoReq:       no
 %{?systemd_requires}
 
-# TODO
-# Note: We actually require python-virtualenv, too, but unfortunately the version in epel-7 is too
-# old (its included pip is too old), so we will install it manually in the postinst scriptlet,
-# which is why we are requiring python-setuptools here instead
-
 %package -n clearwater-memcached
 Summary:       Clearwater - memcached
 Requires:      memcached
@@ -83,12 +78,20 @@ Summary:       Clearwater - RADIUS Authentication
 Requires:      pam_radius
 AutoReq:       no
 
-%package -n clearwater-vellum
-Summary:       Clearwater - Vellum
+%package -n clearwater-node-memcached
+Summary:       Clearwater Node - memcached
+Requires:      clearwater-memcached clearwater-astaire clearwater-rogers clearwater-infrastructure
 AutoReq:       no
 
-%package -n clearwater-dime
-Summary:       Clearwater - Dime
+%package -n clearwater-node-vellum
+Summary:       Clearwater Node - Vellum
+Requires:      clearwater-node-memcached clearwater-chronos clearwater-infrastructure
+AutoReq:       no
+
+%package -n clearwater-node-dime
+Summary:       Clearwater Node - Dime
+Requires:      clearwater-homestead clearwater-homestead-prov clearwater-ralf
+Requires:      clearwater-infrastructure
 AutoReq:       no
 #Requires:      clearwater-infrastructure clearwater-monit clearwater-memcached
 
@@ -131,32 +134,21 @@ Automatic upgrade
 %description -n clearwater-radius-auth
 RADIUS authentication
 
-%description -n clearwater-vellum
-Storage node
+%description -n clearwater-node-memcached
+Clearwater memcached node
 
-%description -n clearwater-dime
-HTTP-to-Rf/Cx gateway node
+%description -n clearwater-node-vellum
+Clearwater Vellum node
+
+%description -n clearwater-node-dime
+Clearwater Dime node
 
 %prep
 %setup
 
 %build
-# TODO: breaks for mock ... ?
-#sed --in-place 's/"setuptools==24"/"pip==10.0.0"/' clearwater-infrastructure/PyZMQ/Makefile
-#sed --in-place 's/ --setuptools/ --no-setuptools/' clearwater-infrastructure/PyZMQ/Makefile
-#sed --in-place 's/"setuptools==24"/setuptools==39.0.1/' clearwater-infrastructure/PyZMQ/Makefile
-#sed --in-place 's/distribute/pip==10.0.0/' clearwater-infrastructure/PyZMQ/Makefile
-#sed --in-place 's/${ENV_DIR}\/bin\/easy_install "setuptools==24"/# ${ENV_DIR}\/bin\/easy_install "setuptools==24"/' clearwater-infrastructure/PyZMQ/Makefile
-#sed --in-place 's/${ENV_DIR}\/bin\/easy_install distribute/# ${ENV_DIR}\/bin\/easy_install distribute/' clearwater-infrastructure/PyZMQ/Makefile
-#sed --in-place 's/"setuptools==24"/setuptools==39.0.1/' clearwater-infrastructure/PyZMQ/Makefile
-#sed --in-place 's/${ENV_DIR}\/bin\/easy_install distribute/# ${ENV_DIR}\/bin\/easy_install distribute/' clearwater-infrastructure/PyZMQ/Makefile
-#sed --in-place '19i\	${ENV_DIR}\/bin\/easy_install pip==10.0.0' clearwater-infrastructure/PyZMQ/Makefile
-
 # CentOS's virtualenv has an old and broken version of easy_install (setuptools)
 sed --in-place 's/easy_install/pip install/g' clearwater-infrastructure/PyZMQ/Makefile
-
-#easy_install --user virtualenv
-#export PATH="~/.local/bin:$PATH"
 
 make MAKE="make --jobs=$(nproc)"
 
@@ -318,7 +310,6 @@ cp --recursive dime/* %{buildroot}/
 /usr/share/clearwater/infrastructure/install/clearwater-memcached.prerm
 /usr/share/clearwater/infrastructure/monit_uptime/check-memcached-uptime
 /usr/share/clearwater/infrastructure/scripts/memcached
-/usr/share/clearwater/node_type.d/90_memcached
 /usr/share/clearwater/clearwater-cluster-manager/plugins/memcached_plugin.py*
 /usr/share/clearwater/clearwater-cluster-manager/plugins/memcached_utils.py*
 /etc/clearwater/secure-connections/memcached.conf
@@ -404,10 +395,13 @@ cp --recursive dime/* %{buildroot}/
 /usr/share/clearwater-radius-auth/bin/enable-radius-authentication
 /etc/libnss-ato.conf.TEMPLATE
 
-%files -n clearwater-vellum
+%files -n clearwater-node-memcached
+/usr/share/clearwater/node_type.d/90_memcached
+
+%files -n clearwater-node-vellum
 /usr/share/clearwater/node_type.d/10_vellum
 
-%files -n clearwater-dime
+%files -n clearwater-node-dime
 /usr/share/clearwater/node_type.d/10_dime
 
 %post
