@@ -8,6 +8,9 @@ Utility Packages
 
 ### `clearwater-cassandra`
 
+This requires [Cassandra](http://cassandra.apache.org/), which is not included in the CentOS
+repositories. You must thuss add the Cassandra repository for this package to install.
+
 ### `clearwater-monit`
 
 Fork of [Monit](https://mmonit.com/monit/) daemon monitor, written in C. The

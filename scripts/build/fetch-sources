@@ -32,6 +32,7 @@ function fetch()
 }
 
 fetch clearwater-astaire astaire
+fetch clearwater-cassandra
 fetch clearwater-chronos chronos
 fetch clearwater-crest crest
 fetch clearwater-ellis ellis

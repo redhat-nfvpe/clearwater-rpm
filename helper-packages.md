@@ -16,7 +16,7 @@ Python code accesses cpp-common via [CFFI](https://cffi.readthedocs.io/).
 ### `clearwater-debian`
 
 Clearwater's init scripts assume a Debian/LSB environment, which unfortunately diverges from
-Red Hat's interpretation. Here we will in the gaps.
+Red Hat's interpretation. Here we fill in the gaps.
 
 ### `clearwater-sprout-libs`
 

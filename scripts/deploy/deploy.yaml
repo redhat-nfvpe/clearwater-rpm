@@ -47,6 +47,13 @@
 
   - include_role:
       name: clearwater-repository
+  - include_role:
+      name: cassandra-repository
+
+  # This should not be necessary anymore in Ansible 2.6
+  # See: https://github.com/ansible/ansible/pull/35989
+  - name: Update repository cache
+    command: yum -y makecache
 
   - name: Install Clearwater Infrastructure
     yum:
@@ -56,4 +63,3 @@
     yum:
       name: clearwater-node-{{ hostvars[inventory_hostname].server.metadata['clearwater.type'] }}
       state: present
-      

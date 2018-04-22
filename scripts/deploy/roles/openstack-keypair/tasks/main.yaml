@@ -3,7 +3,7 @@
   register: keypair
   os_keypair:
     state: present
-    name: "{{ topology.site_name }}"
+    name: "{{ topology.site_name | replace('.', '-') }}-{{ topology.zone | replace('.', '-') }}"
 
 - name: Write keys
   when: keypair.key.private_key is not none # will only be available when keypair is created

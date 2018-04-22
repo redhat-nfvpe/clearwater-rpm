@@ -85,7 +85,8 @@ AutoReq:       no
 
 %package -n clearwater-node-vellum
 Summary:       Clearwater Node - Vellum
-Requires:      clearwater-node-memcached clearwater-chronos clearwater-infrastructure
+Requires:      clearwater-node-cassandra clearwater-node-memcached clearwater-chronos
+Requires:      clearwater-infrastructure
 AutoReq:       no
 
 %package -n clearwater-node-dime

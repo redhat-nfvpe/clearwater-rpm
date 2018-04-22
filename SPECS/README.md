@@ -3,13 +3,23 @@ Build Architecture
 
 Each RPM spec is devoted to a single git repository and most generate several RPMs.
 
-A crucial build architecture decision is a preference is to include and build specific versions of
-C/C++ libraries rather than use those packaged for the operating system. It adds much complexity to
-the build process, but it does ensure stability, though at the cost of losing security fixes
-provided by the operating system.
+A crucial build architecture decision is a preference to include and build specific versions of
+upstream C/C++ libraries rather than use those packaged for the operating system. It adds much
+complexity to the build process, but it does ensure runtime consistency, though at the cost of
+losing security fixes provided by the operating system, which could lead to worse stability. This
+preference is applied inconsistently: e.g. Sprout builds its own libcurl, while Ralf/Homestead use
+the operating system's.
 
-This preference is applied inconsistently: e.g. Sprout builds its own libcurl, while Ralf/Homestead
-use the operating system's.
+Note that these upstream libraries have diverse open source licenses, and some are normally not
+compatible with the GPL license. However, Clearwater's
+[license](http://www.projectclearwater.org/download/license/) includes a "Special Exception" for
+OpenSSL's license.
+
+Another quirk of the repository design is the use of git submodules, for both the upstream libraries
+mentioned above as well as Clearwater's modules, such as `cpp-common` and `cleatwater-etcd-modules`.
+Unfortunately, we found that git tags (for versions) are not used consistently across all Clearwater
+repositories, thus we make sure to use each repository with the exact commit hashes used for
+all submodules. (Otherwise, there will be build errors.)
 
 
 `clearwater-astaire`
@@ -43,10 +53,12 @@ Note that Homestead itself has its own repository (see below).
 * `clearwater-homestead-prov`
 * `clearwater-homestead-prov-cassandra`
 
+
 `clearwater-debian`
 -------------------
 
 * `clearwater-debian`
+
 
 `clearwater-ellis`
 ------------------

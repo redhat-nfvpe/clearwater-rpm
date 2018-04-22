@@ -29,7 +29,6 @@ AutoReq:       no
 %package -n clearwater-rogers
 Summary:       Clearwater - Rogers
 Requires:      zeromq zlib boost
-Requires:      clearwater-rogers-libs
 AutoReq:       no
 %{?systemd_requires}
 #Requires:      clearwater-infrastructure clearwater-tcp-scalability clearwater-log-cleanup

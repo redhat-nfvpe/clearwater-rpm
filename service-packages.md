@@ -10,8 +10,8 @@ MariaDB or Cassandra databases if those services are running on other servers.
 
 Thus, a "complete" install of these services requires a properly configured node and the
 poorly named `clearwater-infrastructure` [utility package](utility-packages.md), which will run the
-appropriate scripts included in each of these packages. clearwater-infrastructure must be installed
-separately. 
+appropriate scripts included in each of these packages. `clearwater-infrastructure` must be
+installed separately. 
 
 Additionally, these packages also contain monit control files, which can be used with the
 optional `clearwater-monit` daemon monitor, also a [utility package](utility-packages.md).

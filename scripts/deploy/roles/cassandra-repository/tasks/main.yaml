@@ -1,0 +1,9 @@
+
+- name: Install Cassandra repository
+  yum_repository:
+    name: Cassandra
+    description: Apache Cassandra
+    baseurl: https://www.apache.org/dist/cassandra/redhat/311x/
+    gpgcheck: true
+    repo_gpgcheck: true
+    gpgkey: https://www.apache.org/dist/cassandra/KEYS

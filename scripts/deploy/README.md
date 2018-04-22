@@ -34,13 +34,13 @@ The play will provision a keypair for you and write the private and public (`.pu
 `keys/`. Note that the private key cannot be retrieved after creation, so make sure not to lose
 these files. The play will then provision the servers and install the necessary packages on them.
 
-It is safe to replay the playbook, as it will never create additional servers beyond those declared
-in `topology.yaml`.
+It is safe and useful to replay the playbook, for example if you add additional nodes in
+`topology.yaml`.
 
 To manually login to the servers use the private key and disable host key checking (something you
 always want to do when dealing we cloud IP addresses, which might be reused), for example:
 
-    ssh -i keys/site-1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.237.176.164
+    ssh -i keys/clearwater-site-1-example-org -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.237.176.164
 
 
 TODO

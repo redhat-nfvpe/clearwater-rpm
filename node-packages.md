@@ -20,7 +20,7 @@ Composite Nodes (priority 10)
 * `clearwater-node-vellum` (storage)
     * `clearwater-node-chronos`
     * `clearwater-node-memcached`
-    * `clearwater-cassandra`
+    * `clearwater-node-cassandra`
     * `clearwater-etcd` (TODO: cluster and queue managers?)
 
 
@@ -49,6 +49,7 @@ Plugin Nodes (priority 80)
 Sub-Nodes (priority 90)
 -----------------------
 
+* `clearwater-node-cassandra` (database)
 * `clearwater-node-chronos` (distributed timer)
 * `clearwater-node-memcached` (cache)
     * `clearwater-memcached`
