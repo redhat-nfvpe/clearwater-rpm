@@ -67,23 +67,6 @@ config manager
 make env MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-etcd.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-etcd.sh
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/clearwater-cluster-manager.service
-install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/clearwater-cluster-manager.sh
-install --mode=644 %{SOURCE6} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
-install --mode=755 %{SOURCE7} %{buildroot}/lib/systemd/scripts/clearwater-queue-manager.sh
-install --mode=644 %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-config-manager.service
-install --mode=755 %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-config-manager.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/clearwater-etcd.init.d %{buildroot}%{_initrddir}/clearwater-etcd
-#install --mode=755 debian/clearwater-cluster-manager.init.d %{buildroot}%{_initrddir}/clearwater-cluster-manager
-#install --mode=755 debian/clearwater-queue-manager.init.d %{buildroot}%{_initrddir}/clearwater-queue-manager
-#install --mode=755 debian/clearwater-config-manager.init.d %{buildroot}%{_initrddir}/clearwater-config-manager
-
 # See: debian/clearwater-etcd.install
 cp --recursive clearwater-etcd/* %{buildroot}/
 
@@ -109,6 +92,33 @@ cp src/clearwater_etcd_plugins/clearwater_config_manager/shared_config_plugin.py
 cp src/clearwater_etcd_plugins/clearwater_config_manager/dns_json_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
 cp src/clearwater_etcd_plugins/clearwater_config_access/shared_config_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-etcd.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-etcd.sh
+install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/clearwater-cluster-manager.service
+install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/clearwater-cluster-manager.sh
+install --mode=644 %{SOURCE6} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
+install --mode=755 %{SOURCE7} %{buildroot}/lib/systemd/scripts/clearwater-queue-manager.sh
+install --mode=644 %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-config-manager.service
+install --mode=755 %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-config-manager.sh
+
+sed --in-place 's/\/etc\/init.d\/clearwater-etcd/service clearwater-etcd/g' %{buildroot}/usr/share/clearwater/conf/clearwater-etcd.monit
+sed --in-place 's/\/etc\/init.d\/clearwater-cluster-manager/service clearwater-cluster-manager/g' %{buildroot}/usr/share/clearwater/conf/clearwater-cluster-manager.monit
+sed --in-place 's/\/etc\/init.d\/clearwater-queue-manager/service clearwater-queue-manager/g' %{buildroot}/usr/share/clearwater/conf/clearwater-queue-manager.monit
+sed --in-place 's/\/etc\/init.d\/clearwater-config-manager/service clearwater-config-manager/g' %{buildroot}/usr/share/clearwater/conf/clearwater-config-manager.monit
+sed --in-place 's/\/etc\/init.d\/cassandra/\/lib\/systemd\/scripts\/clearwater-cassandra.sh/g' %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_cassandra_cluster.py
+sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_chronos_cluster.py
+# TODO: this must be fixed when we fix clearwater-memcached
+#%{buildroot}/usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_memcached_cluster.py
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/clearwater-etcd.init.d %{buildroot}%{_initrddir}/clearwater-etcd
+#install --mode=755 debian/clearwater-cluster-manager.init.d %{buildroot}%{_initrddir}/clearwater-cluster-manager
+#install --mode=755 debian/clearwater-queue-manager.init.d %{buildroot}%{_initrddir}/clearwater-queue-manager
+#install --mode=755 debian/clearwater-config-manager.init.d %{buildroot}%{_initrddir}/clearwater-config-manager
 
 %files
 %{_unitdir}/clearwater-etcd.service

@@ -1,13 +1,18 @@
 zone: example.org
 site_name: clearwater-site-1
+
 image: CentOS 7 (PVHVM)
+
 servers:
+
 - type: vellum
   index: 1
   flavor: 512MB Standard Instance
+
 - type: sprout
   index: 1
   flavor: 512MB Standard Instance
+
 - type: ellis
   index: 1
   flavor: 512MB Standard Instance

@@ -83,17 +83,6 @@ Clearwater Homer node
 make env MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homer.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/homer.sh
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/homestead-prov.service
-install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/homestead-prov.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/homer.init.d %{buildroot}%{_initrddir}/homer
-#install --mode=755 debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
-
 # See: debian/crest.install
 mkdir --parents %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
 cp --recursive crest_wheelhouse/* %{buildroot}/usr/share/clearwater/crest/.wheelhouse/
@@ -128,6 +117,22 @@ cp --recursive homestead.root/* %{buildroot}/
 
 # See: debian/homestead-prov-cassandra.install
 cp --recursive homestead-prov-cassandra.root/* %{buildroot}/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homer.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/homer.sh
+install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/homestead-prov.service
+install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/homestead-prov.sh
+
+sed --in-place 's/\/etc\/init.d\/homestead-prov/service homestead-prov/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/homestead-prov.monit
+sed --in-place 's/\/etc\/init.d\/homer/service homer/g' %{buildroot}/usr/share/clearwater/homer/templates/homer.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/homestead-prov.monit
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/homer.init.d %{buildroot}%{_initrddir}/homer
+#install --mode=755 debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
 
 %files
 /usr/share/clearwater/crest/.wheelhouse/

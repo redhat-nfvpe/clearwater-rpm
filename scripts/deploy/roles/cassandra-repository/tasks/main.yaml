@@ -1,9 +1,15 @@
 
 - name: Install Cassandra repository
-  yum_repository:
-    name: Cassandra
-    description: Apache Cassandra
-    baseurl: https://www.apache.org/dist/cassandra/redhat/311x/
-    gpgcheck: true
-    repo_gpgcheck: true
-    gpgkey: https://www.apache.org/dist/cassandra/KEYS
+  block:
+
+  - yum_repository:
+      name: Cassandra
+      description: Apache Cassandra
+      baseurl: https://www.apache.org/dist/cassandra/redhat/{{ cassandra_version }}/
+      gpgcheck: true
+      repo_gpgcheck: true
+      gpgkey: https://www.apache.org/dist/cassandra/KEYS
+
+  # The following should not be necessary anymore in Ansible 2.6
+  # See: https://github.com/ansible/ansible/pull/35989
+  - command: yum -y makecache

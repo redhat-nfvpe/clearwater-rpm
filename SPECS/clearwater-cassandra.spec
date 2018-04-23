@@ -6,14 +6,20 @@ URL:           https://github.com/Metaswitch/clearwater-cassandra
 
 Source0:       %{name}-%{version}.tar.bz2
 Source1:       scriptlet-util.sh
+Source2:       clearwater-cassandra.service
+Source3:       clearwater-cassandra.sh
 
 BuildRequires: make
+BuildRequires: systemd
 
 %global debug_package %{nil}
 
 Summary:       Clearwater - Cassandra
 Requires:      cassandra
 AutoReq:       no
+%{?systemd_requires}
+
+# Note: cassandra is not packaged for CentOS, so this package will require an external repository
 
 %package -n clearwater-node-cassandra
 Summary:       Clearwater Node - Cassandra
@@ -37,9 +43,21 @@ cp modules/clearwater-etcd-plugins/clearwater_cassandra/cassandra_plugin.py %{bu
 cp modules/clearwater-etcd-plugins/clearwater_cassandra/cassandra_failed_plugin.py %{buildroot}/usr/share/clearwater/conf/
 rm %{buildroot}/etc/init.d/cassandra.clearwater
 rm %{buildroot}/etc/default/cassandra.clearwater
+rm %{buildroot}/usr/share/cassandra/cassandra.in.sh.clearwater
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-cassandra.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-cassandra.sh
+
+sed --in-place 's/\/etc\/init.d\/cassandra/service clearwater-cassandra/g' %{buildroot}/usr/share/clearwater/conf/clearwater-cassandra.monit
+sed --in-place 's/\/etc\/init.d\/cassandra/service clearwater-cassandra/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/cassandra.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/cassandra.monit
 
 %files
-/usr/share/cassandra/cassandra.in.sh.clearwater
+%{_unitdir}/clearwater-cassandra.service
+/lib/systemd/scripts/clearwater-cassandra.sh
 /usr/share/clearwater/bin/do_backup.sh
 /usr/share/clearwater/bin/list_backups.sh
 /usr/share/clearwater/bin/poll_cassandra.sh
@@ -63,3 +81,32 @@ rm %{buildroot}/etc/default/cassandra.clearwater
 
 %files -n clearwater-node-cassandra
 /usr/share/clearwater/node_type.d/90_cassandra
+
+%post -p /bin/bash
+%include %{SOURCE1}
+# See: debian/clearwater-cassandra.links
+ln --symbolic /usr/share/clearwater/bin/do_backup.sh /usr/bin/cw-do_backup
+ln --symbolic /usr/share/clearwater/bin/list_backups.sh /usr/bin/cw-list_backups
+ln --symbolic /usr/share/clearwater/bin/update_cassandra_strategy /usr/sbin/cw-update_cassandra_strategy
+ln --symbolic /usr/share/clearwater/bin/remove_site_from_cassandra /usr/sbin/cw-remove_site_from_cassandra
+ln --symbolic /usr/share/clearwater/bin/restore_backup.sh /usr/sbin/cw-restore_backup
+
+# See: debian/clearwater-cassandra.postinst
+%systemd_post clearwater-cassandra.service
+cw-start clearwater-cassandra
+
+%preun -p /bin/bash
+%include %{SOURCE1}
+# See: debian/astaire.prerm
+%systemd_preun clearwater-cassandra.service
+cw-stop clearwater-cassandra
+
+# See: debian/clearwater-cassandra.links
+rm --force /usr/bin/cw-do_backup
+rm --force /usr/bin/cw-list_backups
+rm --force /usr/sbin/cw-update_cassandra_strategy
+rm --force /usr/sbin/cw-remove_site_from_cassandra
+rm --force /usr/sbin/cw-restore_backup
+
+%postun
+%systemd_postun_with_restart clearwater-cassandra.service

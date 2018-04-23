@@ -27,6 +27,10 @@ cp --recursive clearwater-nginx/* %{buildroot}/
 cp nginx-ensite/nginx_ensite %{buildroot}/usr/bin/
 cp nginx-ensite/nginx_dissite %{buildroot}/usr/bin/
 
+# systemd
+# TODO: fix use of /etc/init.d/nginx
+# %{buildroot}/usr/share/clearwater-nginx/nginx.monit
+
 %files
 /usr/bin/nginx_ensite
 /usr/bin/nginx_dissite

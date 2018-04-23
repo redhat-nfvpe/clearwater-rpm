@@ -66,14 +66,6 @@ sed --in-place '1ioverride MAKE = make' modules/openssl/Makefile.org
 make MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/memento.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/memento.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/memento.init.d %{buildroot}%{_initrddir}/memento
-
 # See: debian/memento.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 cp build/bin/memento %{buildroot}/usr/share/clearwater/bin/
@@ -89,6 +81,18 @@ cp --recursive memento-nginx.root/* %{buildroot}/
 
 # See: debian/memento-cassandra.install
 cp --recursive memento-cassandra.root/* %{buildroot}/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/memento.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/memento.sh
+
+sed --in-place 's/\/etc\/init.d\/memento/service memento/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/memento.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/memento.monit
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/memento.init.d %{buildroot}%{_initrddir}/memento
 
 %files
 %{_unitdir}/memento.service

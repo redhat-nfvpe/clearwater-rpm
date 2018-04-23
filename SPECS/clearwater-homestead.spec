@@ -53,14 +53,6 @@ Clearwater Homestead node
 make MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homestead.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/homestead.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
-
 # See: debian/homestead.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 cp build/bin/homestead %{buildroot}/usr/share/clearwater/bin/
@@ -74,6 +66,18 @@ cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/homestead/lib/fr
 
 # See: debian/homestead-cassandra.install
 cp --recursive homestead-cassandra.root/* %{buildroot}/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homestead.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/homestead.sh
+
+sed --in-place 's/\/etc\/init.d\/homestead/service homestead/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/homestead.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/homestead.monit
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
 
 %files
 %{_unitdir}/homestead.service

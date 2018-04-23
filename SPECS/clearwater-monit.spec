@@ -30,15 +30,16 @@ utility for managing and monitoring processes, files, directories, and filesyste
 make all MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-install --mode=644 debian/clearwater-monit.service %{buildroot}%{_unitdir}/
-
 # See: debian/clearwater-monit.install
 mkdir --parents %{buildroot}/etc/monit/
 mkdir --parents %{buildroot}/usr/bin
 install --mode=700 debian/monitrc %{buildroot}/etc/monit/
 cp monit %{buildroot}/usr/bin/
 cp --recursive clearwater-monit.root/* %{buildroot}/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+install --mode=644 debian/clearwater-monit.service %{buildroot}%{_unitdir}/
 
 %files
 %{_unitdir}/clearwater-monit.service

@@ -43,14 +43,6 @@ Clearwater Ralf node
 make MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/ralf.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/ralf.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/ralf.init.d %{buildroot}%{_initrddir}/ralf
-
 # See: debian/ralf.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 cp build/bin/ralf %{buildroot}/usr/share/clearwater/bin/
@@ -61,6 +53,18 @@ mkdir --parents %{buildroot}/usr/share/clearwater/ralf/lib/freeDiameter/
 cp usr/lib/*.so %{buildroot}/usr/share/clearwater/ralf/lib/
 cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/ralf/lib/
 cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/ralf/lib/freeDiameter/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/ralf.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/ralf.sh
+
+sed --in-place 's/\/etc\/init.d\/ralf/service ralf/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/ralf.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/ralf.monit
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/ralf.init.d %{buildroot}%{_initrddir}/ralf
 
 %files
 %{_unitdir}/ralf.service

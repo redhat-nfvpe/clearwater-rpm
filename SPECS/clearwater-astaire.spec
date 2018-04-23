@@ -47,17 +47,6 @@ memcached proxy
 make MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/astaire.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/astaire.sh
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/rogers.service
-install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/rogers.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/astaire.init.d %{buildroot}%{_initrddir}/astaire
-#install --mode=755 debian/rogers.init.d %{buildroot}%{_initrddir}/rogers
-
 # See: debian/astaire.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/astaire/bin/
@@ -79,6 +68,23 @@ cp --recursive rogers.root/* %{buildroot}/
 mkdir --parents %{buildroot}/usr/share/clearwater/rogers/lib/
 cp usr/lib/*.so %{buildroot}/usr/share/clearwater/rogers/lib/
 cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/rogers/lib/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/astaire.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/astaire.sh
+install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/rogers.service
+install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/rogers.sh
+
+sed --in-place 's/\/etc\/init.d\/astaire/service astaire/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/astaire.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/astaire.monit
+sed --in-place 's/\/etc\/init.d\/rogers/service rogers/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/rogers.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/rogers.monit
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/astaire.init.d %{buildroot}%{_initrddir}/astaire
+#install --mode=755 debian/rogers.init.d %{buildroot}%{_initrddir}/rogers
 
 %files
 %{_unitdir}/astaire.service

@@ -1,0 +1,14 @@
+[Unit]
+Description=Clearwater Cassandra
+
+[Service]
+User=cassandra
+RuntimeDirectory=cassandra
+PIDFile=/var/run/cassandra/cassandra.pid
+WorkingDirectory=/etc/clearwater
+ExecStart=/lib/systemd/scripts/clearwater-cassandra.sh
+LimitNOFILE=100000
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target

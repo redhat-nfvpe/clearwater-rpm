@@ -180,28 +180,6 @@ sed --in-place 's/include libmemcached\/csl\/parser.am//' modules/libmemcached/l
 make MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/sprout.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/sprout.sh
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/bono.service
-install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/bono.sh
-install --mode=644 %{SOURCE6} %{buildroot}%{_unitdir}/restund.service
-install --mode=755 %{SOURCE7} %{buildroot}/lib/systemd/scripts/restund.sh
-install --mode=644 %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-sip-stress.service
-install --mode=755 %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress.sh
-install --mode=644 %{SOURCE10} %{buildroot}%{_unitdir}/clearwater-sip-stress-stats.service
-install --mode=755 %{SOURCE11} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress-stats.sh
-install --mode=644 %{SOURCE12} %{buildroot}%{_unitdir}/clearwater-sip-perf.service
-install --mode=755 %{SOURCE13} %{buildroot}/lib/systemd/scripts/clearwater-sip-perf.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/bono.init.d %{buildroot}%{_initrddir}/bono
-#install --mode=755 debian/restund.init.d %{buildroot}%{_initrddir}/restund
-#install --mode=755 debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
-#install --mode=755 debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
-#install --mode=755 debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
-
 # See: debian/sprout-base.install
 mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-config-manager/plugins/
@@ -290,6 +268,36 @@ cp scripts/sipp-stats/clearwater-sipp-stats-*.gem %{buildroot}/usr/share/clearwa
 
 # See: debian/clearwater-sip-perf.install
 cp --recursive clearwater-sip-perf.root/* %{buildroot}/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/sprout.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/sprout.sh
+install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/bono.service
+install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/bono.sh
+install --mode=644 %{SOURCE6} %{buildroot}%{_unitdir}/restund.service
+install --mode=755 %{SOURCE7} %{buildroot}/lib/systemd/scripts/restund.sh
+install --mode=644 %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-sip-stress.service
+install --mode=755 %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress.sh
+install --mode=644 %{SOURCE10} %{buildroot}%{_unitdir}/clearwater-sip-stress-stats.service
+install --mode=755 %{SOURCE11} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress-stats.sh
+install --mode=644 %{SOURCE12} %{buildroot}%{_unitdir}/clearwater-sip-perf.service
+install --mode=755 %{SOURCE13} %{buildroot}/lib/systemd/scripts/clearwater-sip-perf.sh
+
+sed --in-place 's/\/etc\/init.d\/sprout/service sprout/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/sprout.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/sprout.monit
+sed --in-place 's/\/etc\/init.d\/bono/service bono/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/bono.monit
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/bono.monit
+sed --in-place 's/\/etc\/init.d\/restund/service restund/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/restund
+sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/restund
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/bono.init.d %{buildroot}%{_initrddir}/bono
+#install --mode=755 debian/restund.init.d %{buildroot}%{_initrddir}/restund
+#install --mode=755 debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
+#install --mode=755 debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
+#install --mode=755 debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
 
 %files
 %{_unitdir}/sprout.service

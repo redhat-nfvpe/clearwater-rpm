@@ -49,15 +49,6 @@ Clearwater Ellis node
 make env MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/ellis.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/ellis.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/ellis.init.d %{buildroot}%{_initrddir}/ellis.service
-
-# TODO: this should be in build, not install
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
 cp ellis_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
@@ -75,6 +66,18 @@ mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-prov-tools/.wheelho
 cp prov_tools_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/clearwater-prov-tools/.wheelhouse/
 cp local_settings.py %{buildroot}/usr/share/clearwater/clearwater-prov-tools/
 cp --recursive clearwater-prov-tools.root/* %{buildroot}/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/ellis.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/ellis.sh
+
+sed --in-place 's/\/etc\/init.d\/ellis/service ellis/g' %{buildroot}/usr/share/clearwater/ellis/ellis.monit
+sed --in-place 's/\/etc\/init.d\/mysql/service mysql/g' %{buildroot}/usr/share/clearwater/ellis/mysql.monit
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/ellis.init.d %{buildroot}%{_initrddir}/ellis.service
 
 %files
 %{_unitdir}/ellis.service

@@ -42,14 +42,6 @@ Clearwater Chronos node
 make MAKE="make --jobs=$(nproc)"
 
 %install
-mkdir --parents %{buildroot}%{_unitdir}/
-mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/chronos.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/chronos.sh
-
-#mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
-
 # See: debian/chronos.install
 mkdir --parents %{buildroot}/usr/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/chronos/bin/
@@ -70,6 +62,18 @@ cp modules/clearwater-etcd-plugins/chronos/chronos_shared_config_plugin.py %{bui
 cp modules/clearwater-etcd-plugins/chronos/scripts/check_chronos_shared_restart_queue_state %{buildroot}/usr/share/clearwater/clearwater-queue-manager/scripts/
 cp modules/clearwater-etcd-plugins/chronos/scripts/force_chronos_shared_restart_queue_state %{buildroot}/usr/share/clearwater/clearwater-queue-manager/scripts/
 cp modules/clearwater-etcd-plugins/chronos/scripts/upload_chronos_shared_config %{buildroot}/usr/share/clearwater/clearwater-config-manager/scripts/
+
+# systemd
+mkdir --parents %{buildroot}%{_unitdir}/
+mkdir --parents %{buildroot}/lib/systemd/scripts/
+install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/chronos.service
+install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/chronos.sh
+
+sed --in-place 's/\/etc\/init.d\/chronos/service chronos/g' %{buildroot}/usr/share/chronos/chronos.monit
+
+#mkdir --parents %{buildroot}%{_initrddir}/
+#install --mode=755 debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
+
 
 %files
 %{_unitdir}/chronos.service
