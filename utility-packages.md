@@ -2,10 +2,6 @@ Utility Packages
 ================
 
 
-### `clearwater-radius-auth`
-
-### `clearwater-snmpd`
-
 ### `clearwater-cassandra`
 
 This requires [Cassandra](http://cassandra.apache.org/), which is not included in the CentOS
@@ -14,7 +10,13 @@ repositories. You must thuss add the Cassandra repository for this package to in
 ### `clearwater-monit`
 
 Fork of [Monit](https://mmonit.com/monit/) daemon monitor, written in C. The
-[service packages](service-packages.md) come with appropriate monit control files.
+[service packages](service-packages.md) as well as many of these utility packages come with monit
+control files, and are "monit aware": if monit is installed, they will delegate service management
+to monit.
+
+### `clearwater-snmpd`
+
+### `clearwater-radius-auth`
 
 
 Installation
@@ -22,7 +24,13 @@ Installation
 
 ### `clearwater-infrastructure`
 
-Poorly named. Handles running scripts for deployment-wide installation and upgrading.
+Poorly named. Handles running scripts for deployment-wide installation and upgrading. These scripts
+should all be in `/usr/share/clearwater/infrastructure/scripts/`.
+
+Importantly, this service generates the `/etc/clearwater/config` script, upon which many components
+rely.
+
+TODO: These tools are Debian-specific: `clearwater-version`, `clearwater-upgrade`.
 
 ### `clearwater-auto-upgrade`
 
@@ -41,11 +49,14 @@ Python 2. Python code accesses cpp-common via CFFI.
 
 ### `clearwater-etcd`
 
-### `clearwater-auto-config-generic`
+### Auto Configuration
 
-### `clearwater-auto-config-aws`
+These automatically generate `local_config` and `shared_config` for you based on querying the cloud
+environment.
 
-### `clearwater-auto-config-docker`
+* `clearwater-auto-config-generic`
+* `clearwater-auto-config-aws`
+* `clearwater-auto-config-docker`
 
 
 Testing
@@ -77,8 +88,8 @@ clearwater-splunkforwarder-fake package.
 ### `clearwater-diags-monitor`
 
 The Diagnostics Monitor component is a set of bash scripts for gathering essential machine
-and component diagnostics. Contains pre-configured memcached and snmpd. Contains configuration
-validation (written in Python), loading, and auto-generation.
+and component diagnostics. Contains configuration validation (written in Python), loading, and
+auto-generation.
 
 ### `clearwater-splunkforwarder-fake`
 
@@ -88,8 +99,15 @@ Looks like splunkforwarder but does nothing.
 Networking
 ----------
 
-### `clearwater-tcp-scalability`
-
 ### `clearwater-secure-connections`
 
+IPsec support based on [Racoon](http://www.racoon2.wide.ad.jp/w/).
+
 ### `clearwater-socket-factory`
+
+These systemd services provide on-demand sockets in other namespaces, specifically the management
+(`clearwater-socket-factory-mgmt`) and signaling (`clearwater-socket-factory-sig`) namespaces.
+
+### `clearwater-tcp-scalability`
+
+Modifies `/etc/sysctl.conf` for increased TCP scalability.

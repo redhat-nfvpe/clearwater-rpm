@@ -1,9 +1,12 @@
 #!/bin/bash
-set -e
+
+# Important! do not use "set -e"
 
 # See: debian/clearwater-etcd.init.d
 
 NAME=clearwater-etcd
+
+PIDFILE="/var/run/$NAME/$NAME.pid"
 
 log_level=2
 etcd_version=3.1.7
@@ -19,12 +22,12 @@ ETCD_NAME=${advertisement_ip//./-}
 LOG_FILE="/var/log/$NAME/$NAME-systemd.log"
 
 
-log_info () {
+log_debug () {
   echo $(date +'%Y-%m-%d %H:%M:%S.%N') "$@" >> $LOG_FILE
 }
 
 
-log_debug () {
+log_info () {
   echo "$@"
   log_debug "$@"
 }
@@ -96,7 +99,7 @@ create_cluster () {
   # $etcd_cluster.
   generate_initial_cluster "$etcd_cluster"
 
-  CLUSTER_ARGS="--initial-cluster \"$ETCD_INITIAL_CLUSTER\"
+  CLUSTER_ARGS="--initial-cluster $ETCD_INITIAL_CLUSTER
                 --initial-cluster-state new"
 }
 
@@ -115,7 +118,7 @@ join_cluster_as_proxy () {
       generate_initial_cluster "$etcd_proxy"
   fi
 
-  CLUSTER_ARGS="--initial-cluster \"$ETCD_INITIAL_CLUSTER\" --proxy on"
+  CLUSTER_ARGS="--initial-cluster $ETCD_INITIAL_CLUSTER --proxy on"
 }
 
 
@@ -202,7 +205,7 @@ join_cluster () {
 
   ETCD_INITIAL_CLUSTER=$(/usr/share/clearwater/bin/get_etcd_initial_cluster.py $advertisement_ip $etcd_cluster)
 
-  CLUSTER_ARGS="--initial-cluster \"$ETCD_INITIAL_CLUSTER\"
+  CLUSTER_ARGS="--initial-cluster $ETCD_INITIAL_CLUSTER
                 --initial-cluster-state existing"
 
   # Tidy up
@@ -249,7 +252,7 @@ verify_etcd_health_after_startup () {
 
   start_time=$(date +%s)
   while true; do
-    if nc -z "$listen_ip" 4000; then
+    if nc --send-only "$listen_ip" 4000 < /dev/null; then
       touch "$JOINED_CLUSTER_SUCCESSFULLY"
       break
     else
@@ -315,7 +318,7 @@ if [ -n "$etcd_cluster" ] && [ -n "$etcd_proxy" ]; then
   exit 2
 elif [ -n "$etcd_cluster" ]; then
   # Join or create the etcd cluster as a full member
-  if [ -d "/var/lib/$NAME/$advertisement_ip" ]; then
+  if [ -d "$DATA_DIR/$advertisement_ip" ]; then
     # We'll start normally using the data we saved off on our last boot
     log_info "Rejoining cluster..."
   else
@@ -324,8 +327,8 @@ elif [ -n "$etcd_cluster" ]; then
 
   # Add common clustering parameters
   CLUSTER_ARGS="$CLUSTER_ARGS
-                --initial-advertise-peer-urls \"http://$advertisement_ip:2380\"
-                --listen-peer-urls \"http://$listen_ip:2380\""
+                --initial-advertise-peer-urls http://$advertisement_ip:2380
+                --listen-peer-urls http://$listen_ip:2380"
 elif [ -n "$etcd_proxy" ]; then
   # Run etcd as a proxy talking to the cluster
   join_cluster_as_proxy
@@ -340,7 +343,8 @@ fi
   --data-dir "$DATA_DIR/$advertisement_ip" \
   --name "$ETCD_NAME" \
   --debug \
-  $CLUSTER_ARGS
+  $CLUSTER_ARGS &
 
-# TODO: won't be called
+echo $! > "$PIDFILE"
+
 verify_etcd_health_after_startup

@@ -22,12 +22,14 @@ BuildRequires: systemd
 %global debug_package %{nil}
 
 Summary:       Clearwater - etcd
+Requires:      nmap-ncat
 AutoReq:       no
 %{?systemd_requires}
 #Requires:      clearwater-infrastructure clearwater-monit clearwater-log-cleanup
 
 %package -n clearwater-cluster-manager
 Summary:       Clearwater - Cluster Manager
+#Requires:      clearwater-etcd
 Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
@@ -35,6 +37,7 @@ AutoReq:       no
 
 %package -n clearwater-queue-manager
 Summary:       Clearwater - Queue Manager
+#Requires:      clearwater-etcd
 Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
@@ -42,6 +45,7 @@ AutoReq:       no
 
 %package -n clearwater-config-manager
 Summary:       Clearwater - Config Manager
+#Requires:      clearwater-queue-manager
 Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
@@ -145,6 +149,7 @@ sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' 
 /usr/share/clearwater/infrastructure/monit_uptime/check-etcd-uptime
 /usr/share/clearwater/conf/clearwater-etcd.monit
 /etc/logrotate.d/clearwater-etcd
+%ghost /var/lib/clearwater-etcd/
 
 %files -n clearwater-cluster-manager
 %{_unitdir}/clearwater-cluster-manager.service
@@ -228,6 +233,8 @@ sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' 
 # See: debian/clearwater-etcd.postinst
 cw-create-user clearwater-etcd
 cw-create-log-dir clearwater-etcd
+mkdir --parents /var/lib/clearwater-etcd
+chown clearwater-etcd /var/lib/clearwater-etcd
 %systemd_post clearwater-etcd.service
 cw-start clearwater-etcd
 

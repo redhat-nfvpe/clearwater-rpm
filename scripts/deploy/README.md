@@ -40,7 +40,7 @@ It is safe and useful to replay the playbook, for example if you add additional 
 To manually login to the servers use the private key and disable host key checking (something you
 always want to do when dealing we cloud IP addresses, which might be reused), for example:
 
-    ssh -i keys/clearwater-site-1-example-org -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.237.176.164
+    ssh -i keys/clearwater-1-example-org -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.237.176.164
 
 
 TODO

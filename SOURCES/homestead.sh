@@ -82,10 +82,10 @@ fi
 [ -z "$homestead_impu_store" ] || impu_store_arg="--impu-store=$homestead_impu_store"        
 
 EXTRA_ARGS=
-[ "$http_blacklist_duration" = "" ]     || EXTRA_ARGS="$EXTRA_ARGS --http-blacklist-duration=\"$http_blacklist_duration\""
-[ "$diameter_blacklist_duration" = "" ] || EXTRA_ARGS="$EXTRA_ARGS --diameter-blacklist-duration=\"$diameter_blacklist_duration\""
-[ "$dns_timeout" = "" ]                 || EXTRA_ARGS="$EXTRA_ARGS --dns-timeout=\"$dns_timeout\""
-[ "$astaire_blacklist_duration" = "" ]  || EXTRA_ARGS="$EXTRA_ARGS --astaire-blacklist-duration=\"$astaire_blacklist_duration\""
+[ "$http_blacklist_duration" = "" ]     || EXTRA_ARGS="$EXTRA_ARGS --http-blacklist-duration=$http_blacklist_duration"
+[ "$diameter_blacklist_duration" = "" ] || EXTRA_ARGS="$EXTRA_ARGS --diameter-blacklist-duration=$diameter_blacklist_duration"
+[ "$dns_timeout" = "" ]                 || EXTRA_ARGS="$EXTRA_ARGS --dns-timeout=$dns_timeout"
+[ "$astaire_blacklist_duration" = "" ]  || EXTRA_ARGS="$EXTRA_ARGS --astaire-blacklist-duration=$astaire_blacklist_duration"
 
 $namespace_prefix \
 "/usr/share/clearwater/bin/$NAME" \

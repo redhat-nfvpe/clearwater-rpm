@@ -33,6 +33,9 @@
     command: /bin/true
 
   - include_role:
+      name: essentials
+
+  - include_role:
       name: hosts
 
   - include_role:

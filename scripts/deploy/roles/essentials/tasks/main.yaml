@@ -1,0 +1,14 @@
+
+# Useful packages!
+
+- name: byobu
+  block:
+  - yum:
+      name: byobu
+      state: present
+  - command: byobu-launcher-install
+
+- name: htop
+  yum:
+    name: htop
+    state: present

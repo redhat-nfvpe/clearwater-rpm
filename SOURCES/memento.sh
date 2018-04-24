@@ -52,8 +52,8 @@ fi
 [ -z "$memento_auth_store" ] || astaire_arg="--astaire=$memento_auth_store"
 
 EXTRA_ARGS=
-[ "$http_blacklist_duration" = "" ]       || EXTRA_ARGS="$EXTRA_ARGS --http-blacklist-duration=\"$http_blacklist_duration\""
-[ "$astaire_blacklist_duration" = "" ]    || EXTRA_ARGS="$EXTRA_ARGS --astaire-blacklist-duration=\"$astaire_blacklist_duration\""
+[ "$http_blacklist_duration" = "" ]       || EXTRA_ARGS="$EXTRA_ARGS --http-blacklist-duration=$http_blacklist_duration"
+[ "$astaire_blacklist_duration" = "" ]    || EXTRA_ARGS="$EXTRA_ARGS --astaire-blacklist-duration=$astaire_blacklist_duration"
 
 $namespace_prefix \
 "/usr/share/clearwater/bin/$NAME" \

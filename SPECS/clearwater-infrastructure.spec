@@ -5,6 +5,7 @@ License:       GPLv3+
 URL:           https:/github.com/Metaswitch/clearwater-infrastructure
 
 Source0:       %{name}-%{version}.tar.bz2
+Source1:       scriptlet-util.sh
 
 BuildRequires: make python-virtualenv
 BuildRequires: zeromq-devel boost-devel
@@ -86,7 +87,7 @@ AutoReq:       no
 %package -n clearwater-node-vellum
 Summary:       Clearwater Node - Vellum
 Requires:      clearwater-node-cassandra clearwater-node-memcached clearwater-chronos
-Requires:      clearwater-infrastructure
+Requires:      clearwater-etcd clearwater-infrastructure
 AutoReq:       no
 
 %package -n clearwater-node-dime
@@ -203,12 +204,14 @@ cp clearwater-socket-factory/clearwater_socket_factory %{buildroot}/usr/share/cl
 cp clearwater-socket-factory/clearwater-socket-factory-common %{buildroot}/usr/share/clearwater/bin/
 cp clearwater-socket-factory/clearwater-socket-factory-mgmt-wrapper %{buildroot}/usr/share/clearwater/bin/
 cp clearwater-socket-factory/clearwater-socket-factory-sig-wrapper %{buildroot}/usr/share/clearwater/bin/
-cp clearwater-socket-factory/clearwater-socket-factory-mgmt.conf %{buildroot}/etc/init/
-cp clearwater-socket-factory/clearwater-socket-factory-sig.conf %{buildroot}/etc/init/
 
 mkdir --parents %{buildroot}%{_unitdir}/
 cp debian/clearwater-socket-factory-mgmt.service %{buildroot}%{_unitdir}/
 cp debian/clearwater-socket-factory-sig.service %{buildroot}%{_unitdir}/
+
+# Upstart
+#cp clearwater-socket-factory/clearwater-socket-factory-mgmt.conf %{buildroot}/etc/init/
+#cp clearwater-socket-factory/clearwater-socket-factory-sig.conf %{buildroot}/etc/init/
 
 # See: debian/clearwater-auto-config-aws.install
 mkdir --parents %{buildroot}/usr/share/clearwater-auto-config/bin/
@@ -349,6 +352,7 @@ cp --recursive dime/* %{buildroot}/
 /etc/cron.d/clearwater-sysstat
 /etc/logrotate.d/clearwater-diags-monitor
 /etc/logrotate.d/clearwater-iotop
+%ghost /etc/clearwater/diags-monitor/sysstat.old
 
 %files -n clearwater-socket-factory
 %{_unitdir}/clearwater-socket-factory-mgmt.service
@@ -357,8 +361,6 @@ cp --recursive dime/* %{buildroot}/
 /usr/share/clearwater/bin/clearwater-socket-factory-common
 /usr/share/clearwater/bin/clearwater-socket-factory-mgmt-wrapper
 /usr/share/clearwater/bin/clearwater-socket-factory-sig-wrapper
-/etc/init/clearwater-socket-factory-mgmt.conf
-/etc/init/clearwater-socket-factory-sig.conf
 
 %files -n clearwater-auto-config-aws
 %{_initrddir}/clearwater-auto-config-aws
@@ -422,6 +424,8 @@ ln --symbolic /usr/share/clearwater/bin/clearwater-show-config /usr/sbin/clearwa
 # See: debian/clearwater-infrastructure.postinst
 #easy_install virtualenv
 /usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
+systemctl enable clearwater-infrastructure.service
+systemctl start clearwater-infrastructure.service
 
 %preun
 # See: debian/clearwater-infrastructure.prerm
@@ -442,6 +446,10 @@ rm --force /usr/sbin/clearwater-show-config
 %post -n clearwater-memcached
 # See: debian/clearwater-memached.postinst
 /usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst
+systemctl enable memcached.service
+systemctl start memcached.service
+systemctl enable clearwater-memcached.service
+systemctl start clearwater-memcached.service
 
 %preun -n clearwater-memcached
 # See: debian/clearwater-memached.prerm
@@ -458,6 +466,8 @@ rm --force /usr/sbin/clearwater-show-config
 %post -n clearwater-secure-connections
 # See: debian/clearwater-secure-connections.postinst
 /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.postinst
+systemctl enable clearwater-secure-connections.service
+systemctl start clearwater-secure-connections.service
 
 %preun -n clearwater-secure-connections
 # See: debian/clearwater-secure-connections.prerm
@@ -473,27 +483,31 @@ rm --force /usr/sbin/clearwater-show-config
 
 %post -n clearwater-diags-monitor
 # See: debian/clearwater-diags-monitor.postinst
-cp --preserve /etc/default/sysstat /etc/clearwater/diags-monitor/sysstat.old
-sed --in-place 's/ENABLED=.*/ENABLED="true"/g' /etc/default/sysstat
+#cp --preserve /etc/default/sysstat /etc/clearwater/diags-monitor/sysstat.old
+#sed --in-place 's/ENABLED=.*/ENABLED="true"/g' /etc/default/sysstat
 /usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.postinst
+systemctl enable sysstat.service
+systemctl start sysstat.service
 
 %preun -n clearwater-diags-monitor
 # See: debian/clearwater-diags-monitor.prerm
 [ ! -f /etc/clearwater/diags-monitor/sysstat.old ] || cp --preserve /etc/clearwater/diags-monitor/sysstat.old /etc/default/sysstat
-rm --force /etc/clearwater/diags-monitor/sysstat.old
+#rm --force /etc/clearwater/diags-monitor/sysstat.old
 /usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.prerm
 
-%post -n clearwater-socket-factory
+%post -n clearwater-socket-factory -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-socket-factory.postinst
-service clearwater-socket-factory-mgmt start || /bin/true
-service clearwater-socket-factory-sig start || /bin/true
 %systemd_post socket-factory-mgmt.service
 %systemd_post socket-factory-sig.service
+cw-start clearwater-socket-factory-mgmt
+cw-start clearwater-socket-factory-sig
 
-%preun -n clearwater-socket-factory
+%preun -n clearwater-socket-factory -p /bin/bash
+%include %{SOURCE1}
 # See: debian/clearwater-socket-factory.prerm
-service clearwater-socket-factory-mgmt stop || /bin/true
-service clearwater-socket-factory-sig stop || /bin/true
+cw-stop clearwater-socket-factory-mgmt
+cw-stop clearwater-socket-factory-sig
 rm --force /tmp/clearwater_mgmt_namespace_socket
 %systemd_preun socket-factory-mgmt.service
 %systemd_preun socket-factory-sig.service

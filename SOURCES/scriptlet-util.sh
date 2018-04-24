@@ -166,13 +166,19 @@ cw-create-virtualenv ()
   local PACKAGE_NAME=${2:-$NAME}
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
   local ENV_DIR="$HOME_DIR/env"
-  local EASY_INSTALL="$ENV_DIR/bin/easy_install"
   local PIP="$ENV_DIR/bin/pip"
   local WHEELHOUSE="$HOME_DIR/.wheelhouse"
-  virtualenv --no-pip --no-wheel "$ENV_DIR/"
-  "$EASY_INSTALL" "$WHEELHOUSE/pip-"*.whl
-  "$PIP" install wheel --no-index --find-links="$WHEELHOUSE/" \
-    |& grep --invert-match 'Requirement already satisfied'
+
+  #virtualenv --no-pip --no-wheel "$ENV_DIR/"
+  #"$EASY_INSTALL" "$WHEELHOUSE/wheel-"*.whl
+  #"$EASY_INSTALL" "$WHEELHOUSE/pip-"*.whl
+
+  # The virtualenv packaged with CentOS is very, very old. Its setuptools doesn't even support
+  # wheels, so we have a chicken-and-egg problem with installing our included wheel and pip wheels.
+  # For now, let's upgrade pip from the downloaded tarball.
+  virtualenv "$ENV_DIR/"
+  "$PIP" install --upgrade pip
+
   cw-add-to-virtualenv "$NAME" "$NAME" "$PACKAGE_NAME"
 }
 
@@ -187,7 +193,7 @@ cw-add-to-virtualenv ()
   local PIP="$ENV_DIR/bin/pip"
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
   local WHEELHOUSE="$HOME_DIR/.wheelhouse"
-  "$PIP" install "$PACKAGE_NAME" --no-index --find-links="$ENV_WHEELHOUSE/" --find-links="$WHEELHOUSE/" \
+  "$PIP" install "$(echo "$PACKAGE_NAME" | tr - _)" --no-index --find-links="$ENV_WHEELHOUSE/" --find-links="$WHEELHOUSE/" \
     |& grep --invert-match 'Requirement already satisfied'
 }
 
