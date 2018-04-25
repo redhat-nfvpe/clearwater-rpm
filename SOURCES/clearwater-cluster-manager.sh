@@ -5,7 +5,7 @@ set -e
 
 NAME=clearwater-cluster-manager
 
-PIDFILE="/var/run/$NAME.pid"
+PIDFILE="/var/run/$NAME/$NAME.pid"
 
 if [ -e /etc/clearwater/no_cluster_manager ]; then
   echo "/etc/clearwater/no_cluster_manager exists, not starting cluster manager"

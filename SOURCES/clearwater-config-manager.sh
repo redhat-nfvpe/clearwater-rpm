@@ -5,7 +5,7 @@ set -e
 
 NAME=clearwater-config-manager
 
-PIDFILE="/var/run/$NAME.pid"
+PIDFILE="/var/run/$NAME/$NAME.pid"
 
 if [ -e /etc/clearwater/no_config_manager ]; then
   echo "/etc/clearwater/no_config_manager exists, not starting config manager"
@@ -28,5 +28,5 @@ fi
   --local-site="$local_site_name" \
   --log-level="$log_level" \
   --log-directory="$log_directory" \
-  --pidfile="$PIDFILE" \
-  --etcd-key="$etcd_key"
+  --etcd-key="$etcd_key" \
+  --pidfile="$PIDFILE"

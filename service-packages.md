@@ -8,10 +8,9 @@ Importantly, though these packages install the components, they do not and canno
 deployment-wide requirements for the components. For example, they cannot commission required
 MariaDB or Cassandra databases if those services are running on other servers.
 
-Thus, a "complete" install of these services requires a properly configured node and the
+Thus, a "complete" install of these services requires a properly configured node *as well as* the
 poorly named `clearwater-infrastructure` [utility package](utility-packages.md), which will run the
-appropriate scripts included in each of these packages. `clearwater-infrastructure` must be
-installed separately. 
+appropriate scripts included in each of these packages.
 
 Additionally, these packages also contain monit control files, which can be used with the
 optional `clearwater-monit` daemon monitor, also a [utility package](utility-packages.md).

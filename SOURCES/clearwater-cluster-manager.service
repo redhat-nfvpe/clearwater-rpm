@@ -1,11 +1,10 @@
-# Note: PID location is different from other Clearwater components
-
 [Unit]
 Description=Clearwater Cluster Manager
 
 [Service]
 User=clearwater-cluster-manager
-PIDFile=/var/run/clearwater-cluster-manager.pid
+RuntimeDirectory=clearwater-cluster-manager
+PIDFile=/var/run/clearwater-cluster-manager/clearwater-cluster-manager.pid
 WorkingDirectory=/usr/share/clearwater/clearwater-cluster-manager
 ExecStart=/lib/systemd/scripts/clearwater-cluster-manager.sh
  

@@ -10,6 +10,7 @@ sprout_registration_store=vellum.{{ topology.site_name }}.{{ topology.zone }}
 hs_hostname=homestead.{{ topology.site_name }}.{{ topology.zone }}:8888
 hs_hostname_mgmt=homestead.{{ topology.site_name }}.{{ topology.zone }}:8886
 hs_provisioning_hostname=homestead.{{ topology.site_name }}.{{ topology.zone }}:8889
+homestead_impu_store=vellum.{{ topology.site_name }}.{{ topology.zone }}
 ralf_hostname=ralf.{{ topology.site_name }}.{{ topology.zone }}:10888 # 9888?
 ralf_session_store=vellum.{{ topology.site_name }}.{{ topology.zone }}
 xdms_hostname=homer.{{ topology.site_name }}.{{ topology.zone }}:7888
@@ -18,17 +19,17 @@ cassandra_hostname=vellum.{{ topology.site_name }}.{{ topology.zone }}
 
 # SMTP
 
-smtp_smarthost=$SMTP_HOSTNAME
-smtp_username=$SMTP_USERNAME
-smtp_password=$SMTP_PASSWORD
+smtp_smarthost=''
+smtp_username=''
+smtp_password=''
 email_recovery_sender=clearwater@{{ topology.zone }}
 
 # Keys
 
-signup_key=$SECRET
-turn_workaround=$SECRET
-ellis_api_key=$SECRET
-ellis_cookie_key=$SECRET
+signup_key=''
+turn_workaround=''
+ellis_api_key=''
+ellis_cookie_key=''
 
 # Misc
 

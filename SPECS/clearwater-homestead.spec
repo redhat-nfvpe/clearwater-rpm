@@ -20,7 +20,7 @@ BuildRequires: systemd
 
 Summary:       Clearwater - Homestead
 Requires:      libevent lksctp-tools libidn libgcrypt gnutls openssl-libs zeromq libcurl
-Requires:      net-snmp-libs
+Requires:      net-snmp-libs net-snmp-agent-libs
 AutoReq:       no
 %{?systemd_requires}
 #Requires:      clearwater-infrastructure clearwater-nginx clearwater-log-cleanup clearwater-monit
@@ -108,6 +108,7 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 %post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homestead.postinst
+mkdir --parents /var/lib/homestead/
 cw-create-user homestead
 cw-create-log-dir homestead
 cw-add-security-limits homestead

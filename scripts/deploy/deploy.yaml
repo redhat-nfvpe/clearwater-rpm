@@ -57,10 +57,13 @@
     yum:
       name: clearwater-infrastructure
       state: present
-      update_cache: true
+
+  - name: Install Clearwater Cluster Manager
+    yum:
+      name: clearwater-cluster-manager
+      state: present
 
   - name: Install Clearwater Node
     yum:
       name: clearwater-node-{{ hostvars[inventory_hostname].server.metadata['clearwater.type'] }}
       state: present
-      update_cache: true

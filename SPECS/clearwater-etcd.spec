@@ -97,6 +97,12 @@ cp src/clearwater_etcd_plugins/clearwater_config_manager/dns_json_plugin.py %{bu
 cp src/clearwater_etcd_plugins/clearwater_config_access/shared_config_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.py %{buildroot}/usr/share/clearwater/clearwater-config-access/plugins/
 
+# Fix pid files
+sed --in-place 's/\/var\/run\/clearwater-cluster-manager.pid/\/var\/run\/clearwater-cluster-manager\/clearwater-cluster-manager.pid/g' %{buildroot}/usr/share/clearwater/conf/clearwater-cluster-manager.monit 
+sed --in-place 's/\/var\/run\/clearwater-config-manager.pid/\/var\/run\/clearwater-config-manager\/clearwater-config-manager.pid/g' %{buildroot}/usr/share/clearwater/conf/clearwater-config-manager.monit 
+sed --in-place 's/\/var\/run\/clearwater-queue-manager.pid/\/var\/run\/clearwater-queue-manager\/clearwater-queue-manager.pid/g' %{buildroot}/usr/share/clearwater/conf/clearwater-queue-manager.monit 
+sed --in-place 's/\/var\/run\/clearwater-queue-manager.pid/\/var\/run\/clearwater-queue-manager\/clearwater-queue-manager.pid/g' %{buildroot}/usr/share/clearwater/infrastructure/monit_uptime/check-queue-manager-uptime 
+
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/

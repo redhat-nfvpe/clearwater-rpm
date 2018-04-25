@@ -1,11 +1,10 @@
-# Note: PID location is different from other Clearwater components
-
 [Unit]
 Description=Clearwater Config Manager
 
 [Service]
 User=clearwater-config-manager
-PIDFile=/var/run/clearwater-config-manager.pid
+RuntimeDirectory=clearwater-config-manager
+PIDFile=/var/run/clearwater-config-manager/clearwater-config-manager.pid
 WorkingDirectory=/usr/share/clearwater/clearwater-config-manager
 ExecStart=/lib/systemd/scripts/clearwater-config-manager.sh
  

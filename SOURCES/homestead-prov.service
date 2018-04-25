@@ -1,10 +1,10 @@
 # Note: PID location is different from other Clearwater components
+# Note: runs as root!
 
 [Unit]
 Description=Clearwater Homestead Provisioning
 
 [Service]
-#User=homer
 PIDFile=/var/run/homestead-prov.pid
 WorkingDirectory=/usr/share/clearwater/homestead
 ExecStart=/lib/systemd/scripts/homestead-prov.sh

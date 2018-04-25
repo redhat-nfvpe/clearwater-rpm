@@ -251,7 +251,7 @@ cp --recursive vellum/* %{buildroot}/
 cp --recursive dime/* %{buildroot}/
 
 %files
-%{_initrddir}/clearwater-infrastructure
+%attr(755,-,-) %{_initrddir}/clearwater-infrastructure
 %attr(755,-,-) /usr/bin/clearwater-upgrade
 %attr(755,-,-) /usr/share/clearwater/bin/alarms.py
 %attr(755,-,-) /usr/share/clearwater/bin/clearwater-check-config
@@ -306,7 +306,7 @@ cp --recursive dime/* %{buildroot}/
 %ghost /etc/clearwater/config
 
 %files -n clearwater-memcached
-%{_initrddir}/clearwater-memcached
+%attr(755,-,-) %{_initrddir}/clearwater-memcached
 %attr(755,-,-) /usr/share/clearwater/bin/poll_memcached.sh
 %attr(755,-,-) /usr/share/clearwater/bin/reload_memcached_users
 /usr/share/clearwater/infrastructure/alarms/memcached_alarms.json
@@ -327,7 +327,7 @@ cp --recursive dime/* %{buildroot}/
 /etc/sysctl.conf.clearwater
 
 %files -n clearwater-secure-connections
-%{_initrddir}/clearwater-secure-connections
+%attr(755,-,-) %{_initrddir}/clearwater-secure-connections
 %attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.postinst
 %attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.prerm
 /etc/clearwater/secure-connections/plain-local.conf
@@ -342,7 +342,7 @@ cp --recursive dime/* %{buildroot}/
 %ghost /etc/monit/conf.d/snmpd.monit
 
 %files -n clearwater-diags-monitor
-%{_initrddir}/clearwater-diags-monitor
+%attr(755,-,-) %{_initrddir}/clearwater-diags-monitor
 %attr(755,-,-) /usr/share/clearwater/bin/clearwater_diags_monitor
 %attr(755,-,-) /usr/share/clearwater/bin/compress_core_file
 %attr(755,-,-) /usr/share/clearwater/bin/gather_diags
@@ -367,14 +367,14 @@ cp --recursive dime/* %{buildroot}/
 %attr(755,-,-) /usr/share/clearwater/bin/clearwater-socket-factory-sig-wrapper
 
 %files -n clearwater-auto-config-aws
-%{_initrddir}/clearwater-auto-config-aws
+%attr(755,-,-) %{_initrddir}/clearwater-auto-config-aws
 %attr(755,-,-) /usr/share/clearwater-auto-config/bin/init-functions
 /usr/share/clearwater-auto-config/bin/common
 /etc/clearwater/local_config
 /etc/clearwater/shared_config
 
 %files -n clearwater-auto-config-docker
-%{_initrddir}/clearwater-auto-config-docker
+%attr(755,-,-) %{_initrddir}/clearwater-auto-config-docker
 /usr/share/clearwater-auto-config/bin/init-functions
 %attr(755,-,-) /usr/share/clearwater/clearwater-auto-config-docker/bin/bracket-ipv6-address
 %attr(755,-,-) /usr/share/clearwater/clearwater-auto-config-docker/bin/is-address-ipv6
@@ -382,7 +382,7 @@ cp --recursive dime/* %{buildroot}/
 /etc/clearwater/shared_config
 
 %files -n clearwater-auto-config-generic
-%{_initrddir}/clearwater-auto-config-generic
+%attr(755,-,-) %{_initrddir}/clearwater-auto-config-generic
 /usr/share/clearwater-auto-config/bin/init-functions
 %attr(755,-,-) /usr/share/clearwater/clearwater-auto-config-generic/bin/bracket-ipv6-address
 %attr(755,-,-) /usr/share/clearwater/clearwater-auto-config-generic/bin/is-address-ipv6
@@ -394,7 +394,7 @@ cp --recursive dime/* %{buildroot}/
 %attr(755,-,-) /usr/share/clearwater/bin/log_cleanup.py
 
 %files -n clearwater-auto-upgrade
-%{_initrddir}/clearwater-auto-upgrade
+%attr(755,-,-) %{_initrddir}/clearwater-auto-upgrade
 
 %files -n clearwater-radius-auth
 %attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/clearwater-radius-auth

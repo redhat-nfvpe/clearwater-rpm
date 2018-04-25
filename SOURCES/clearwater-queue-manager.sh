@@ -5,7 +5,7 @@ set -e
 
 NAME=clearwater-queue-manager
 
-PIDFILE="/var/run/$NAME.pid"
+PIDFILE="/var/run/$NAME/$NAME.pid"
 
 local_site_name=site1
 etcd_key=clearwater
@@ -36,7 +36,8 @@ fi
   --local-site="$local_site_name" \
   --log-level="$log_level" \
   --log-directory="$log_directory" \
-  --pidfile="$PIDFILE" \
   --etcd-key="$etcd_key" \
   --node-type="$etcd_cluster_key" \
   --wait-plugin-complete="$wait_plugin_complete"
+  --pidfile="$PIDFILE"
+

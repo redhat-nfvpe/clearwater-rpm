@@ -1,10 +1,10 @@
 # Note: PID location is different from other Clearwater components
+# Note: runs as root!
 
 [Unit]
 Description=Clearwater Homer XDMS
 
 [Service]
-#User=homer
 PIDFile=/var/run/homer.pid
 WorkingDirectory=/usr/share/clearwater/homer
 ExecStart=/lib/systemd/scripts/homer.sh
