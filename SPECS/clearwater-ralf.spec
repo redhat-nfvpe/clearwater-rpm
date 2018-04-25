@@ -57,31 +57,32 @@ cp usr/lib/freeDiameter/*.fdx %{buildroot}/usr/share/clearwater/ralf/lib/freeDia
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/ralf.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/ralf.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/ralf.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/ralf.sh
 
 sed --in-place 's/\/etc\/init.d\/ralf/service ralf/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/ralf.monit
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/ralf.monit
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/ralf.init.d %{buildroot}%{_initrddir}/ralf
+#cp debian/ralf.init.d %{buildroot}%{_initrddir}/ralf
 
 %files
-%{_unitdir}/ralf.service
-/lib/systemd/scripts/ralf.sh
-/usr/share/clearwater/bin/ralf
-/usr/share/clearwater/bin/poll_ralf.sh
+%attr(644,-,-) %{_unitdir}/ralf.service
+%attr(755,-,-) /lib/systemd/scripts/ralf.sh
+%attr(755,-,-) /usr/share/clearwater/bin/ralf
+%attr(755,-,-) /usr/share/clearwater/bin/poll_ralf.sh
 /usr/share/clearwater/ralf/lib/
-/usr/share/clearwater/clearwater-diags-monitor/scripts/ralf_diags
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/ralf_diags
 /usr/share/clearwater/infrastructure/alarms/ralf_alarms.json
-/usr/share/clearwater/infrastructure/monit_stability/ralf-stability
-/usr/share/clearwater/infrastructure/monit_uptime/check-ralf-uptime
-/usr/share/clearwater/infrastructure/scripts/reload/memcached/ralf_reload
-/usr/share/clearwater/infrastructure/scripts/restart/ralf_restart
-/usr/share/clearwater/infrastructure/scripts/ralf
-/usr/share/clearwater/infrastructure/scripts/ralf.monit
-/etc/cron.hourly/ralf-log-cleanup
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_stability/ralf-stability
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-ralf-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/reload/memcached/ralf_reload
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/ralf_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/ralf
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/ralf.monit
+%attr(755,-,-) /etc/cron.hourly/ralf-log-cleanup
 /etc/security/limits.conf.ralf
+%ghost /etc/monit/conf.d/ralf.monit
 
 %files -n clearwater-node-ralf
 /usr/share/clearwater/node_type.d/20_ralf

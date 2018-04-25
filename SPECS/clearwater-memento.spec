@@ -85,22 +85,22 @@ cp --recursive memento-cassandra.root/* %{buildroot}/
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/memento.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/memento.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/memento.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/memento.sh
 
 sed --in-place 's/\/etc\/init.d\/memento/service memento/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/memento.monit
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/memento.monit
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/memento.init.d %{buildroot}%{_initrddir}/memento
+#cp debian/memento.init.d %{buildroot}%{_initrddir}/memento
 
 %files
-%{_unitdir}/memento.service
-/lib/systemd/scripts/memento.sh
-/usr/share/clearwater/bin/memento
-/usr/share/clearwater/bin/poll_memento.sh
-/usr/share/clearwater/bin/memento-disk-usage-stats
-/usr/share/clearwater/bin/memento-disk-usage-functions
+%attr(644,-,-) %{_unitdir}/memento.service
+%attr(755,-,-) /lib/systemd/scripts/memento.sh
+%attr(755,-,-) /usr/share/clearwater/bin/memento
+%attr(755,-,-) /usr/share/clearwater/bin/poll_memento.sh
+%attr(755,-,-) /usr/share/clearwater/bin/memento-disk-usage-stats
+%attr(755,-,-) /usr/share/clearwater/bin/memento-disk-usage-functions
 /usr/share/clearwater/lib/libcares.so*
 /usr/share/clearwater/lib/libcassandra.so
 /usr/share/clearwater/lib/libhashkit.so*
@@ -113,22 +113,23 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 /usr/share/clearwater/lib/libthriftnb-0.9.3.so
 /usr/share/clearwater/lib/libthriftz.so
 /usr/share/clearwater/lib/libthriftz-0.9.3.so
-/usr/share/clearwater/infrastructure/scripts/reload/memcached/memento_reload
-/usr/share/clearwater/infrastructure/scripts/restart/memento_restart
-/usr/share/clearwater/infrastructure/scripts/memento.monit
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/reload/memcached/memento_reload
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/memento_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/memento.monit
 /usr/share/clearwater/infrastructure/alarms/memento_alarms.json
-/usr/share/clearwater/infrastructure/monit_uptime/check-memento-uptime
-/usr/share/clearwater/clearwater-diags-monitor/scripts/memento_diags
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-memento-uptime
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/memento_diags
 /etc/security/limits.conf.memento
-/etc/cron.hourly/memento-log-cleanup
-/etc/cron.hourly/memento_disk_usage
+%attr(755,-,-) /etc/cron.hourly/memento-log-cleanup
+%attr(755,-,-) /etc/cron.hourly/memento_disk_usage
+%ghost /etc/monit/conf.d/memento.monit
 
 %files nginx
-/usr/share/clearwater/infrastructure/scripts/create-memento-nginx-config
-/usr/share/clearwater/bin/poll_memento_https.sh
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/create-memento-nginx-config
+%attr(755,-,-) /usr/share/clearwater/bin/poll_memento_https.sh
 
 %files cassandra
-/usr/share/clearwater/cassandra-schemas/memento.sh
+%attr(755,-,-) /usr/share/clearwater/cassandra-schemas/memento.sh
 
 %files -n clearwater-node-memento
 /usr/share/clearwater/node_type.d/80_memento

@@ -33,8 +33,8 @@ find %{buildroot} -type f -exec sed --in-place 's/\/var\/lib\/nagios\/spool\//\/
 %files
 /usr/lib/nagios/plugins/check_cpu_perf
 /usr/lib/nagios/plugins/check_iftraffic_nrpe
-/usr/share/clearwater/bin/clearwater-logging-update
-/usr/share/clearwater/infrastructure/scripts/clearwater-logging
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-logging-update
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/clearwater-logging
 /etc/nagios/clearwater/commands.cfg
 /etc/nagios/clearwater/nagios.cfg
 /opt/splunkforwarder/etc/apps/search/local/inputs.conf.clearwater

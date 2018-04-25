@@ -51,13 +51,14 @@ make env MAKE="make --jobs=$(nproc)"
 %install
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
 mkdir --parents %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
+mkdir --parents %{buildroot}/usr/share/clearwater/ellis/templates/
 cp ellis_wheelhouse/*.whl %{buildroot}/usr/share/clearwater/ellis/.wheelhouse/
 rm --recursive web-content/.project web-content/.settings
 cp --recursive web-content %{buildroot}/usr/share/clearwater/ellis/
 cp local_settings.py %{buildroot}/usr/share/clearwater/ellis/
 cp src/metaswitch/ellis/data/*.sql %{buildroot}/usr/share/clearwater/ellis/
 cp --recursive src/metaswitch/ellis/tools %{buildroot}/usr/share/clearwater/ellis/src/metaswitch/ellis/
-cp *.monit %{buildroot}/usr/share/clearwater/ellis/
+cp *.monit %{buildroot}/usr/share/clearwater/ellis/templates/ # we are putting these here for consistency
 cp --recursive root/* %{buildroot}/
 cp --recursive backup %{buildroot}/usr/share/clearwater/ellis/
 
@@ -70,33 +71,38 @@ cp --recursive clearwater-prov-tools.root/* %{buildroot}/
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/ellis.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/ellis.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/ellis.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/ellis.sh
 
-sed --in-place 's/\/etc\/init.d\/ellis/service ellis/g' %{buildroot}/usr/share/clearwater/ellis/ellis.monit
-sed --in-place 's/\/etc\/init.d\/mysql/service mysql/g' %{buildroot}/usr/share/clearwater/ellis/mysql.monit
+sed --in-place 's/\/etc\/init.d\/ellis/service ellis/g' %{buildroot}/usr/share/clearwater/ellis/templates/ellis.monit
+sed --in-place 's/\/etc\/init.d\/mysql/service mysql/g' %{buildroot}/usr/share/clearwater/ellis/templates/mysql.monit
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/ellis.init.d %{buildroot}%{_initrddir}/ellis.service
+#cp debian/ellis.init.d %{buildroot}%{_initrddir}/ellis.service
 
 %files
-%{_unitdir}/ellis.service
-/lib/systemd/scripts/ellis.sh
-/etc/cron.hourly/ellis-log-cleanup
-/usr/share/clearwater/bin/poll_ellis.sh
-/usr/share/clearwater/bin/poll_ellis_https.sh
-/usr/share/clearwater/infrastructure/scripts/ellis
-/usr/share/clearwater/infrastructure/scripts/restart/ellis_restart
-/usr/share/clearwater/infrastructure/scripts/create-ellis-nginx-config
+%attr(644,-,-) %{_unitdir}/ellis.service
+%attr(755,-,-) /lib/systemd/scripts/ellis.sh
+%attr(755,-,-) /etc/cron.hourly/ellis-log-cleanup
+%attr(755,-,-) /usr/share/clearwater/bin/poll_ellis.sh
+%attr(755,-,-) /usr/share/clearwater/bin/poll_ellis_https.sh
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/ellis
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/ellis_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/create-ellis-nginx-config
 /usr/share/clearwater/ellis/.wheelhouse
 /usr/share/clearwater/ellis/apply_db_updates.sql
-/usr/share/clearwater/ellis/backup/do_backup.sh
-/usr/share/clearwater/ellis/backup/list_backups.sh
-/usr/share/clearwater/ellis/backup/restore_backup.sh
-/usr/share/clearwater/ellis/ellis.monit
-/usr/share/clearwater/ellis/mysql.monit
+%attr(755,-,-) /usr/share/clearwater/ellis/backup/do_backup.sh
+%attr(755,-,-) /usr/share/clearwater/ellis/backup/list_backups.sh
+%attr(755,-,-) /usr/share/clearwater/ellis/backup/restore_backup.sh
+/usr/share/clearwater/ellis/templates/ellis.monit
+/usr/share/clearwater/ellis/templates/mysql.monit
 /usr/share/clearwater/ellis/schema.sql
-/usr/share/clearwater/ellis/src/metaswitch/ellis/tools/
+%attr(755,-,-) /usr/share/clearwater/ellis/src/metaswitch/ellis/tools/create_numbers.py
+/usr/share/clearwater/ellis/src/metaswitch/ellis/tools/create_numbers.pyc
+/usr/share/clearwater/ellis/src/metaswitch/ellis/tools/create_numbers.pyo
+%attr(755,-,-) /usr/share/clearwater/ellis/src/metaswitch/ellis/tools/sync_databases.py
+/usr/share/clearwater/ellis/src/metaswitch/ellis/tools/sync_databases.pyc
+/usr/share/clearwater/ellis/src/metaswitch/ellis/tools/sync_databases.pyo
 /usr/share/clearwater/ellis/web-content/addressbook.html
 /usr/share/clearwater/ellis/web-content/blank.html
 /usr/share/clearwater/ellis/web-content/forgotpassword.html
@@ -136,19 +142,19 @@ sed --in-place 's/\/etc\/init.d\/mysql/service mysql/g' %{buildroot}/usr/share/c
 /usr/share/clearwater/ellis/web-content/js/zxcvbn-async.js
 /usr/share/clearwater/ellis/web-content/js/zxcvbn.js
 /usr/share/clearwater/clearwater-diags-monitor/scripts/ellis_diags
-%config /usr/share/clearwater/ellis/local_settings.py
-%config /usr/share/clearwater/ellis/local_settings.pyo
-%config /usr/share/clearwater/ellis/local_settings.pyc
+/usr/share/clearwater/ellis/local_settings.py*
 %config /usr/share/clearwater/ellis/web-content/js/app-servers.json
 %ghost /usr/share/clearwater/ellis/env/
+%ghost /etc/monit/conf.d/ellis.monit
+%ghost /etc/monit/conf.d/mysql.monit
 
 %files -n clearwater-prov-tools
-/usr/share/clearwater/bin/update_user
-/usr/share/clearwater/bin/delete_user
-/usr/share/clearwater/bin/display_user
-/usr/share/clearwater/bin/create_user
-/usr/share/clearwater/bin/list_users
-/usr/share/clearwater/infrastructure/scripts/clearwater-prov-tools
+%attr(755,-,-) /usr/share/clearwater/bin/update_user
+%attr(755,-,-) /usr/share/clearwater/bin/delete_user
+%attr(755,-,-) /usr/share/clearwater/bin/display_user
+%attr(755,-,-) /usr/share/clearwater/bin/create_user
+%attr(755,-,-) /usr/share/clearwater/bin/list_users
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/clearwater-prov-tools
 /usr/share/clearwater/clearwater-prov-tools/
 %ghost /usr/share/clearwater/clearwater-prov-tools/env/
 

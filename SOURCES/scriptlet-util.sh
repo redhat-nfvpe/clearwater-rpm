@@ -23,6 +23,7 @@ service-action ()
 {
   local NAME=$1
   local ACTION=$2
+
   local SERVICE="$NAME.service"
 
   if [ -f /usr/bin/monit ]; then
@@ -55,6 +56,7 @@ cw-add-security-limits ()
 {
   # TODO: can't we use /etc/security/limits.d?
   local NAME=$1
+
   {
     echo "#+$NAME"
     cat "/etc/security/limits.conf.$NAME"
@@ -65,7 +67,9 @@ cw-add-security-limits ()
 cw-remove-security-limits ()
 {
   local NAME=$1
+
   local TMP_FILE=$(mktemp)
+
   awk '/^#\+'$NAME'$/,/^#-'$NAME'$/ {next} {print}' "$SECURITY_LIMITS" > "$TMP_FILE"
   mv "$TMP_FILE" "$SECURITY_LIMITS"
 }
@@ -73,7 +77,9 @@ cw-remove-security-limits ()
 cw-create-user ()
 {
   local NAME=$1
+
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
+
   if ! getent passwd "$NAME" &> /dev/null; then
     useradd --system --no-create-home --home-dir "$HOME_DIR" --shell /bin/false "$NAME"
   fi
@@ -82,6 +88,7 @@ cw-create-user ()
 cw-remove-user ()
 {
   local NAME=$1
+
   if getent passwd "$NAME" &> /dev/null; then
     userdel "$NAME"
   fi
@@ -91,7 +98,9 @@ cw-create-log-dir ()
 {
   local NAME=$1
   local GROUP=${2:-root}
+
   local LOG_DIR="/var/log/$NAME/"
+
   mkdir --parents --mode=755 "$LOG_DIR"
   chown --recursive "$NAME:$GROUP" "$LOG_DIR"
   if [ "$GROUP" != root ]; then
@@ -105,13 +114,16 @@ cw-create-log-dir ()
 cw-remove-log-dir ()
 {
   local NAME=$1
+
   local LOG_DIR="/var/log/$NAME/"
+
   rm --recursive --force "$LOG_DIR"
 }
 
 cw-start ()
 {
   local NAME=$1
+
   local MONIT="/usr/share/clearwater/conf/$NAME.monit"
   local TEMPLATES="/usr/share/clearwater/$NAME/templates"
 
@@ -135,6 +147,7 @@ cw-start ()
 cw-stop ()
 {
   local NAME=$1
+
   local TEMPLATES="/usr/share/clearwater/$NAME/templates"
 
   # monit support (optional)
@@ -164,6 +177,7 @@ cw-create-virtualenv ()
 {
   local NAME=$1
   local PACKAGE_NAME=${2:-$NAME}
+
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
   local ENV_DIR="$HOME_DIR/env"
   local PIP="$ENV_DIR/bin/pip"
@@ -186,21 +200,25 @@ cw-add-to-virtualenv ()
 {
   local ENV_NAME=$1
   local NAME=$2
-  local PACKAGE_NAME=${3:-$NAME}
+
+  local PACKAGE_NAME=$(echo "${3:-$NAME}" | tr - _)
   local ENV_HOME_DIR="$CLEARWATER_HOME/$ENV_NAME"
   local ENV_WHEELHOUSE="$ENV_HOME_DIR/.wheelhouse"
   local ENV_DIR="$ENV_HOME_DIR/env"
   local PIP="$ENV_DIR/bin/pip"
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
   local WHEELHOUSE="$HOME_DIR/.wheelhouse"
-  "$PIP" install "$(echo "$PACKAGE_NAME" | tr - _)" --no-index --find-links="$ENV_WHEELHOUSE/" --find-links="$WHEELHOUSE/" \
+
+  "$PIP" install "$PACKAGE_NAME" --no-index --find-links="$ENV_WHEELHOUSE/" --find-links="$WHEELHOUSE/" \
     |& grep --invert-match 'Requirement already satisfied'
 }
 
 cw-remove-virtualenv ()
 {
   local NAME=$1
+
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
   local ENV_DIR="$HOME_DIR/env"
+
   rm --recursive --force "$ENV_DIR/"
 }

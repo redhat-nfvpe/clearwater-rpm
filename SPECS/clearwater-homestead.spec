@@ -70,36 +70,37 @@ cp --recursive homestead-cassandra.root/* %{buildroot}/
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homestead.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/homestead.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/homestead.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/homestead.sh
 
 sed --in-place 's/\/etc\/init.d\/homestead/service homestead/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/homestead.monit
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/homestead.monit
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
+#cp debian/homestead.init.d %{buildroot}%{_initrddir}/homestead
 
 %files
-%{_unitdir}/homestead.service
-/lib/systemd/scripts/homestead.sh
-/usr/share/clearwater/bin/homestead
-/usr/share/clearwater/bin/check_cx_health
-/usr/share/clearwater/bin/check_cx_health.py*
-/usr/share/clearwater/bin/poll_homestead.sh
+%attr(644,-,-) %{_unitdir}/homestead.service
+%attr(755,-,-) /lib/systemd/scripts/homestead.sh
+%attr(755,-,-) /usr/share/clearwater/bin/homestead
+%attr(755,-,-) /usr/share/clearwater/bin/check_cx_health
+%attr(755,-,-) /usr/share/clearwater/bin/check_cx_health.py
+%attr(755,-,-) /usr/share/clearwater/bin/poll_homestead.sh
 /usr/share/clearwater/homestead/lib/
-/usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_diags
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_diags
 /usr/share/clearwater/infrastructure/alarms/homestead_alarms.json
-/usr/share/clearwater/infrastructure/monit_stability/homestead-stability
-/usr/share/clearwater/infrastructure/monit_uptime/check-homestead-uptime
-/usr/share/clearwater/infrastructure/scripts/restart/homestead_restart
-/usr/share/clearwater/infrastructure/scripts/create-homestead-nginx-config
-/usr/share/clearwater/infrastructure/scripts/homestead
-/usr/share/clearwater/infrastructure/scripts/homestead.monit
-/etc/cron.hourly/homestead-log-cleanup
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_stability/homestead-stability
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-homestead-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/homestead_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/create-homestead-nginx-config
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/homestead
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/homestead.monit
+%attr(755,-,-) /etc/cron.hourly/homestead-log-cleanup
 /etc/security/limits.conf.homestead
+%ghost /etc/monit/conf.d/homestead.monit
 
 %files cassandra
-/usr/share/clearwater/cassandra-schemas/homestead_cache.sh
+%attr(755,-,-) /usr/share/clearwater/cassandra-schemas/homestead_cache.sh
 
 %files -n clearwater-node-homestead
 /usr/share/clearwater/node_type.d/20_homestead

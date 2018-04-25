@@ -272,18 +272,18 @@ cp --recursive clearwater-sip-perf.root/* %{buildroot}/
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/sprout.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/sprout.sh
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/bono.service
-install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/bono.sh
-install --mode=644 %{SOURCE6} %{buildroot}%{_unitdir}/restund.service
-install --mode=755 %{SOURCE7} %{buildroot}/lib/systemd/scripts/restund.sh
-install --mode=644 %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-sip-stress.service
-install --mode=755 %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress.sh
-install --mode=644 %{SOURCE10} %{buildroot}%{_unitdir}/clearwater-sip-stress-stats.service
-install --mode=755 %{SOURCE11} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress-stats.sh
-install --mode=644 %{SOURCE12} %{buildroot}%{_unitdir}/clearwater-sip-perf.service
-install --mode=755 %{SOURCE13} %{buildroot}/lib/systemd/scripts/clearwater-sip-perf.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/sprout.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/sprout.sh
+cp %{SOURCE4} %{buildroot}%{_unitdir}/bono.service
+cp %{SOURCE5} %{buildroot}/lib/systemd/scripts/bono.sh
+cp %{SOURCE6} %{buildroot}%{_unitdir}/restund.service
+cp %{SOURCE7} %{buildroot}/lib/systemd/scripts/restund.sh
+cp %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-sip-stress.service
+cp %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress.sh
+cp %{SOURCE10} %{buildroot}%{_unitdir}/clearwater-sip-stress-stats.service
+cp %{SOURCE11} %{buildroot}/lib/systemd/scripts/clearwater-sip-stress-stats.sh
+cp %{SOURCE12} %{buildroot}%{_unitdir}/clearwater-sip-perf.service
+cp %{SOURCE13} %{buildroot}/lib/systemd/scripts/clearwater-sip-perf.sh
 
 sed --in-place 's/\/etc\/init.d\/sprout/service sprout/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/sprout.monit
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/sprout.monit
@@ -293,33 +293,33 @@ sed --in-place 's/\/etc\/init.d\/restund/service restund/g' %{buildroot}/usr/sha
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/restund
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/bono.init.d %{buildroot}%{_initrddir}/bono
-#install --mode=755 debian/restund.init.d %{buildroot}%{_initrddir}/restund
-#install --mode=755 debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
-#install --mode=755 debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
-#install --mode=755 debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
+#cp debian/bono.init.d %{buildroot}%{_initrddir}/bono
+#cp debian/restund.init.d %{buildroot}%{_initrddir}/restund
+#cp debian/clearwater-sip-stress.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress
+#cp debian/clearwater-sip-stress-stats.init.d %{buildroot}%{_initrddir}/clearwater-sip-stress-stats
+#cp debian/clearwater-sip-perf.init.d %{buildroot}%{_initrddir}/clearwater-sip-perf
 
 %files
-%{_unitdir}/sprout.service
-/lib/systemd/scripts/sprout.sh
-/usr/share/clearwater/bin/sprout
-/usr/share/clearwater/bin/poll_sprout_http.sh
-/usr/share/clearwater/bin/poll_sprout_sip.sh
+%attr(644,-,-) %{_unitdir}/sprout.service
+%attr(755,-,-) /lib/systemd/scripts/sprout.sh
+%attr(755,-,-) /usr/share/clearwater/bin/sprout
+%attr(755,-,-) /usr/share/clearwater/bin/poll_sprout_http.sh
+%attr(755,-,-) /usr/share/clearwater/bin/poll_sprout_sip.sh
 /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/enum_schema.json
 /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/rph_schema.json
-/usr/share/clearwater/clearwater-config-manager/scripts/config_validation/rph_validation.py*
+/usr/share/clearwater/clearwater-config-manager/scripts/config_validation/rph_validation.py
 /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/scscf_schema.json
-/usr/share/clearwater/clearwater-diags-monitor/scripts/sprout_base_diags
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/sprout_base_diags
 /usr/share/clearwater/infrastructure/alarms/sprout_alarms.json
-/usr/share/clearwater/infrastructure/monit_stability/sprout-stability
-/usr/share/clearwater/infrastructure/monit_uptime/check-sprout-uptime
-/usr/share/clearwater/infrastructure/scripts/reload/fallback_ifcs_xml/sprout_reload
-/usr/share/clearwater/infrastructure/scripts/reload/memcached/sprout_reload
-/usr/share/clearwater/infrastructure/scripts/reload/shared_ifcs_xml/sprout_reload
-/usr/share/clearwater/infrastructure/scripts/restart/sprout_restart
-/usr/share/clearwater/infrastructure/scripts/create-analytics-syslog-config
-/usr/share/clearwater/infrastructure/scripts/create-sprout-nginx-config
-/usr/share/clearwater/infrastructure/scripts/sprout.monit
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_stability/sprout-stability
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-sprout-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/reload/fallback_ifcs_xml/sprout_reload
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/reload/memcached/sprout_reload
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/reload/shared_ifcs_xml/sprout_reload
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/sprout_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/create-analytics-syslog-config
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/create-sprout-nginx-config
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/sprout.monit
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_json_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_scscf_json_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_enum_json_plugin.py*
@@ -330,43 +330,46 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 /etc/clearwater/logging/sprout
 /etc/logrotate.d/sproutanalytics
 /etc/security/limits.conf.sprout
-/etc/cron.hourly/sprout-log-cleanup
+%attr(755,-,-) /etc/cron.hourly/sprout-log-cleanup
+%ghost /etc/monit/conf.d/sprout.monit
 
 %files libs
 /usr/share/clearwater/sprout/lib/
 
 %files -n clearwater-bono
-%{_unitdir}/bono.service
-/lib/systemd/scripts/bono.sh
-/usr/share/clearwater/bin/bono
-/usr/share/clearwater/bin/poll_bono.sh
-/usr/share/clearwater/clearwater-diags-monitor/scripts/bono_diags
-/usr/share/clearwater/infrastructure/scripts/restart/bono_restart
-/usr/share/clearwater/infrastructure/scripts/bono.monit
+%attr(644,-,-) %{_unitdir}/bono.service
+%attr(755,-,-) /lib/systemd/scripts/bono.sh
+%attr(755,-,-) /usr/share/clearwater/bin/bono
+%attr(755,-,-) /usr/share/clearwater/bin/poll_bono.sh
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/bono_diags
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/bono_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/bono.monit
 /etc/clearwater/logging/bono
 /etc/security/limits.conf.bono
-/etc/cron.hourly/bono-log-cleanup
+%attr(755,-,-) /etc/cron.hourly/bono-log-cleanup
+%ghost /etc/monit/conf.d/bono.monit
 
 %files -n clearwater-restund
-%{_unitdir}/restund.service
-/lib/systemd/scripts/restund.sh
-/usr/share/clearwater/bin/restund
+%attr(644,-,-) %{_unitdir}/restund.service
+%attr(755,-,-) /lib/systemd/scripts/restund.sh
+%attr(755,-,-) /usr/share/clearwater/bin/restund
 /usr/share/clearwater/restund/lib/
-/usr/share/clearwater/bin/poll_restund.sh
-/usr/share/clearwater/infrastructure/scripts/restund
+%attr(755,-,-) /usr/share/clearwater/bin/poll_restund.sh
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restund
 /etc/security/limits.conf.restund
+%ghost /etc/monit/conf.d/restund.monit
 
 %files plugin-scscf
 /usr/share/clearwater/sprout/plugins/sprout_scscf.so
 /usr/share/clearwater/clearwater-config-manager/plugins/shared_ifcs_xml_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/fallback_ifcs_xml_plugin.py*
-/usr/share/clearwater/clearwater-config-manager/scripts/remove_shared_ifcs_xml
-/usr/share/clearwater/clearwater-config-manager/scripts/remove_fallback_ifcs_xml
-/usr/share/clearwater/clearwater-config-manager/scripts/validate_shared_ifcs_xml
-/usr/share/clearwater/clearwater-config-manager/scripts/validate_fallback_ifcs_xml
-/usr/share/clearwater/clearwater-config-manager/scripts/display_shared_ifcs
-/usr/share/clearwater/clearwater-config-manager/scripts/display_fallback_ifcs
-/usr/share/clearwater/clearwater-config-manager/scripts/config_validation/
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/remove_shared_ifcs_xml
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/remove_fallback_ifcs_xml
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/validate_shared_ifcs_xml
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/validate_fallback_ifcs_xml
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/display_shared_ifcs
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/display_fallback_ifcs
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/
 /usr/share/clearwater/clearwater-config-access/plugins/shared_ifcs_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/fallback_ifcs_config_plugin.py*
 
@@ -376,14 +379,14 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 %files plugin-bgcf
 /usr/share/clearwater/sprout/plugins/sprout_bgcf.so
 /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/bgcf_schema.json
-/usr/share/clearwater/clearwater-config-manager/scripts/print-bgcf-configuration
-/usr/share/clearwater/clearwater-config-manager/scripts/upload_bgcf_json
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/print-bgcf-configuration
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/upload_bgcf_json
 /usr/share/clearwater/clearwater-config-manager/plugins/sprout_bgcf_json_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/bgcf_json_config_plugin.py*
 
 %files as-plugin-mmtel
 /usr/share/clearwater/sprout/plugins/sprout_mmtel_as.so
-/usr/share/clearwater/clearwater-diags-monitor/scripts/sprout_mmtel_as_diags
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/sprout_mmtel_as_diags
 
 %files as-plugin-gemini
 /usr/share/clearwater/sprout/plugins/gemini-as.so
@@ -400,26 +403,26 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 
 %files -n clearwater-sipp
 /etc/sysctl.conf.clearwater-sipp
-/usr/share/clearwater/bin/sipp
+%attr(755,-,-) /usr/share/clearwater/bin/sipp
 
 %files -n clearwater-sip-stress
-%{_unitdir}/clearwater-sip-stress.service
-/lib/systemd/scripts/clearwater-sip-stress.sh
-/etc/cron.hourly/clearwater-sip-stress-log-cleanup
-/usr/share/clearwater/bin/sip-stress
-/usr/share/clearwater/infrastructure/scripts/sip-stress
+%attr(644,-,-) %{_unitdir}/clearwater-sip-stress.service
+%attr(755,-,-) /lib/systemd/scripts/clearwater-sip-stress.sh
+%attr(755,-,-) /usr/share/clearwater/bin/sip-stress
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/sip-stress
 /usr/share/clearwater/sip-stress/sip-stress.xml
+%attr(755,-,-) /etc/cron.hourly/clearwater-sip-stress-log-cleanup
 
 %files -n clearwater-sip-stress-stats
-%{_unitdir}/clearwater-sip-stress-stats.service
-/lib/systemd/scripts/clearwater-sip-stress-stats.sh
+%attr(644,-,-) %{_unitdir}/clearwater-sip-stress-stats.service
+%attr(755,-,-) /lib/systemd/scripts/clearwater-sip-stress-stats.sh
 /usr/share/clearwater/gems/clearwater-sipp-stats-*.gem
 
 %files -n clearwater-sip-perf
-%{_unitdir}/clearwater-sip-perf.service
-/lib/systemd/scripts/clearwater-sip-perf.sh
-/usr/share/clearwater/bin/sip-perf
-/usr/share/clearwater/infrastructure/scripts/sip-perf
+%attr(644,-,-) %{_unitdir}/clearwater-sip-perf.service
+%attr(755,-,-) /lib/systemd/scripts/clearwater-sip-perf.sh
+%attr(755,-,-) /usr/share/clearwater/bin/sip-perf
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/sip-perf
 /usr/share/clearwater/sip-perf/sip-perf.xml
 
 %files -n clearwater-node-sprout

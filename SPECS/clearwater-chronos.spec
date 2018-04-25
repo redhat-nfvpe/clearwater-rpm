@@ -66,38 +66,37 @@ cp modules/clearwater-etcd-plugins/chronos/scripts/upload_chronos_shared_config 
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/chronos.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/chronos.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/chronos.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/chronos.sh
 
 sed --in-place 's/\/etc\/init.d\/chronos/service chronos/g' %{buildroot}/usr/share/chronos/chronos.monit
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
-
+#cp debian/chronos.init.d %{buildroot}%{_initrddir}/chronos
 
 %files
-%{_unitdir}/chronos.service
-/lib/systemd/scripts/chronos.sh
-/usr/bin/chronos
-/usr/share/clearwater/chronos/bin/
+%attr(644,-,-) %{_unitdir}/chronos.service
+%attr(755,-,-) /lib/systemd/scripts/chronos.sh
+%attr(755,-,-) /usr/bin/chronos
+%attr(755,-,-) /usr/share/clearwater/chronos/bin/
 /usr/share/chronos/lib/
 /usr/share/clearwater/clearwater-cluster-manager/plugins/chronos_plugin.py*
 /usr/share/clearwater/clearwater-queue-manager/plugins/apply_chronos_shared_config_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/chronos_shared_config_plugin.py*
-/usr/share/clearwater/clearwater-queue-manager/scripts/check_chronos_shared_restart_queue_state
-/usr/share/clearwater/clearwater-queue-manager/scripts/force_chronos_shared_restart_queue_state
-/usr/share/clearwater/clearwater-config-manager/scripts/upload_chronos_shared_config
+%attr(755,-,-) /usr/share/clearwater/clearwater-queue-manager/scripts/check_chronos_shared_restart_queue_state
+%attr(755,-,-) /usr/share/clearwater/clearwater-queue-manager/scripts/force_chronos_shared_restart_queue_state
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/upload_chronos_shared_config
 /usr/share/chronos/chronos.monit
-/usr/share/chronos/write_monit_restart_diags
-/usr/share/clearwater/bin/chronos_configuration_split.py*
-/usr/share/clearwater/bin/poll_chronos.sh
-/usr/share/clearwater/clearwater-diags-monitor/scripts/chronos_diags
+%attr(755,-,-) /usr/share/chronos/write_monit_restart_diags
+%attr(755,-,-) /usr/share/clearwater/bin/chronos_configuration_split.py
+%attr(755,-,-) /usr/share/clearwater/bin/poll_chronos.sh
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/chronos_diags
 /usr/share/clearwater/infrastructure/alarms/chronos_alarms.json
-/usr/share/clearwater/infrastructure/monit_stability/chronos-stability
-/usr/share/clearwater/infrastructure/monit_uptime/check-chronos-uptime
-/usr/share/clearwater/infrastructure/scripts/reload/dns_json/chronos_reload
-/usr/share/clearwater/infrastructure/scripts/chronos
-/etc/cron.hourly/chronos-log-cleanup
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_stability/chronos-stability
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-chronos-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/reload/dns_json/chronos_reload
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/chronos
+%attr(755,-,-) /etc/cron.hourly/chronos-log-cleanup
 /etc/chronos/chronos.conf.sample
 %ghost /etc/chronos/chronos.conf
 

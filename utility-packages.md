@@ -27,10 +27,12 @@ Installation
 Poorly named. Handles running scripts for deployment-wide installation and upgrading. These scripts
 should all be in `/usr/share/clearwater/infrastructure/scripts/`.
 
-Importantly, this service generates the `/etc/clearwater/config` script, upon which many components
-rely.
+This service generates the `/etc/clearwater/config` script, upon which many components rely.
 
-TODO: These tools are Debian-specific: `clearwater-version`, `clearwater-upgrade`.
+TODO:
+
+* Many of the scripts are still not fixed for systemd: they try to run non-LSB service commands
+* These included tools are Debian-specific: `clearwater-version`, `clearwater-upgrade`.
 
 ### `clearwater-auto-upgrade`
 

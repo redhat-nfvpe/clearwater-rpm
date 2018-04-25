@@ -72,10 +72,10 @@ cp usr/lib/*.so.* %{buildroot}/usr/share/clearwater/rogers/lib/
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/astaire.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/astaire.sh
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/rogers.service
-install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/rogers.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/astaire.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/astaire.sh
+cp %{SOURCE4} %{buildroot}%{_unitdir}/rogers.service
+cp %{SOURCE5} %{buildroot}/lib/systemd/scripts/rogers.sh
 
 sed --in-place 's/\/etc\/init.d\/astaire/service astaire/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/astaire.monit
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/astaire.monit
@@ -83,35 +83,37 @@ sed --in-place 's/\/etc\/init.d\/rogers/service rogers/g' %{buildroot}/usr/share
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/rogers.monit
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/astaire.init.d %{buildroot}%{_initrddir}/astaire
-#install --mode=755 debian/rogers.init.d %{buildroot}%{_initrddir}/rogers
+#cp debian/astaire.init.d %{buildroot}%{_initrddir}/astaire
+#cp debian/rogers.init.d %{buildroot}%{_initrddir}/rogers
 
 %files
-%{_unitdir}/astaire.service
-/lib/systemd/scripts/astaire.sh
-/usr/share/clearwater/bin/astaire
-/usr/share/clearwater/astaire/bin/cw_stat
+%attr(644,-,-) %{_unitdir}/astaire.service
+%attr(755,-,-) /lib/systemd/scripts/astaire.sh
+%attr(755,-,-) /usr/share/clearwater/bin/astaire
+%attr(755,-,-) /usr/share/clearwater/astaire/bin/cw_stat
 /usr/share/clearwater/astaire/lib/
 /usr/share/clearwater/infrastructure/alarms/astaire_alarms.json
-/usr/share/clearwater/infrastructure/monit_uptime/check-astaire-uptime
-/usr/share/clearwater/infrastructure/scripts/reload/memcached/astaire_reload
-/usr/share/clearwater/infrastructure/scripts/restart/astaire_restart
-/usr/share/clearwater/infrastructure/scripts/astaire.monit
-/etc/cron.hourly/astaire-log-cleanup
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-astaire-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/reload/memcached/astaire_reload
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/astaire_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/astaire.monit
+%attr(755,-,-) /etc/cron.hourly/astaire-log-cleanup
 /etc/security/limits.conf.astaire
+%ghost /etc/monit/conf.d/astaire.monit
 
 %files -n clearwater-rogers
-%{_unitdir}/rogers.service
-/lib/systemd/scripts/rogers.sh
-/usr/share/clearwater/bin/rogers
+%attr(644,-,-) %{_unitdir}/rogers.service
+%attr(755,-,-) /lib/systemd/scripts/rogers.sh
+%attr(755,-,-) /usr/share/clearwater/bin/rogers
 /usr/share/clearwater/rogers/lib/
 /usr/share/clearwater/infrastructure/alarms/rogers_alarms.json
-/usr/share/clearwater/infrastructure/monit_uptime/check-rogers-uptime
-/usr/share/clearwater/infrastructure/scripts/reload/memcached/rogers_reload
-/usr/share/clearwater/infrastructure/scripts/restart/rogers_restart
-/usr/share/clearwater/infrastructure/scripts/rogers.monit
-/etc/cron.hourly/rogers-log-cleanup
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-rogers-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/reload/memcached/rogers_reload
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/rogers_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/rogers.monit
+%attr(755,-,-) /etc/cron.hourly/rogers-log-cleanup
 /etc/security/limits.conf.rogers
+%ghost /etc/monit/conf.d/rogers.monit
 
 %post -p /bin/bash
 %include %{SOURCE1}

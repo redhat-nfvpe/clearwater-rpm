@@ -32,18 +32,19 @@ cp nginx-ensite/nginx_dissite %{buildroot}/usr/bin/
 # %{buildroot}/usr/share/clearwater-nginx/nginx.monit
 
 %files
-/usr/bin/nginx_ensite
-/usr/bin/nginx_dissite
+%attr(755,-,-) /usr/bin/nginx_ensite
+%attr(755,-,-) /usr/bin/nginx_dissite
 /usr/share/clearwater/infrastructure/alarms/nginx_alarms.json
-/usr/share/clearwater/infrastructure/monit_uptime/check-nginx-uptime
-/usr/share/clearwater-nginx/nginx_ping
-/usr/share/clearwater-nginx/nginx.monit
-/usr/share/clearwater-nginx/run-in-nginx-namespace
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-nginx-uptime
+%attr(755,-,-) /usr/share/clearwater-nginx/nginx_ping
+%attr(755,-,-) /usr/share/clearwater-nginx/nginx.monit
+%attr(755,-,-) /usr/share/clearwater-nginx/run-in-nginx-namespace
 /etc/nginx/sites-available/ping
 /etc/nginx/ssl/nginx_openssl_config
 %ghost /etc/nginx/ssl/nginx.crt
 %ghost /etc/nginx/ssl/nginx.csr
 %ghost /etc/nginx/ssl/nginx.key
+%ghost /etc/monit/conf.d/nginx.monit
 
 %post -p /bin/bash
 %include %{SOURCE1}

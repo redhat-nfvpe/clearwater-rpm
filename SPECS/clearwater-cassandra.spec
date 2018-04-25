@@ -48,36 +48,38 @@ rm %{buildroot}/usr/share/cassandra/cassandra.in.sh.clearwater
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-cassandra.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-cassandra.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-cassandra.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-cassandra.sh
 
 sed --in-place 's/\/etc\/init.d\/cassandra/service clearwater-cassandra/g' %{buildroot}/usr/share/clearwater/conf/clearwater-cassandra.monit
 sed --in-place 's/\/etc\/init.d\/cassandra/service clearwater-cassandra/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/cassandra.monit
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/cassandra.monit
+sed --in-place 's/\/etc\/init.d\/clearwater-cluster-manager stop/service clearwater-cluster-manager stop/g'  %{buildroot}/usr/share/clearwater/infrastructure/scripts/cassandra_cluster_manager
 
 %files
-%{_unitdir}/clearwater-cassandra.service
-/lib/systemd/scripts/clearwater-cassandra.sh
-/usr/share/clearwater/bin/do_backup.sh
-/usr/share/clearwater/bin/list_backups.sh
-/usr/share/clearwater/bin/poll_cassandra.sh
-/usr/share/clearwater/bin/poll_cassandra_ring.sh
-/usr/share/clearwater/bin/poll_cqlsh.sh
-/usr/share/clearwater/bin/remove_site_from_cassandra
-/usr/share/clearwater/bin/restore_backup.sh
-/usr/share/clearwater/bin/update_cassandra_strategy
+%attr(644,-,-) %{_unitdir}/clearwater-cassandra.service
+%attr(755,-,-) /lib/systemd/scripts/clearwater-cassandra.sh
+%attr(755,-,-) /usr/share/clearwater/bin/do_backup.sh
+%attr(755,-,-) /usr/share/clearwater/bin/list_backups.sh
+%attr(755,-,-) /usr/share/clearwater/bin/poll_cassandra.sh
+%attr(755,-,-) /usr/share/clearwater/bin/poll_cassandra_ring.sh
+%attr(755,-,-) /usr/share/clearwater/bin/poll_cqlsh.sh
+%attr(755,-,-) /usr/share/clearwater/bin/remove_site_from_cassandra
+%attr(755,-,-) /usr/share/clearwater/bin/restore_backup.sh
+%attr(755,-,-) /usr/share/clearwater/bin/update_cassandra_strategy
 /usr/share/clearwater/cassandra/cassandra-env.sh.template
 /usr/share/clearwater/cassandra/cassandra.yaml.template
-/usr/share/clearwater/cassandra_schema_utils.sh
+%attr(755,-,-) /usr/share/clearwater/cassandra_schema_utils.sh
 /usr/share/clearwater/conf/cassandra_failed_plugin.py*
 /usr/share/clearwater/conf/cassandra_plugin.py*
 /usr/share/clearwater/conf/clearwater-cassandra.monit
 /usr/share/clearwater/infrastructure/alarms/cassandra_alarms.json
-/usr/share/clearwater/infrastructure/monit_uptime/check-cassandra-uptime
-/usr/share/clearwater/infrastructure/scripts/cassandra
-/usr/share/clearwater/infrastructure/scripts/cassandra.monit
-/usr/share/clearwater/infrastructure/scripts/cassandra_cluster_manager
-/usr/share/clearwater/infrastructure/scripts/cassandra_schemas/run_cassandra_schemas
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-cassandra-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/cassandra
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/cassandra.monit
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/cassandra_cluster_manager
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/cassandra_schemas/run_cassandra_schemas
+%ghost /etc/monit/conf.d/clearwater-cassandra.monit
 
 %files -n clearwater-node-cassandra
 /usr/share/clearwater/node_type.d/90_cassandra

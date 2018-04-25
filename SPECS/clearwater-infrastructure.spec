@@ -150,6 +150,7 @@ Clearwater Dime node
 
 %build
 # CentOS's virtualenv has an old and broken version of easy_install (setuptools)
+sed --in-place 's/${ENV_DIR}\/bin\/easy_install distribute//g' clearwater-infrastructure/PyZMQ/Makefile
 sed --in-place 's/easy_install/pip install/g' clearwater-infrastructure/PyZMQ/Makefile
 
 make MAKE="make --jobs=$(nproc)"
@@ -164,7 +165,7 @@ mkdir --parents %{buildroot}/usr/share/clearwater/bin/
 mkdir --parents %{buildroot}/usr/share/clearwater/infrastructure/.wheelhouse/
 cp --recursive clearwater-infrastructure/etc/* %{buildroot}/etc/
 cp --recursive clearwater-infrastructure/usr/* %{buildroot}/usr/
-install --mode=755 debian/clearwater-infrastructure.init.d %{buildroot}%{_initrddir}/clearwater-infrastructure
+cp debian/clearwater-infrastructure.init.d %{buildroot}%{_initrddir}/clearwater-infrastructure
 cp --recursive clearwater-infrastructure/PyZMQ/eggs/pyzmq* %{buildroot}/usr/share/clearwater/infrastructure/eggs/
 cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/bin/
 cp build/bin/ipv6-to-hostname %{buildroot}/usr/share/clearwater/bin/
@@ -177,9 +178,9 @@ sed --in-place 's/\/wheelhouse\//\/.wheelhouse\//g' %{buildroot}/usr/share/clear
 
 # See: debian/clearwater-memcached.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
-install --mode=755 debian/clearwater-memcached.init.d %{buildroot}%{_initrddir}/clearwater-memcached
+cp debian/clearwater-memcached.init.d %{buildroot}%{_initrddir}/clearwater-memcached
 cp --recursive clearwater-memcached/* %{buildroot}/
-sed --in-place s/invoke-rc.d/service/g %{buildroot}/usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst # patch
+sed --in-place 's/invoke-rc.d/service/g' %{buildroot}/usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst # patch
 cp modules/clearwater-etcd-plugins/clearwater_memcached/memcached_plugin.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
 cp modules/clearwater-etcd-plugins/clearwater_memcached/memcached_utils.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
 touch %{buildroot}/etc/memcached.conf # missing!
@@ -188,14 +189,14 @@ touch %{buildroot}/etc/memcached.conf # missing!
 cp --recursive clearwater-tcp-scalability/* %{buildroot}/
 
 # See: debian/clearwater-secure-connections.install
-install --mode=755 debian/clearwater-secure-connections.init.d %{buildroot}%{_initrddir}/clearwater-secure-connections
+cp debian/clearwater-secure-connections.init.d %{buildroot}%{_initrddir}/clearwater-secure-connections
 cp --recursive clearwater-secure-connections/* %{buildroot}/
 
 # See: debian/clearwater-snmpd.install
 cp --recursive clearwater-snmpd/* %{buildroot}/
 
 # See: debian/clearwater-diags-monitor.install
-install --mode=755 debian/clearwater-diags-monitor.init.d %{buildroot}%{_initrddir}/clearwater-diags-monitor
+cp debian/clearwater-diags-monitor.init.d %{buildroot}%{_initrddir}/clearwater-diags-monitor
 cp --recursive clearwater-diags-monitor/* %{buildroot}/
 
 # See: debian/clearwater-socket-factory.install
@@ -215,20 +216,20 @@ cp debian/clearwater-socket-factory-sig.service %{buildroot}%{_unitdir}/
 
 # See: debian/clearwater-auto-config-aws.install
 mkdir --parents %{buildroot}/usr/share/clearwater-auto-config/bin/
-install --mode=755 debian/clearwater-auto-config-aws.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-aws
+cp debian/clearwater-auto-config-aws.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-aws
 cp --recursive clearwater-auto-config/* %{buildroot}/
 cp clearwater-infrastructure/usr/share/clearwater/infrastructure/install/common %{buildroot}/usr/share/clearwater-auto-config/bin/
 
 # See: debian/clearwater-auto-config-docker.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
-install --mode=755 debian/clearwater-auto-config-docker.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-docker
+cp debian/clearwater-auto-config-docker.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-docker
 cp --recursive clearwater-auto-config/* %{buildroot}/
 cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
 cp build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/clearwater-auto-config-docker/bin/
 
 # See: debian/clearwater-auto-config-generic.install
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
-install --mode=755 debian/clearwater-auto-config-generic.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-generic
+cp debian/clearwater-auto-config-generic.init.d %{buildroot}%{_initrddir}/clearwater-auto-config-generic
 cp --recursive clearwater-auto-config/* %{buildroot}/
 cp build/bin/bracket-ipv6-address %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
 cp build/bin/is-address-ipv6 %{buildroot}/usr/share/clearwater/clearwater-auto-config-generic/bin/
@@ -238,7 +239,7 @@ cp clearwater-infrastructure/usr/share/clearwater/infrastructure/install/common 
 cp --recursive clearwater-log-cleanup/* %{buildroot}/
 
 # See: clearwater-auto-upgrade
-install --mode=755 debian/clearwater-auto-upgrade.init.d %{buildroot}%{_initrddir}/clearwater-auto-upgrade
+cp debian/clearwater-auto-upgrade.init.d %{buildroot}%{_initrddir}/clearwater-auto-upgrade
 
 # See: debian/clearwater-radius-auth.install
 cp --recursive clearwater-radius-auth/* %{buildroot}/
@@ -249,122 +250,125 @@ cp --recursive vellum/* %{buildroot}/
 # See: debian/dime.install
 cp --recursive dime/* %{buildroot}/
 
-# TODO: /usr/share/clearwater/bin/clearwater-version is Debian-specific
-
 %files
 %{_initrddir}/clearwater-infrastructure
-/usr/bin/clearwater-upgrade
-/usr/share/clearwater/bin/alarms.py
-/usr/share/clearwater/bin/clearwater-check-config
-/usr/share/clearwater/bin/ent_log.py
-/usr/share/clearwater/bin/reload_fallback_ifcs_xml
-/usr/share/clearwater/bin/clearwater-version
-/usr/share/clearwater/bin/poll-sip
-/usr/share/clearwater/bin/restart_node_processes
-/usr/share/clearwater/bin/check-uptime
-/usr/share/clearwater/bin/generic_create_diameterconf
-/usr/share/clearwater/bin/poll-http
-/usr/share/clearwater/bin/clearwater-show-config
-/usr/share/clearwater/bin/reload_dns_json
-/usr/share/clearwater/bin/sync_alarms.py
-/usr/share/clearwater/bin/process-stability
-/usr/share/clearwater/bin/reload_shared_ifcs_xml
-/usr/share/clearwater/bin/run-in-signaling-namespace
-/usr/share/clearwater/bin/poll-tcp
-/usr/share/clearwater/bin/cw-flag
-/usr/share/clearwater/bin/stop_or_abort
-/usr/share/clearwater/bin/set_ntp_server
+%attr(755,-,-) /usr/bin/clearwater-upgrade
+%attr(755,-,-) /usr/share/clearwater/bin/alarms.py
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-check-config
+%attr(755,-,-) /usr/share/clearwater/bin/ent_log.py
+%attr(755,-,-) /usr/share/clearwater/bin/reload_fallback_ifcs_xml
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-version
+%attr(755,-,-) /usr/share/clearwater/bin/poll-sip
+%attr(755,-,-) /usr/share/clearwater/bin/restart_node_processes
+%attr(755,-,-) /usr/share/clearwater/bin/check-uptime
+%attr(755,-,-) /usr/share/clearwater/bin/generic_create_diameterconf
+%attr(755,-,-) /usr/share/clearwater/bin/poll-http
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-show-config
+%attr(755,-,-) /usr/share/clearwater/bin/reload_dns_json
+%attr(755,-,-) /usr/share/clearwater/bin/sync_alarms.py
+%attr(755,-,-) /usr/share/clearwater/bin/process-stability
+%attr(755,-,-) /usr/share/clearwater/bin/reload_shared_ifcs_xml
+%attr(755,-,-) /usr/share/clearwater/bin/run-in-signaling-namespace
+%attr(755,-,-) /usr/share/clearwater/bin/poll-tcp
+%attr(755,-,-) /usr/share/clearwater/bin/cw-flag
+%attr(755,-,-) /usr/share/clearwater/bin/stop_or_abort
+%attr(755,-,-) /usr/share/clearwater/bin/set_ntp_server
 /usr/share/clearwater/infrastructure/bin/bash.bashrc
-/usr/share/clearwater/infrastructure/bin/set_snmp_community
-/usr/share/clearwater/infrastructure/bin/set_log_level
-/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.prerm
-/usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
+%attr(755,-,-) /usr/share/clearwater/infrastructure/bin/set_snmp_community
+%attr(755,-,-) /usr/share/clearwater/infrastructure/bin/set_log_level
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-infrastructure.prerm
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-infrastructure.postinst
 /usr/share/clearwater/infrastructure/install/common
-/usr/share/clearwater/infrastructure/migration-utils/migrate_local_config
-/usr/share/clearwater/infrastructure/migration-utils/switch_to_migrated_config
-/usr/share/clearwater/infrastructure/migration-utils/configlint.py*
-/usr/share/clearwater/infrastructure/migration-utils/migrate_shared_config
-/usr/share/clearwater/infrastructure/scripts/namespace
-/usr/share/clearwater/infrastructure/scripts/sas_socket_factory
-/usr/share/clearwater/infrastructure/scripts/1hosts
-/usr/share/clearwater/infrastructure/scripts/hostname
-/usr/share/clearwater/infrastructure/scripts/node_identity
-/usr/share/clearwater/utils/cassandra_enabled
+%attr(755,-,-) /usr/share/clearwater/infrastructure/migration-utils/migrate_local_config
+%attr(755,-,-) /usr/share/clearwater/infrastructure/migration-utils/switch_to_migrated_config
+%attr(755,-,-) /usr/share/clearwater/infrastructure/migration-utils/configlint.py
+/usr/share/clearwater/infrastructure/migration-utils/configlint.pyc
+/usr/share/clearwater/infrastructure/migration-utils/configlint.pyo
+%attr(755,-,-) /usr/share/clearwater/infrastructure/migration-utils/migrate_shared_config
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/namespace
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/sas_socket_factory
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/1hosts
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/hostname
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/node_identity
+%attr(755,-,-) /usr/share/clearwater/utils/cassandra_enabled
 /usr/share/clearwater/utils/logging.bash
-/usr/share/clearwater/utils/check-root-permissions
+%attr(755,-,-) /usr/share/clearwater/utils/check-root-permissions
 /usr/share/clearwater/utils/init-utils.bash
 /usr/share/clearwater/infrastructure/eggs/
-/usr/share/clearwater/bin/bracket-ipv6-address
-/usr/share/clearwater/bin/ipv6-to-hostname
-/usr/share/clearwater/bin/is-address-ipv6
-/usr/share/clearwater/bin/issue-alarm
+%attr(755,-,-) /usr/share/clearwater/bin/bracket-ipv6-address
+%attr(755,-,-) /usr/share/clearwater/bin/ipv6-to-hostname
+%attr(755,-,-) /usr/share/clearwater/bin/is-address-ipv6
+%attr(755,-,-) /usr/share/clearwater/bin/issue-alarm
 /usr/share/clearwater/infrastructure/.wheelhouse/
 /etc/dnsmasq.d/dnsmasq.clearwater.conf
-/etc/monit/run_logged
+%attr(755,-,-) /etc/monit/run_logged
 /etc/monit/conf.d/node.monit
 %ghost /etc/clearwater/config
 
 %files -n clearwater-memcached
 %{_initrddir}/clearwater-memcached
-/usr/share/clearwater/bin/poll_memcached.sh
-/usr/share/clearwater/bin/reload_memcached_users
+%attr(755,-,-) /usr/share/clearwater/bin/poll_memcached.sh
+%attr(755,-,-) /usr/share/clearwater/bin/reload_memcached_users
 /usr/share/clearwater/infrastructure/alarms/memcached_alarms.json
 /usr/share/clearwater/infrastructure/conf/memcached_11211.monit
-/usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst
-/usr/share/clearwater/infrastructure/install/clearwater-memcached.prerm
-/usr/share/clearwater/infrastructure/monit_uptime/check-memcached-uptime
-/usr/share/clearwater/infrastructure/scripts/memcached
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-memcached.prerm
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-memcached-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/memcached
 /usr/share/clearwater/clearwater-cluster-manager/plugins/memcached_plugin.py*
 /usr/share/clearwater/clearwater-cluster-manager/plugins/memcached_utils.py*
 /etc/clearwater/secure-connections/memcached.conf
 /etc/memcached.conf
+%ghost /etc/monit/conf.d/memcached_11211.monit
 
 %files -n clearwater-tcp-scalability
-/usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.postinst
-/usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.prerm
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.postinst
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-tcp-scalability.prerm
 /etc/sysctl.conf.clearwater
 
 %files -n clearwater-secure-connections
 %{_initrddir}/clearwater-secure-connections
-/usr/share/clearwater/infrastructure/install/clearwater-secure-connections.postinst
-/usr/share/clearwater/infrastructure/install/clearwater-secure-connections.prerm
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.postinst
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-secure-connections.prerm
 /etc/clearwater/secure-connections/plain-local.conf
 /etc/racoon/racoon.conf.clearwater-secure-connections
 
 %files -n clearwater-snmpd
 /usr/share/clearwater/conf/snmpd.monit
-/usr/share/clearwater/infrastructure/install/clearwater-snmpd.postinst
-/usr/share/clearwater/infrastructure/install/clearwater-snmpd.prerm
-/usr/share/clearwater/infrastructure/scripts/snmpd
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-snmpd.postinst
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-snmpd.prerm
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/snmpd
 /etc/snmp/snmpd.conf.clearwater-snmpd
+%ghost /etc/monit/conf.d/snmpd.monit
 
 %files -n clearwater-diags-monitor
 %{_initrddir}/clearwater-diags-monitor
-/usr/share/clearwater/bin/clearwater_diags_monitor
-/usr/share/clearwater/bin/compress_core_file
-/usr/share/clearwater/bin/gather_diags
-/usr/share/clearwater/bin/gather_diags_and_report_location
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater_diags_monitor
+%attr(755,-,-) /usr/share/clearwater/bin/compress_core_file
+%attr(755,-,-) /usr/share/clearwater/bin/gather_diags
+%attr(755,-,-) /usr/share/clearwater/bin/gather_diags_and_report_location
 /usr/share/clearwater/clearwater-diags-monitor/conf/clearwater-diags-monitor.monit
-/usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.postinst
-/usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.prerm
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.postinst
+%attr(755,-,-) /usr/share/clearwater/infrastructure/install/clearwater-diags-monitor.prerm
 /etc/clearwater/diags-monitor/core_pattern
-/etc/cron.d/clearwater-iotop
-/etc/cron.d/clearwater-sysstat
+%attr(755,-,-) /etc/cron.d/clearwater-iotop
+%attr(755,-,-) /etc/cron.d/clearwater-sysstat
 /etc/logrotate.d/clearwater-diags-monitor
 /etc/logrotate.d/clearwater-iotop
 %ghost /etc/clearwater/diags-monitor/sysstat.old
+%ghost /etc/monit/conf.d/clearwater-diags-monitor.monit
 
 %files -n clearwater-socket-factory
-%{_unitdir}/clearwater-socket-factory-mgmt.service
-%{_unitdir}/clearwater-socket-factory-sig.service
-/usr/share/clearwater/bin/clearwater_socket_factory
-/usr/share/clearwater/bin/clearwater-socket-factory-common
-/usr/share/clearwater/bin/clearwater-socket-factory-mgmt-wrapper
-/usr/share/clearwater/bin/clearwater-socket-factory-sig-wrapper
+%attr(644,-,-) %{_unitdir}/clearwater-socket-factory-mgmt.service
+%attr(644,-,-) %{_unitdir}/clearwater-socket-factory-sig.service
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater_socket_factory
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-socket-factory-common
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-socket-factory-mgmt-wrapper
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-socket-factory-sig-wrapper
 
 %files -n clearwater-auto-config-aws
 %{_initrddir}/clearwater-auto-config-aws
-/usr/share/clearwater-auto-config/bin/init-functions
+%attr(755,-,-) /usr/share/clearwater-auto-config/bin/init-functions
 /usr/share/clearwater-auto-config/bin/common
 /etc/clearwater/local_config
 /etc/clearwater/shared_config
@@ -372,30 +376,30 @@ cp --recursive dime/* %{buildroot}/
 %files -n clearwater-auto-config-docker
 %{_initrddir}/clearwater-auto-config-docker
 /usr/share/clearwater-auto-config/bin/init-functions
-/usr/share/clearwater/clearwater-auto-config-docker/bin/bracket-ipv6-address
-/usr/share/clearwater/clearwater-auto-config-docker/bin/is-address-ipv6
+%attr(755,-,-) /usr/share/clearwater/clearwater-auto-config-docker/bin/bracket-ipv6-address
+%attr(755,-,-) /usr/share/clearwater/clearwater-auto-config-docker/bin/is-address-ipv6
 /etc/clearwater/local_config
 /etc/clearwater/shared_config
 
 %files -n clearwater-auto-config-generic
 %{_initrddir}/clearwater-auto-config-generic
 /usr/share/clearwater-auto-config/bin/init-functions
-/usr/share/clearwater/clearwater-auto-config-generic/bin/bracket-ipv6-address
-/usr/share/clearwater/clearwater-auto-config-generic/bin/is-address-ipv6
+%attr(755,-,-) /usr/share/clearwater/clearwater-auto-config-generic/bin/bracket-ipv6-address
+%attr(755,-,-) /usr/share/clearwater/clearwater-auto-config-generic/bin/is-address-ipv6
 /usr/share/clearwater-auto-config/bin/common
 /etc/clearwater/local_config
 /etc/clearwater/shared_config
 
 %files -n clearwater-log-cleanup
-/usr/share/clearwater/bin/log_cleanup.py*
+%attr(755,-,-) /usr/share/clearwater/bin/log_cleanup.py
 
 %files -n clearwater-auto-upgrade
 %{_initrddir}/clearwater-auto-upgrade
 
 %files -n clearwater-radius-auth
-/usr/share/clearwater/infrastructure/scripts/clearwater-radius-auth
-/usr/share/clearwater-radius-auth/bin/disable-radius-authentication
-/usr/share/clearwater-radius-auth/bin/enable-radius-authentication
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/clearwater-radius-auth
+%attr(755,-,-) /usr/share/clearwater-radius-auth/bin/disable-radius-authentication
+%attr(755,-,-) /usr/share/clearwater-radius-auth/bin/enable-radius-authentication
 /etc/libnss-ato.conf.TEMPLATE
 
 %files -n clearwater-node-memcached

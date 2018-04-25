@@ -121,18 +121,18 @@ cp --recursive homestead-prov-cassandra.root/* %{buildroot}/
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/homer.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/homer.sh
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/homestead-prov.service
-install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/homestead-prov.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/homer.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/homer.sh
+cp %{SOURCE4} %{buildroot}%{_unitdir}/homestead-prov.service
+cp %{SOURCE5} %{buildroot}/lib/systemd/scripts/homestead-prov.sh
 
 sed --in-place 's/\/etc\/init.d\/homestead-prov/service homestead-prov/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/homestead-prov.monit
 sed --in-place 's/\/etc\/init.d\/homer/service homer/g' %{buildroot}/usr/share/clearwater/homer/templates/homer.monit
 sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{buildroot}/usr/share/clearwater/infrastructure/scripts/homestead-prov.monit
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/homer.init.d %{buildroot}%{_initrddir}/homer
-#install --mode=755 debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
+#cp debian/homer.init.d %{buildroot}%{_initrddir}/homer
+#cp debian/homestead-prov.init.d %{buildroot}%{_initrddir}/homestead-prov
 
 %files
 /usr/share/clearwater/crest/.wheelhouse/
@@ -142,44 +142,43 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 /usr/share/clearwater/crest-prov/
 
 %files -n clearwater-homer
-%{_unitdir}/homer.service
-/lib/systemd/scripts/homer.sh
+%attr(644,-,-) %{_unitdir}/homer.service
+%attr(755,-,-)/lib/systemd/scripts/homer.sh
 /usr/share/clearwater/homer/.wheelhouse/
 /usr/share/clearwater/homer/handlers/
 /usr/share/clearwater/homer/schemas/
 /usr/share/clearwater/homer/src/
 /usr/share/clearwater/homer/templates/homer.monit
-/usr/share/clearwater/bin/poll_homer.sh
-/usr/share/clearwater/clearwater-diags-monitor/scripts/homer_diags
-/usr/share/clearwater/infrastructure/scripts/restart/homer_restart
-/usr/share/clearwater/infrastructure/scripts/create-homer-nginx-config
-/usr/share/clearwater/infrastructure/scripts/homer
+%attr(755,-,-) /usr/share/clearwater/bin/poll_homer.sh
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/homer_diags
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/homer_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/create-homer-nginx-config
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/homer
 /etc/clearwater/secure-connections/homer.conf
-/etc/cron.hourly/homer-log-cleanup
-%config /usr/share/clearwater/homer/templates/local_settings.py
-/usr/share/clearwater/homer/templates/local_settings.pyc
-/usr/share/clearwater/homer/templates/local_settings.pyo
+%attr(755,-,-) /etc/cron.hourly/homer-log-cleanup
+/usr/share/clearwater/homer/templates/local_settings.py*
 
 %files -n clearwater-homer-cassandra
-/usr/share/clearwater/cassandra/users/homer
-/usr/share/clearwater/cassandra-schemas/homer.sh
+%attr(755,-,-) /usr/share/clearwater/cassandra/users/homer
+%attr(755,-,-) /usr/share/clearwater/cassandra-schemas/homer.sh
 
 %files -n clearwater-homestead-prov
-%{_unitdir}/homestead-prov.service
-/lib/systemd/scripts/homestead-prov.sh
+%attr(644,-,-) %{_unitdir}/homestead-prov.service
+%attr(755,-,-) /lib/systemd/scripts/homestead-prov.sh
 /usr/share/clearwater/homestead/
-/usr/share/clearwater/bin/poll_homestead-prov.sh
-/usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_prov_diags
-/usr/share/clearwater/infrastructure/scripts/restart/homestead_prov_restart
-/usr/share/clearwater/infrastructure/scripts/create-homestead-prov-nginx-config
-/usr/share/clearwater/infrastructure/scripts/homestead-prov
-/usr/share/clearwater/infrastructure/scripts/homestead-prov.monit
+%attr(755,-,-) /usr/share/clearwater/bin/poll_homestead-prov.sh
+%attr(755,-,-) /usr/share/clearwater/clearwater-diags-monitor/scripts/homestead_prov_diags
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/homestead_prov_restart
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/create-homestead-prov-nginx-config
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/homestead-prov
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/homestead-prov.monit
 /etc/clearwater/secure-connections/homestead.conf
-/etc/cron.hourly/homestead-prov-log-cleanup
+%attr(755,-,-) /etc/cron.hourly/homestead-prov-log-cleanup
+%ghost /etc/monit/conf.d/homestead-prov.monit
 
 %files -n clearwater-homestead-prov-cassandra
-/usr/share/clearwater/cassandra/users/homestead-prov
-/usr/share/clearwater/cassandra-schemas/homestead_provisioning.sh
+%attr(755,-,-) /usr/share/clearwater/cassandra/users/homestead-prov
+%attr(755,-,-) /usr/share/clearwater/cassandra-schemas/homestead_provisioning.sh
 
 %files -n clearwater-node-homer
 /usr/share/clearwater/node_type.d/20_homer
@@ -242,7 +241,7 @@ cw-start homestead-prov
 %include %{SOURCE1}
 # See: debian/homestead-prov.prerm
 cw-stop homestead-prov
-rm --force /usr/share/clearwater/homestead/local_settings.py
+rm --force /usr/share/clearwater/homestead/local_settings.py*
 %systemd_preun homestead-prov.service
 
 %postun -n clearwater-homestead-prov

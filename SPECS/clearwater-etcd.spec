@@ -100,14 +100,14 @@ cp src/clearwater_etcd_plugins/clearwater_config_access/dns_json_config_plugin.p
 # systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 mkdir --parents %{buildroot}/lib/systemd/scripts/
-install --mode=644 %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-etcd.service
-install --mode=755 %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-etcd.sh
-install --mode=644 %{SOURCE4} %{buildroot}%{_unitdir}/clearwater-cluster-manager.service
-install --mode=755 %{SOURCE5} %{buildroot}/lib/systemd/scripts/clearwater-cluster-manager.sh
-install --mode=644 %{SOURCE6} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
-install --mode=755 %{SOURCE7} %{buildroot}/lib/systemd/scripts/clearwater-queue-manager.sh
-install --mode=644 %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-config-manager.service
-install --mode=755 %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-config-manager.sh
+cp %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-etcd.service
+cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-etcd.sh
+cp %{SOURCE4} %{buildroot}%{_unitdir}/clearwater-cluster-manager.service
+cp %{SOURCE5} %{buildroot}/lib/systemd/scripts/clearwater-cluster-manager.sh
+cp %{SOURCE6} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
+cp %{SOURCE7} %{buildroot}/lib/systemd/scripts/clearwater-queue-manager.sh
+cp %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-config-manager.service
+cp %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-config-manager.sh
 
 sed --in-place 's/\/etc\/init.d\/clearwater-etcd/service clearwater-etcd/g' %{buildroot}/usr/share/clearwater/conf/clearwater-etcd.monit
 sed --in-place 's/\/etc\/init.d\/clearwater-cluster-manager/service clearwater-cluster-manager/g' %{buildroot}/usr/share/clearwater/conf/clearwater-cluster-manager.monit
@@ -119,122 +119,130 @@ sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' 
 #%{buildroot}/usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_memcached_cluster.py
 
 #mkdir --parents %{buildroot}%{_initrddir}/
-#install --mode=755 debian/clearwater-etcd.init.d %{buildroot}%{_initrddir}/clearwater-etcd
-#install --mode=755 debian/clearwater-cluster-manager.init.d %{buildroot}%{_initrddir}/clearwater-cluster-manager
-#install --mode=755 debian/clearwater-queue-manager.init.d %{buildroot}%{_initrddir}/clearwater-queue-manager
-#install --mode=755 debian/clearwater-config-manager.init.d %{buildroot}%{_initrddir}/clearwater-config-manager
+#cp debian/clearwater-etcd.init.d %{buildroot}%{_initrddir}/clearwater-etcd
+#cp debian/clearwater-cluster-manager.init.d %{buildroot}%{_initrddir}/clearwater-cluster-manager
+#cp debian/clearwater-queue-manager.init.d %{buildroot}%{_initrddir}/clearwater-queue-manager
+#cp debian/clearwater-config-manager.init.d %{buildroot}%{_initrddir}/clearwater-config-manager
 
 %files
-%{_unitdir}/clearwater-etcd.service
-/lib/systemd/scripts/clearwater-etcd.sh
+%attr(644,-,-) %{_unitdir}/clearwater-etcd.service
+%attr(755,-,-) /lib/systemd/scripts/clearwater-etcd.sh
 /usr/bin/clearwater-etcdctl
-/usr/share/clearwater/bin/poll_etcd.sh
-/usr/share/clearwater/bin/get_etcd_initial_cluster.py*
-/usr/share/clearwater/bin/poll_etcd_cluster.sh
-/usr/share/clearwater/bin/raise_etcd_cluster_alarm.sh
-/usr/share/clearwater/clearwater-etcd/scripts/save_etcd_config.py*
-/usr/share/clearwater/clearwater-etcd/scripts/wait_for_etcd
-/usr/share/clearwater/clearwater-etcd/scripts/load_etcd_config.py*
-/usr/share/clearwater/clearwater-etcd/scripts/load_etcd_config
-/usr/share/clearwater/clearwater-etcd/scripts/save_etcd_config
-/usr/share/clearwater/clearwater-etcd/2.2.5/etcd-dump-logs
-/usr/share/clearwater/clearwater-etcd/2.2.5/etcdctl
-/usr/share/clearwater/clearwater-etcd/2.2.5/etcdwrapper
-/usr/share/clearwater/clearwater-etcd/2.2.5/etcd
-/usr/share/clearwater/clearwater-etcd/3.1.7/etcd-dump-logs
-/usr/share/clearwater/clearwater-etcd/3.1.7/etcdctl
-/usr/share/clearwater/clearwater-etcd/3.1.7/etcdwrapper
-/usr/share/clearwater/clearwater-etcd/3.1.7/etcd
+%attr(755,-,-) /usr/share/clearwater/bin/poll_etcd.sh
+%attr(755,-,-) /usr/share/clearwater/bin/get_etcd_initial_cluster.py
+%attr(755,-,-) /usr/share/clearwater/bin/poll_etcd_cluster.sh
+%attr(755,-,-) /usr/share/clearwater/bin/raise_etcd_cluster_alarm.sh
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/scripts/save_etcd_config.py
+/usr/share/clearwater/clearwater-etcd/scripts/save_etcd_config.pyc
+/usr/share/clearwater/clearwater-etcd/scripts/save_etcd_config.pyo
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/scripts/wait_for_etcd
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/scripts/load_etcd_config.py
+/usr/share/clearwater/clearwater-etcd/scripts/load_etcd_config.pyc
+/usr/share/clearwater/clearwater-etcd/scripts/load_etcd_config.pyo
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/scripts/load_etcd_config
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/scripts/save_etcd_config
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/2.2.5/etcd-dump-logs
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/2.2.5/etcdctl
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/2.2.5/etcdwrapper
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/2.2.5/etcd
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/3.1.7/etcd-dump-logs
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/3.1.7/etcdctl
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/3.1.7/etcdwrapper
+%attr(755,-,-) /usr/share/clearwater/clearwater-etcd/3.1.7/etcd
 /usr/share/clearwater/infrastructure/alarms/clearwater_etcd_alarms.json
-/usr/share/clearwater/infrastructure/monit_uptime/check-etcd-uptime
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-etcd-uptime
 /usr/share/clearwater/conf/clearwater-etcd.monit
 /etc/logrotate.d/clearwater-etcd
 %ghost /var/lib/clearwater-etcd/
+%ghost /etc/monit/conf.d/clearwater-etcd.monit
 
 %files -n clearwater-cluster-manager
-%{_unitdir}/clearwater-cluster-manager.service
-/lib/systemd/scripts/clearwater-cluster-manager.sh
+%attr(644,-,-) %{_unitdir}/clearwater-cluster-manager.service
+%attr(755,-,-) /lib/systemd/scripts/clearwater-cluster-manager.sh
 /usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/
-/usr/share/clearwater/bin/clearwater-cluster-manager
-/usr/share/clearwater/infrastructure/scripts/restart/clearwater_cluster_manager_restart
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-cluster-manager
+%attr(755,-,-) /usr/share/clearwater/infrastructure/scripts/restart/clearwater_cluster_manager_restart
 /usr/share/clearwater/infrastructure/alarms/clearwater_cluster_manager_alarms.json
-/usr/share/clearwater/clearwater-cluster-manager/scripts/recreate_homestead_cluster
-/usr/share/clearwater/clearwater-cluster-manager/scripts/mark_remote_node_failed
-/usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_chronos_cluster
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/recreate_homestead_cluster
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/mark_remote_node_failed
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_chronos_cluster
 /usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_chronos_cluster.py*
 /usr/share/clearwater/clearwater-cluster-manager/scripts/mark_node_failed.py*
 /usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_cassandra_cluster.py*
-/usr/share/clearwater/clearwater-cluster-manager/scripts/mark_node_failed
-/usr/share/clearwater/clearwater-cluster-manager/scripts/force_etcd_state
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/mark_node_failed
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/force_etcd_state
 /usr/share/clearwater/clearwater-cluster-manager/scripts/recreate_cluster.py*
 /usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_memcached_cluster.py*
-/usr/share/clearwater/clearwater-cluster-manager/scripts/dump_etcd_state
-/usr/share/clearwater/clearwater-cluster-manager/scripts/recreate_sprout_cluster
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/dump_etcd_state
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/recreate_sprout_cluster
 /usr/share/clearwater/clearwater-cluster-manager/scripts/dump_etcd_state.py*
-/usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_memcached_cluster
-/usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_cassandra_cluster
-/usr/share/clearwater/clearwater-cluster-manager/scripts/check_cluster_state
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_memcached_cluster
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/load_from_cassandra_cluster
+%attr(755,-,-) /usr/share/clearwater/clearwater-cluster-manager/scripts/check_cluster_state
 /usr/share/clearwater/clearwater-cluster-manager/scripts/check_cluster_state.py*
 /usr/share/clearwater/clearwater-cluster-manager/scripts/force_etcd_state.py*
 /usr/share/clearwater/conf/clearwater-cluster-manager.monit
 /etc/logrotate.d/clearwater-cluster-manager
-/etc/cron.hourly/clearwater-cluster-manager-log-cleanup
+%attr(755,-,-) /etc/cron.hourly/clearwater-cluster-manager-log-cleanup
 %ghost /usr/share/clearwater/clearwater-cluster-manager/env/
+%ghost /etc/monit/conf.d/clearwater-cluster-manager.monit
 
 %files -n clearwater-queue-manager
-%{_unitdir}/clearwater-queue-manager.service
-/lib/systemd/scripts/clearwater-queue-manager.sh
+%attr(644,-,-) %{_unitdir}/clearwater-queue-manager.service
+%attr(755,-,-) /lib/systemd/scripts/clearwater-queue-manager.sh
 /usr/share/clearwater/clearwater-queue-manager/.wheelhouse/
 /usr/share/clearwater/clearwater-queue-manager/plugins/apply_config_plugin.py*
-/usr/share/clearwater/bin/clearwater-queue-manager
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-queue-manager
 /usr/share/clearwater/infrastructure/alarms/clearwater_queue_manager_alarms.json
-/usr/share/clearwater/infrastructure/monit_uptime/check-queue-manager-uptime
-/usr/share/clearwater/clearwater-queue-manager/scripts/get_apply_config_key
-/usr/share/clearwater/clearwater-queue-manager/scripts/modify_nodes_in_queue
-/usr/share/clearwater/clearwater-queue-manager/scripts/check_restart_queue_state
-/usr/share/clearwater/clearwater-queue-manager/scripts/force_restart_queue_state
+%attr(755,-,-) /usr/share/clearwater/infrastructure/monit_uptime/check-queue-manager-uptime
+%attr(755,-,-) /usr/share/clearwater/clearwater-queue-manager/scripts/get_apply_config_key
+%attr(755,-,-) /usr/share/clearwater/clearwater-queue-manager/scripts/modify_nodes_in_queue
+%attr(755,-,-) /usr/share/clearwater/clearwater-queue-manager/scripts/check_restart_queue_state
+%attr(755,-,-) /usr/share/clearwater/clearwater-queue-manager/scripts/force_restart_queue_state
 /usr/share/clearwater/clearwater-queue-manager/scripts/force_queue_state.py*
 /usr/share/clearwater/clearwater-queue-manager/scripts/check_node_health.py*
 /usr/share/clearwater/clearwater-queue-manager/scripts/check_queue_state.py*
 /usr/share/clearwater/clearwater-queue-manager/scripts/modify_nodes_in_queue.py*
 /usr/share/clearwater/conf/clearwater-queue-manager.monit
-/etc/cron.hourly/clearwater-queue-manager-log-cleanup
+%attr(755,-,-) /etc/cron.hourly/clearwater-queue-manager-log-cleanup
 %ghost /usr/share/clearwater/clearwater-queue-manager/env/
+%ghost /etc/monit/conf.d/clearwater-queue-manager.monit
 
 %files -n clearwater-config-manager
-%{_unitdir}/clearwater-config-manager.service
-/lib/systemd/scripts/clearwater-config-manager.sh
+%attr(644,-,-) %{_unitdir}/clearwater-config-manager.service
+%attr(755,-,-) /lib/systemd/scripts/clearwater-config-manager.sh
 /usr/share/clearwater/clearwater-config-manager/.wheelhouse/
 /usr/share/clearwater/clearwater-config-manager/plugins/shared_config_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/dns_json_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/shared_config_config_plugin.py*
 /usr/share/clearwater/clearwater-config-access/plugins/dns_json_config_plugin.py*
-/usr/share/clearwater/bin/clearwater-config-manager
+%attr(755,-,-) /usr/share/clearwater/bin/clearwater-config-manager
 /usr/share/clearwater/infrastructure/alarms/clearwater_config_manager_alarms.json
-/usr/share/clearwater/clearwater-config-manager/scripts/print-dns-configuration
-/usr/share/clearwater/clearwater-config-manager/scripts/cw-config
-/usr/share/clearwater/clearwater-config-manager/scripts/upload_generic_json
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/print-dns-configuration
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/cw-config
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/upload_generic_json
 /usr/share/clearwater/clearwater-config-manager/scripts/validate_json.py*
 /usr/share/clearwater/clearwater-config-manager/scripts/check_config_sync.py*
-/usr/share/clearwater/clearwater-config-manager/scripts/check_config_sync
-/usr/share/clearwater/clearwater-config-manager/scripts/restore_config
-/usr/share/clearwater/clearwater-config-manager/scripts/backup_config
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/check_config_sync
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/restore_config
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/backup_config
 /usr/share/clearwater/clearwater-config-manager/scripts/config_validation/dns_schema.json
-/usr/share/clearwater/clearwater-config-manager/scripts/print-s-cscf-configuration
-/usr/share/clearwater/clearwater-config-manager/scripts/print-enum-configuration
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/print-s-cscf-configuration
+%attr(755,-,-) /usr/share/clearwater/clearwater-config-manager/scripts/print-enum-configuration
 /usr/share/clearwater/conf/clearwater-config-manager.monit
 /etc/rsyslog.d/35-config-manager.conf
 /etc/logrotate.d/clearwater-config-manager
-/etc/cron.hourly/clearwater-config-manager-log-cleanup
+%attr(755,-,-) /etc/cron.hourly/clearwater-config-manager-log-cleanup
 %ghost /usr/share/clearwater/clearwater-config-manager/env/
+%ghost /etc/monit/conf.d/clearwater-config-manager.monit
 
 %post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-etcd.postinst
 cw-create-user clearwater-etcd
 cw-create-log-dir clearwater-etcd
-mkdir --parents /var/lib/clearwater-etcd
-chown clearwater-etcd /var/lib/clearwater-etcd
+mkdir --parents /var/lib/clearwater-etcd/
+chown --recursive clearwater-etcd /var/lib/clearwater-etcd/
 %systemd_post clearwater-etcd.service
 cw-start clearwater-etcd
 
