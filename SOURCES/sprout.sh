@@ -74,7 +74,7 @@ fi
 
 MMTEL_SERVICES_ENABLED=Y
 
-has-content ()
+has_content ()
 {
  if [ -d "$1" ]; then
    find "$1" -mindepth 1 -print -quit | grep -q .
@@ -84,7 +84,7 @@ has-content ()
 }
 
 # Work out which features are enabled
-if has-content /etc/clearwater/features.d/; then
+if has_content /etc/clearwater/features.d/; then
   for file in $(find /etc/clearwater/features.d/ -type f); do
     [ -r "$file" ] && . "$file"
   done

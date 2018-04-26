@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/clearwater-logging
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 
 %global debug_package %{nil}
 
@@ -56,7 +56,7 @@ touch /var/log/nagios/service-perfdata
 chown nagios:nagios /var/log/nagios/host-perfdata
 chown nagios:nagios /var/log/nagios/service-perfdata
 
-service-action nagios restart
+service_action nagios restart
 
 add_section () {
   local FILE=$1
@@ -96,4 +96,4 @@ remove_section /opt/splunkforwarder/etc/system/local/outputs.conf clearwater-log
 #mv /etc/nagios/clearwater/nagios.cfg.preinst /etc/nagios/nagios.cfg
 #mv /etc/nagios/clearwater/commands.cfg.preinst /etc/nagios/commands.cfg
 
-service-action nagios restart
+service_action nagios restart

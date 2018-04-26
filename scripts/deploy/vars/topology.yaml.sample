@@ -7,7 +7,7 @@ servers:
 
 - type: vellum
   index: 1
-  flavor: 512MB Standard Instance
+  flavor: 1GB Standard Instance
 
 - type: sprout
   index: 1

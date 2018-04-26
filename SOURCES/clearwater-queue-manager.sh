@@ -14,13 +14,13 @@ log_level=3
 log_directory="/var/log/$NAME"
 wait_plugin_complete=Y
 
-has-content ()
+has_content ()
 {
  find "$1" -mindepth 1 -print -quit | grep -q .
  return $?
 }
 
-if has-content /usr/share/clearwater/node_type.d/; then
+if has_content /usr/share/clearwater/node_type.d/; then
   . "/usr/share/clearwater/node_type.d/$(ls /usr/share/clearwater/node_type.d | head -n 1)"
 fi
 
@@ -38,6 +38,5 @@ fi
   --log-directory="$log_directory" \
   --etcd-key="$etcd_key" \
   --node-type="$etcd_cluster_key" \
-  --wait-plugin-complete="$wait_plugin_complete"
+  --wait-plugin-complete="$wait_plugin_complete" \
   --pidfile="$PIDFILE"
-

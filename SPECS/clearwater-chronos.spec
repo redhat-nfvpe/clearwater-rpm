@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/chronos
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       chronos.service
 Source3:       chronos.sh
 
@@ -111,19 +111,19 @@ ln --symbolic /usr/share/clearwater/clearwater-queue-manager/scripts/force_chron
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/upload_chronos_shared_config /usr/bin/cw-upload_chronos_shared_config
 
 # See: debian/chronos.postinst
-cw-create-user chronos
-cw-create-log-dir chronos
+cw_create_user chronos
+cw_create_log_dir chronos
 %systemd_post chronos.service
-cw-start chronos
+cw_activate chronos
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/chronos.prerm
 %systemd_preun chronos.service
-cw-stop chronos
+cw_deactivate chronos
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user chronos
-  cw-remove-log-dir chronos
+  cw_remove_user chronos
+  cw_remove_log_dir chronos
 fi
 
 # See: debian/chronos.links

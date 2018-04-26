@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ellis
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       ellis.service
 Source3:       ellis.sh
 
@@ -168,23 +168,23 @@ systemctl enable mariadb.service
 systemctl start mariadb.service
 mysql -u root --password= < /usr/share/clearwater/ellis/schema.sql
 mysql -u root --password= < /usr/share/clearwater/ellis/apply_db_updates.sql
-cw-create-user ellis
-cw-create-log-dir ellis
-cw-create-virtualenv ellis
+cw_create_user ellis
+cw_create_log_dir ellis
+cw_create_virtualenv ellis
 chown --recursive ellis:root /usr/share/clearwater/ellis/
 %systemd_post ellis.service
-cw-start ellis
+cw_activate ellis
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/ellis.prerm
 %systemd_remove ellis.service
-cw-stop ellis
-cw-remove-virtualenv ellis
+cw_deactivate ellis
+cw_remove_virtualenv ellis
 if [ "$1" = 0 ]; then # Uninstall
   rm --force /tmp/.ellis-sock*
-  cw-remove-user ellis
-  cw-remove-log-dir ellis
+  cw_remove_user ellis
+  cw_remove_log_dir ellis
 fi
 
 %postun
@@ -199,18 +199,18 @@ ln --symbolic /usr/share/clearwater/bin/display_user /usr/bin/cw-display_user
 ln --symbolic /usr/share/clearwater/bin/update_user /usr/bin/cw-update_user
 ln --symbolic /usr/share/clearwater/bin/list_users /usr/bin/cw-list_users
 
-cw-create-user clearwater-prov-tools
-cw-create-log-dir clearwater-prov-tools
-cw-create-virtualenv clearwater-prov-tools
+cw_create_user clearwater-prov-tools
+cw_create_log_dir clearwater-prov-tools
+cw_create_virtualenv clearwater-prov-tools
 chown --recursive clearwater-prov-tools:root /usr/share/clearwater/clearwater-prov-tools/
-service-action clearwater-infrastructure restart
+service_action clearwater-infrastructure restart
 
 %preun -n clearwater-prov-tools -p /bin/bash
 %include %{SOURCE1}
-cw-remove-virtualenv clearwater-prov-tools
+cw_remove_virtualenv clearwater-prov-tools
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user clearwater-prov-tools
-  cw-remove-log-dir clearwater-prov-tools
+  cw_remove_user clearwater-prov-tools
+  cw_remove_log_dir clearwater-prov-tools
 fi
 
 # See: debian/clearwater-prov-tools.links

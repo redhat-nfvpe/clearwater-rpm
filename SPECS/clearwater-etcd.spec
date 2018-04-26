@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/clearwater-etcd
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       clearwater-etcd.service
 Source3:       clearwater-etcd.sh
 Source4:       clearwater-cluster-manager.service
@@ -29,7 +29,6 @@ AutoReq:       no
 
 %package -n clearwater-cluster-manager
 Summary:       Clearwater - Cluster Manager
-#Requires:      clearwater-etcd
 Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
@@ -37,7 +36,6 @@ AutoReq:       no
 
 %package -n clearwater-queue-manager
 Summary:       Clearwater - Queue Manager
-#Requires:      clearwater-etcd
 Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
@@ -45,12 +43,17 @@ AutoReq:       no
 
 %package -n clearwater-config-manager
 Summary:       Clearwater - Config Manager
-#Requires:      clearwater-queue-manager
 Requires:      python-virtualenv libffi
 AutoReq:       no
 %{?systemd_requires}
 #Requires:      python2-pip python2-requests python2-jsonschema
 #Requires:      clearwater-etcd clearwater-queue-manager clearwater-monit
+
+%package -n clearwater-clustering
+Summary:       Clearwater - Clustering
+Requires:      clearwater-etcd clearwater-cluster-manager clearwater-queue-manager
+Requires:      clearwater-config-manager
+AutoReq:       no
 
 %description
 etcd configured for Clearwater
@@ -63,6 +66,9 @@ queue manager
 
 %description -n clearwater-config-manager
 config manager
+
+%description -n clearwater-clustering
+clustering
 
 %prep
 %setup
@@ -242,24 +248,26 @@ sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' 
 %ghost /usr/share/clearwater/clearwater-config-manager/env/
 %ghost /etc/monit/conf.d/clearwater-config-manager.monit
 
+%files -n clearwater-clustering
+
 %post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-etcd.postinst
-cw-create-user clearwater-etcd
-cw-create-log-dir clearwater-etcd
+cw_create_user clearwater-etcd
+cw_create_log_dir clearwater-etcd
 mkdir --parents /var/lib/clearwater-etcd/
 chown --recursive clearwater-etcd /var/lib/clearwater-etcd/
 %systemd_post clearwater-etcd.service
-cw-start clearwater-etcd
+cw_activate clearwater-etcd
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-etcd.prerm
 %systemd_preun clearwater-etcd.service
-cw-stop clearwater-etcd
+cw_deactivate clearwater-etcd
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user clearwater-etcd
-  cw-remove-log-dir clearwater-etcd
+  cw_remove_user clearwater-etcd
+  cw_remove_log_dir clearwater-etcd
 fi
 
 %postun
@@ -272,21 +280,21 @@ ln --symbolic /usr/share/clearwater/clearwater-cluster-manager/scripts/check_clu
 ln --symbolic /usr/share/clearwater/clearwater-cluster-manager/scripts/mark_node_failed /usr/sbin/cw-mark_node_failed
 
 # See: debian/clearwater-cluster-manager.postinst
-cw-create-user clearwater-cluster-manager
-cw-create-log-dir clearwater-cluster-manager adm
-cw-create-virtualenv clearwater-cluster-manager
+cw_create_user clearwater-cluster-manager
+cw_create_log_dir clearwater-cluster-manager adm
+cw_create_virtualenv clearwater-cluster-manager
 %systemd_post clearwater-cluster-manager.service
-cw-start clearwater-cluster-manager
+cw_activate clearwater-cluster-manager
 
 %preun -n clearwater-cluster-manager -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-cluster-manager.prerm
 %systemd_preun clearwater-cluster-manager.service
-cw-stop clearwater-cluster-manager
-cw-remove-virtualenv clearwater-cluster-manager
+cw_deactivate clearwater-cluster-manager
+cw_remove_virtualenv clearwater-cluster-manager
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user clearwater-cluster-manager
-  cw-remove-log-dir clearwater-cluster-manager
+  cw_remove_user clearwater-cluster-manager
+  cw_remove_log_dir clearwater-cluster-manager
 fi
 
 # See: debian/clearwater-cluster-manager.links
@@ -302,21 +310,21 @@ rm --force /usr/sbin/cw-mark_node_failed
 ln --symbolic /usr/share/clearwater/clearwater-queue-manager/scripts/check_restart_queue_state /usr/bin/cw-check_restart_queue_state
 
 # See: debian/clearwater-queue-manager.postinst
-cw-create-user clearwater-queue-manager
-cw-create-log-dir clearwater-queue-manager adm
-cw-create-virtualenv clearwater-queue-manager
+cw_create_user clearwater-queue-manager
+cw_create_log_dir clearwater-queue-manager adm
+cw_create_virtualenv clearwater-queue-manager
 %systemd_post clearwater-queue-manager.service
-cw-start clearwater-queue-manager
+cw_activate clearwater-queue-manager
 
 %preun -n clearwater-queue-manager -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-queue-manager.prerm
 %systemd_preun clearwater-queue-manager.service
-cw-stop clearwater-queue-manager
-cw-remove-virtualenv clearwater-queue-manager
+cw_deactivate clearwater-queue-manager
+cw_remove_virtualenv clearwater-queue-manager
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user clearwater-queue-manager
-  cw-remove-log-dir clearwater-queue-manager
+  cw_remove_user clearwater-queue-manager
+  cw_remove_log_dir clearwater-queue-manager
 fi
 
 # See: debian/clearwater-queue-manager.links
@@ -334,21 +342,21 @@ ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/check_conf
 ln --symbolic /usr/share/clearwater/clearwater-config-manager/scripts/backup_config /usr/sbin/cw-backup_config
 
 # See: debian/clearwater-config-manager.postinst
-cw-create-user clearwater-config-manager
-cw-create-log-dir clearwater-config-manager adm
-cw-create-virtualenv clearwater-config-manager
+cw_create_user clearwater-config-manager
+cw_create_log_dir clearwater-config-manager adm
+cw_create_virtualenv clearwater-config-manager
 %systemd_post clearwater-config-manager.service
-cw-start clearwater-config-manager
+cw_activate clearwater-config-manager
 
 %preun -n clearwater-config-manager -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-config-manager.prerm
 %systemd_preun clearwater-config-manager.service
-cw-stop clearwater-config-manager
-cw-remove-virtualenv clearwater-config-manager
+cw_deactivate clearwater-config-manager
+cw_remove_virtualenv clearwater-config-manager
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user clearwater-config-manager
-  cw-remove-log-dir clearwater-config-manager
+  cw_remove_user clearwater-config-manager
+  cw_remove_log_dir clearwater-config-manager
 fi
 
 # See: debian/clearwater-config-manager.links

@@ -1,55 +1,19 @@
 Utility Packages
 ================
 
-
-### `clearwater-cassandra`
-
-This requires [Cassandra](http://cassandra.apache.org/), which is not included in the CentOS
-repositories. You must thuss add the Cassandra repository for this package to install.
-
-### `clearwater-monit`
-
-Fork of [Monit](https://mmonit.com/monit/) daemon monitor, written in C. The
-[service packages](service-packages.md) as well as many of these utility packages come with monit
-control files, and are "monit aware": if monit is installed, they will delegate service management
-to monit.
-
 ### `clearwater-snmpd`
 
 ### `clearwater-radius-auth`
 
+### `clearwater-provisioning-tools`
 
-Installation
-------------
-
-### `clearwater-infrastructure`
-
-Poorly named. Handles running scripts for deployment-wide installation and upgrading. These scripts
-should all be in `/usr/share/clearwater/infrastructure/scripts/`.
-
-This service generates the `/etc/clearwater/config` script, upon which many components rely.
-
-TODO:
-
-* Many of the scripts are still not fixed for systemd: they try to run non-LSB service commands
-* These included tools are Debian-specific: `clearwater-version`, `clearwater-upgrade`.
-
-### `clearwater-auto-upgrade`
+Provisioning CLI tools.
 
 
 Configuration
 -------------
 
-Tools to configure a cluster of [etcd](https://github.com/coreos/etcd). All of these are written in
-Python 2. Python code accesses cpp-common via CFFI.
-
-### `clearwater-cluster-manager`
-
-### `clearwater-queue-manager`
-
-### `clearwater-config-manager`
-
-### `clearwater-etcd`
+### `clearwater-auto-upgrade`
 
 ### Auto Configuration
 
@@ -104,11 +68,6 @@ Networking
 ### `clearwater-secure-connections`
 
 IPsec support based on [Racoon](http://www.racoon2.wide.ad.jp/w/).
-
-### `clearwater-socket-factory`
-
-These systemd services provide on-demand sockets in other namespaces, specifically the management
-(`clearwater-socket-factory-mgmt`) and signaling (`clearwater-socket-factory-sig`) namespaces.
 
 ### `clearwater-tcp-scalability`
 

@@ -2,9 +2,12 @@ Name:          clearwater-debian
 Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
-Summary:       Clearwater - Debian Support
+
 Source0:       debian.sh
+
+Summary:       Clearwater Debian
 Requires:      dpkg
+AutoReq:       no
 
 # Note: the start-stop-daemon command is in dpkg
 

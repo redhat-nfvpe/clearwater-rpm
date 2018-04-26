@@ -3,6 +3,8 @@
 #
 # For use by %%post and %%preun scriptlets in Clearwater components.
 #
+# (Note the required use of double %% in order to escape them in the RPM spec!)
+#
 
 #set -x
 
@@ -10,34 +12,44 @@ CLEARWATER_HOME=/usr/share/clearwater
 MONIT_CONTROL_FILES=/etc/monit/conf.d
 SECURITY_LIMITS=/etc/security/limits.conf
 
-has-content ()
+has_monit ()
 {
- if [ -d "$1" ]; then
-   find "$1" -mindepth 1 -print -quit | grep -q .
-   return $?
- fi
- return 1
+  test -x /usr/bin/monit
 }
 
-service-action ()
+has_service ()
+{
+  test "$(systemctl status "$1.service" 2> /dev/null)" 
+}
+
+is_service_active ()
+{
+  systemctl is-active "$1.service" > /dev/null 
+}
+
+service_action ()
 {
   local NAME=$1
   local ACTION=$2
 
   local SERVICE="$NAME.service"
 
-  if [ -f /usr/bin/monit ]; then
+  if [ "$ACTION" != enable ] && [ "$ACTION" != disable ] && ! has_service "$NAME"; then
+    return
+  fi
+
+  if has_monit; then
     if [ "$ACTION" = start ]; then
-      # monit will restart it
-      ACTION=stop
+      # It is expected that monit will start it
+      return
     elif [ "$ACTION" = restart ]; then
-      # monit will restart it
+      # It is expected that monit will restart it
       ACTION=stop
     fi
   fi
 
   if [ "$ACTION" = stop ]; then
-    if systemctl --quiet is-active "$SERVICE"; then # no need to stop if already stopped
+    if is_service_active "$SERVICE"; then # no need to stop if already stopped
       systemctl stop "$SERVICE" || /bin/true
     fi
   else 
@@ -45,14 +57,24 @@ service-action ()
   fi
 }
 
-cw-config ()
+has_user ()
 {
-  if [ -f /etc/clearwater/config ]; then
+  getent passwd "$1" > /dev/null
+}
+
+has_content ()
+{
+  test "$(find "$1" -mindepth 1 -maxdepth 1 2> /dev/null)"
+}
+
+cw_config ()
+{
+  if [ -x /etc/clearwater/config ]; then
     . /etc/clearwater/config
   fi
 }
 
-cw-add-security-limits ()
+cw_add_security_limits ()
 {
   # TODO: can't we use /etc/security/limits.d?
   local NAME=$1
@@ -64,7 +86,7 @@ cw-add-security-limits ()
   } >> "$SECURITY_LIMITS"
 }
 
-cw-remove-security-limits ()
+cw_remove_security_limits ()
 {
   local NAME=$1
 
@@ -74,27 +96,27 @@ cw-remove-security-limits ()
   mv "$TMP_FILE" "$SECURITY_LIMITS"
 }
 
-cw-create-user ()
+cw_create_user ()
 {
   local NAME=$1
 
   local HOME_DIR="$CLEARWATER_HOME/$NAME"
 
-  if ! getent passwd "$NAME" &> /dev/null; then
+  if ! has_user "$NAME"; then
     useradd --system --no-create-home --home-dir "$HOME_DIR" --shell /bin/false "$NAME"
   fi
 }
 
-cw-remove-user ()
+cw_remove_user ()
 {
   local NAME=$1
 
-  if getent passwd "$NAME" &> /dev/null; then
+  if has_user "$NAME"; then
     userdel "$NAME"
   fi
 }
 
-cw-create-log-dir ()
+cw_create_log_dir ()
 {
   local NAME=$1
   local GROUP=${2:-root}
@@ -111,7 +133,7 @@ cw-create-log-dir ()
   fi
 }
 
-cw-remove-log-dir ()
+cw_remove_log_dir ()
 {
   local NAME=$1
 
@@ -120,51 +142,84 @@ cw-remove-log-dir ()
   rm --recursive --force "$LOG_DIR"
 }
 
-cw-start ()
+cw_install_monit_control ()
 {
-  local NAME=$1
-
-  local MONIT="/usr/share/clearwater/conf/$NAME.monit"
-  local TEMPLATES="/usr/share/clearwater/$NAME/templates"
-
-  # monit support (optional)
-  if [ -f "$MONIT" ]; then
-    mkdir --parents "$MONIT_CONTROL_FILES/"
-    install --mode=0644 "$MONIT" "$MONIT_CONTROL_FILES/"
-  fi
-  if has-content "$TEMPLATES/"; then
-    cp "$TEMPLATES/"*.monit "$MONIT_CONTROL_FILES/"
-  fi
-
-  service-action clearwater-infrastructure restart # run our restart scripts
-  service-action clearwater-secure-connections reload
-  service-action clearwater-monit reload # read our new monit control files
-  service-action clearwater-cluster-manager start
-  service-action "$NAME" enable
-  service-action "$NAME" start
+  mkdir --parents "$MONIT_CONTROL_FILES/"
+  install --mode=0644 "$1" "$MONIT_CONTROL_FILES/"
+  service_action clearwater-monit reload
 }
 
-cw-stop ()
+cw_update ()
+{
+  # Plugins
+  service_action clearwater-cluster-manager restart
+  service_action clearwater-config-manager restart
+  service_action clearwater-queue-manager restart
+
+  # Other possible changes
+  service_action clearwater-secure-connections reload
+  service_action nginx reload
+}
+
+cw_activate ()
 {
   local NAME=$1
 
-  local TEMPLATES="/usr/share/clearwater/$NAME/templates"
+  local MONIT_CONTROL="$CLEARWATER_HOME/conf/$NAME.monit"
+  local TEMPLATES="$CLEARWATER_HOME/$NAME/templates"
+  local MONIT_SCRIPT="$CLEARWATER_HOME/scripts/$NAME.monit"
+
+  # monit support (optional) can be in three (!) different places
+  if [ -f "$MONIT_CONTROL" ]; then
+    cw_install_monit_control "$MONIT_CONTROL"
+  fi
+  if [ -d "$TEMPLATES" ]; then
+    for F in "$TEMPLATES"/*.monit; do
+      if [ -f "$F" ]; then
+        cw_install_monit_control "$F"
+      fi
+    done
+  fi
+  if [ -x "$MONIT_SCRIPT" ]; then
+    mkdir --parents "$MONIT_CONTROL_FILES/"
+    "$MONIT_SCRIPT"
+    # It is expected that the script create a monit control file and reload monit
+  fi
+  
+  # Run our infrastructure scripts
+  service_action clearwater-infrastructure restart
+
+  cw_update
+
+  service_action "$NAME" enable
+  service_action "$NAME" start
+}
+
+cw_deactivate ()
+{
+  local NAME=$1
+
+  local TEMPLATES="$CLEARWATER_HOME/$NAME/templates"
 
   # monit support (optional)
   rm --force "$MONIT_CONTROL_FILES/$NAME.monit"
   if [ -d "$TEMPLATES" ]; then
     for F in "$TEMPLATES"/*.monit; do
-      rm --force "$MONIT_CONTROL_FILES/$(basename "$F")"
+      if [ -f "$F" ]; then
+        rm "$F"
+        service_action clearwater-monit reload
+      fi
     done
   fi
 
-  rm --force "/usr/share/clearwater/clearwater-cluster-manager/plugins/$NAME"*
+  # Plugins
+  rm --force "$CLEARWATER_HOME/clearwater-cluster-manager/plugins/$NAME"*
+  rm --force "$CLEARWATER_HOME/clearwater-config-manager/plugins/$NAME"*
+  rm --force "$CLEARWATER_HOME/clearwater-queue-manager/plugins/$NAME"*
 
-  service-action nginx reload
-  service-action clearwater-secure-connections reload
-  service-action clearwater-monit reload # forget our monit control files
-  service-action clearwater-cluster-manager stop # monit will restart it if it's installed
-  service-action "$NAME" stop # monit will *not* restart it
+  cw_update
+
+  service_action "$NAME" stop
 }
 
 # TODO: Why does the original Clearwater packaging create the virtualenv during the %%post
@@ -173,7 +228,7 @@ cw-stop ()
 
 # If you use this in %%post you want to set "Requires: python-virtualenv" and also "AutoReq: no" so
 # that rpmbuild won't automatically add an un-fulfillable dependency for our env/bin/python
-cw-create-virtualenv ()
+cw_create_virtualenv ()
 {
   local NAME=$1
   local PACKAGE_NAME=${2:-$NAME}
@@ -191,12 +246,14 @@ cw-create-virtualenv ()
   # wheels, so we have a chicken-and-egg problem with installing our included wheel and pip wheels.
   # For now, let's upgrade pip from the downloaded tarball.
   virtualenv "$ENV_DIR/"
+  
   "$PIP" install --upgrade pip
 
-  cw-add-to-virtualenv "$NAME" "$NAME" "$PACKAGE_NAME"
+  cw_add_to_virtualenv "$NAME" "$NAME" "$PACKAGE_NAME"
+  chown --recursive "$NAME" "$ENV_DIR"
 }
 
-cw-add-to-virtualenv ()
+cw_add_to_virtualenv ()
 {
   local ENV_NAME=$1
   local NAME=$2
@@ -213,7 +270,7 @@ cw-add-to-virtualenv ()
     |& grep --invert-match 'Requirement already satisfied'
 }
 
-cw-remove-virtualenv ()
+cw_remove_virtualenv ()
 {
   local NAME=$1
 

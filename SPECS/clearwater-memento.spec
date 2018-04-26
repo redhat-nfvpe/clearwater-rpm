@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/memento
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       memento.service
 Source3:       memento.sh
 
@@ -138,24 +138,24 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 %include %{SOURCE1}
 # See: debian/memento.postinst
 . /usr/share/clearwater/bin/memento-disk-usage-functions
-cw-create-user memento
-cw-create-log-dir memento
-cw-add-security-limits memtno
+cw_create_user memento
+cw_create_log_dir memento
+cw_add_security_limits memtno
 memento_get_current_use > "$MEMENTO_DISK_USAGE_FILE"
 %systemd_post memento.service
-cw-start memento
+cw_activate memento
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento.prerm
 %systemd_preun astaire.service
 . /usr/share/clearwater/bin/memento-disk-usage-functions
-cw-stop astaire
+cw_deactivate astaire
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user memento
-  cw-remove-log-dir memento
+  cw_remove_user memento
+  cw_remove_log_dir memento
 fi
-cw-remove-security-limits memento
+cw_remove_security_limits memento
 rm --force "$MEMENTO_DISK_USAGE_FILE"
 
 %postun
@@ -164,15 +164,15 @@ rm --force "$MEMENTO_DISK_USAGE_FILE"
 %post nginx -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento-nginx.postinst
-service-action clearwater-infrastructure restart
+service_action clearwater-infrastructure restart
 
 %preun nginx -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento-nginx.prerm
 nginx_dissite memento
-service-action nginx reload
+service_action nginx reload
 
 %post cassandra -p /bin/bash
 %include %{SOURCE1}
 # See: debian/memento-cassandra.postinst
-service-action clearwater-infrastructure restart
+service_action clearwater-infrastructure restart

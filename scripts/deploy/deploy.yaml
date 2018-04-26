@@ -58,9 +58,9 @@
       name: clearwater-infrastructure
       state: present
 
-  - name: Install Clearwater Cluster Manager
+  - name: Install Clearwater Clustering
     yum:
-      name: clearwater-cluster-manager
+      name: clearwater-clustering
       state: present
 
   - name: Install Clearwater Node

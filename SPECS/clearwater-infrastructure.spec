@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https:/github.com/Metaswitch/clearwater-infrastructure
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 
 BuildRequires: make python-virtualenv
 BuildRequires: zeromq-devel boost-devel
@@ -87,7 +87,7 @@ AutoReq:       no
 %package -n clearwater-node-vellum
 Summary:       Clearwater Node - Vellum
 Requires:      clearwater-node-cassandra clearwater-node-memcached clearwater-chronos
-Requires:      clearwater-etcd clearwater-infrastructure
+Requires:      clearwater-infrastructure
 AutoReq:       no
 
 %package -n clearwater-node-dime
@@ -504,14 +504,14 @@ systemctl start sysstat.service
 # See: debian/clearwater-socket-factory.postinst
 %systemd_post socket-factory-mgmt.service
 %systemd_post socket-factory-sig.service
-cw-start clearwater-socket-factory-mgmt
-cw-start clearwater-socket-factory-sig
+cw_activate clearwater-socket-factory-mgmt
+cw_activate clearwater-socket-factory-sig
 
 %preun -n clearwater-socket-factory -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-socket-factory.prerm
-cw-stop clearwater-socket-factory-mgmt
-cw-stop clearwater-socket-factory-sig
+cw_deactivate clearwater-socket-factory-mgmt
+cw_deactivate clearwater-socket-factory-sig
 rm --force /tmp/clearwater_mgmt_namespace_socket
 %systemd_preun socket-factory-mgmt.service
 %systemd_preun socket-factory-sig.service

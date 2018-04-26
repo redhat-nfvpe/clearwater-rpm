@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/crest
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       homer.service
 Source3:       homer.sh
 Source4:       homestead-prov.service
@@ -186,39 +186,39 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 %post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/crest.postinst
-cw-create-virtualenv crest
-service-action clearwater-secure-connections reload
-service-action clearwater-cluster-manager stop
+cw_create_virtualenv crest
+service_action clearwater-secure-connections reload
+service_action clearwater-cluster-manager stop
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/crest.preun
-cw-remove-virtualenv crest
+cw_remove_virtualenv crest
 
 %post prov -p /bin/bash
 %include %{SOURCE1}
 # See: debian/crest-prov.postinst
-cw-create-virtualenv crest-prov crest
+cw_create_virtualenv crest-prov crest
 
 %preun prov -p /bin/bash
 %include %{SOURCE1}
-cw-remove-virtualenv crest-prov
+cw_remove_virtualenv crest-prov
 
 %post -n clearwater-homer -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homer.postinst
 if [ -f /usr/share/clearwater/cassandra-schemas/homer.sh ]; then
-  cw-config
+  cw_config
   /usr/share/clearwater/cassandra-schemas/homer.sh
 fi
-cw-add-to-virtualenv crest homer
+cw_add_to_virtualenv crest homer
 %systemd_post homer.service
-cw-start homer
+cw_activate homer
 
 %preun -n clearwater-homer -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homer.prerm
-cw-stop homer
+cw_deactivate homer
 # TODO: remove from virtualenv?
 %systemd_preun homer.service
 
@@ -228,19 +228,19 @@ cw-stop homer
 %post -n clearwater-homer-cassandra -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homer-cassandra.postinst
-service-action clearwater-infrastructure restart
+service_action clearwater-infrastructure restart
 
 %post -n clearwater-homestead-prov -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homestead-prov.postinst
-cw-add-to-virtualenv crest homestead homestead-prov
+cw_add_to_virtualenv crest homestead homestead-prov
 %systemd_post homestead-prov.service
-cw-start homestead-prov
+cw_activate homestead-prov
 
 %preun -n clearwater-homestead-prov -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homestead-prov.prerm
-cw-stop homestead-prov
+cw_deactivate homestead-prov
 rm --force /usr/share/clearwater/homestead/local_settings.py*
 %systemd_preun homestead-prov.service
 
@@ -250,4 +250,4 @@ rm --force /usr/share/clearwater/homestead/local_settings.py*
 %post -n clearwater-homestead-prov-cassandra -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homestead-prov-cassandra.postinst
-service-action clearwater-infrastructure restart
+service_action clearwater-infrastructure restart

@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/ralf
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       ralf.service
 Source3:       ralf.sh
 
@@ -90,22 +90,22 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 %post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/ralf.postinst
-cw-create-user ralf
-cw-create-log-dir ralf
-cw-add-security-limits ralf
-cw-start ralf
+cw_create_user ralf
+cw_create_log_dir ralf
+cw_add_security_limits ralf
+cw_activate ralf
 %systemd_post ralf.service
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/ralf.prerm
 %systemd_preun ralf.service
-cw-stop ralf
+cw_deactivate ralf
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user ralf
-  cw-remove-log-dir ralf
+  cw_remove_user ralf
+  cw_remove_log_dir ralf
 fi
-cw-remove-security-limits ralf
+cw_remove_security_limits ralf
 rm --force /var/lib/ralf/ralf.conf
 
 %postun

@@ -5,7 +5,7 @@ License:       AGPLv3+
 URL:           https://github.com/Metaswitch/clearwater-nginx
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 
 %global debug_package %{nil}
 
@@ -63,10 +63,10 @@ cd /etc/nginx/ssl/
 openssl req -nodes -sha256 -newkey rsa:2048 -keyout nginx.key -out nginx.csr -config nginx_openssl_config
 openssl x509 -sha256 -req -in nginx.csr -signkey nginx.key -out nginx.crt
 
-cw-start clearwater-nginx
+cw_activate clearwater-nginx
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-nginx.prerm
 nginx_dissite ping
-cw-stop clearwater-nginx
+cw_deactivate clearwater-nginx

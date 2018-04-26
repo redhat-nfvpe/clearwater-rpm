@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/astaire
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       astaire.service
 Source3:       astaire.sh
 Source4:       rogers.service
@@ -118,24 +118,24 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 %post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/astaire.postinst
-cw-create-user astaire
-cw-create-log-dir astaire
-cw-add-security-limits astaire
-#service-action astaire-throttle start
+cw_create_user astaire
+cw_create_log_dir astaire
+cw_add_security_limits astaire
+#service_action astaire-throttle start
 %systemd_post astaire.service
-cw-start astaire
+cw_activate astaire
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/astaire.prerm
 %systemd_preun astaire.service
-cw-stop astaire
-service-action astaire-throttle stop
+cw_deactivate astaire
+service_action astaire-throttle stop
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user astaire
-  cw-remove-log-dir astaire
+  cw_remove_user astaire
+  cw_remove_log_dir astaire
 fi
-cw-remove-security-limits astaire
+cw_remove_security_limits astaire
 
 %postun
 %systemd_postun_with_restart astaire.service
@@ -143,22 +143,22 @@ cw-remove-security-limits astaire
 %post -n clearwater-rogers -p /bin/bash
 %include %{SOURCE1}
 # See: debian/rogers.postinst
-cw-create-user rogers
-cw-create-log-dir rogers
-cw-add-security-limits rogers
+cw_create_user rogers
+cw_create_log_dir rogers
+cw_add_security_limits rogers
 %systemd_post rogers.service
-cw-start rogers
+cw_activate rogers
 
 %preun -n clearwater-rogers -p /bin/bash
 %include %{SOURCE1}
 # See: debian/rogers.prerm
 %systemd_preun rogers.service
-cw-stop rogers stop
+cw_deactivate rogers stop
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user rogers
-  cw-remove-log-dir rogers
+  cw_remove_user rogers
+  cw_remove_log_dir rogers
 fi
-cw-remove-security-limits rogers
+cw_remove_security_limits rogers
 
 %postun -n clearwater-rogers
 %systemd_postun_with_restart rogers.service

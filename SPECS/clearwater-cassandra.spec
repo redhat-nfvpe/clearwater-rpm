@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/clearwater-cassandra
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       clearwater-cassandra.service
 Source3:       clearwater-cassandra.sh
 
@@ -95,13 +95,13 @@ ln --symbolic /usr/share/clearwater/bin/restore_backup.sh /usr/sbin/cw-restore_b
 
 # See: debian/clearwater-cassandra.postinst
 %systemd_post clearwater-cassandra.service
-cw-start clearwater-cassandra
+cw_activate clearwater-cassandra
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/astaire.prerm
 %systemd_preun clearwater-cassandra.service
-cw-stop clearwater-cassandra
+cw_deactivate clearwater-cassandra
 
 # See: debian/clearwater-cassandra.links
 rm --force /usr/bin/cw-do_backup

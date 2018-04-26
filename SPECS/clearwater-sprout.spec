@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/sprout
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       sprout.service
 Source3:       sprout.sh
 Source4:       bono.service
@@ -434,22 +434,22 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 %post -p /bin/bash
 %include %{SOURCE1}
 # See: debian/sprout-base.postinst
-cw-create-user sprout
-cw-create-log-dir sprout
-cw-add-security-limits sprout
+cw_create_user sprout
+cw_create_log_dir sprout
+cw_add_security_limits sprout
 %systemd_post sprout.service
-cw-start sprout
+cw_activate sprout
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/sprout-base.prerm
 %systemd_preun sprout.service
-cw-stop sprout
+cw_deactivate sprout
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user sprout
-  cw-remove-log-dir sprout
+  cw_remove_user sprout
+  cw_remove_log_dir sprout
 fi
-cw-remove-security-limits sprout
+cw_remove_security_limits sprout
 
 %postun
 %systemd_postun_with_restart sprout.service
@@ -457,22 +457,22 @@ cw-remove-security-limits sprout
 %post -n clearwater-bono -p /bin/bash
 %include %{SOURCE1}
 # See: debian/bono.postinst
-cw-create-user bono
-cw-create-log-dir bono
-cw-add-security-limits bono
+cw_create_user bono
+cw_create_log_dir bono
+cw_add_security_limits bono
 %systemd_post bono.service
-cw-start bono
+cw_activate bono
 
 %preun -n clearwater-bono -p /bin/bash
 %include %{SOURCE1}
 # See: debian/bono.prerm
 %systemd_preun bono.service
-cw-stop bono
+cw_deactivate bono
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user bono
-  cw-remove-log-dir bono
+  cw_remove_user bono
+  cw_remove_log_dir bono
 fi
-cw-remove-security-limits bono
+cw_remove_security_limits bono
 
 %postun -n clearwater-bono
 %systemd_postun_with_restart bono.service
@@ -480,22 +480,22 @@ cw-remove-security-limits bono
 %post -n clearwater-restund -p /bin/bash
 %include %{SOURCE1}
 # See: debian/restund.postinst
-cw-create-user restund
-cw-create-log-dir restund
-cw-add-security-limits restund
+cw_create_user restund
+cw_create_log_dir restund
+cw_add_security_limits restund
 %systemd_post restund.service
-cw-start restund
+cw_activate restund
 
 %preun -n clearwater-restund -p /bin/bash
 %include %{SOURCE1}
 # See: debian/restund.prerm
 %systemd_preun restund.service
-cw-stop restund
+cw_deactivate restund
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user restund
-  cw-remove-log-dir restund
+  cw_remove_user restund
+  cw_remove_log_dir restund
 fi
-cw-remove-security-limits restund
+cw_remove_security_limits restund
 
 %postun -n clearwater-restund
 %systemd_postun_with_restart restund.service
@@ -528,7 +528,7 @@ rm --force /usr/bin/cw-upload_bgcf_json
 %include %{SOURCE1}
 # See: debian/clearwater-sip-stress.postinst
 /usr/share/clearwater/infrastructure/scripts/sip-stress
-service-action clearwater-sip-stress start
+service_action clearwater-sip-stress start
 %systemd_post clearwater-sip-stress.service
 
 %preun -n clearwater-sip-stress
@@ -541,7 +541,7 @@ service-action clearwater-sip-stress start
 %include %{SOURCE1}
 # See: debian/clearwater-sip-stress-stats.postinst
 gem install /usr/share/clearwater/gems/clearwater-sipp-stats-1.0.0.gem --no-ri --no-rdoc
-service-action clearwater-sip-stress-stats start
+service_action clearwater-sip-stress-stats start
 %systemd_post clearwater-sip-stress-stats.service
 
 %preun -n clearwater-sip-stress-stats

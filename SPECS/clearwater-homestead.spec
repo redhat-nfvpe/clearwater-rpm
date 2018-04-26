@@ -5,7 +5,7 @@ License:       GPLv3+
 URL:           https://github.com/Metaswitch/homestead
 
 Source0:       %{name}-%{version}.tar.bz2
-Source1:       scriptlet-util.sh
+Source1:       housekeeping.sh
 Source2:       homestead.service
 Source3:       homestead.sh
 
@@ -109,22 +109,22 @@ sed --in-place 's/reload clearwater-monit/service reload clearwater-monit/g' %{b
 %include %{SOURCE1}
 # See: debian/homestead.postinst
 mkdir --parents /var/lib/homestead/
-cw-create-user homestead
-cw-create-log-dir homestead
-cw-add-security-limits homestead
+cw_create_user homestead
+cw_create_log_dir homestead
+cw_add_security_limits homestead
 %systemd_post homestead.service
-cw-start homestead
+cw_activate homestead
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homestead.prerm
 %systemd_preun homestead.service
-cw-stop homestead
+cw_deactivate homestead
 if [ "$1" = 0 ]; then # Uninstall
-  cw-remove-user homestead
-  cw-remove-log-dir homestead
+  cw_remove_user homestead
+  cw_remove_log_dir homestead
 fi
-cw-remove-security-limits homestead
+cw_remove_security_limits homestead
 rm --force /var/lib/homestead/homestead.conf
 
 %postun
@@ -133,4 +133,4 @@ rm --force /var/lib/homestead/homestead.conf
 %post cassandra -p /bin/bash
 %include %{SOURCE1}
 # See: debian/homestead-cassandra.postinst
-service-action clearwater-infrastructure restart
+service_action clearwater-infrastructure restart
