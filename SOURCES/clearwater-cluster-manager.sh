@@ -27,11 +27,7 @@ cluster_manager_enabled=Y
 
 has_content ()
 {
- if [ -d "$1" ]; then
-   find "$1" -mindepth 1 -print -quit | grep -q .
-   return $?
- fi
- return 1
+  test "$(find "$1" -mindepth 1 -maxdepth 1 2> /dev/null)"
 }
 
 if has_content /usr/share/clearwater/node_type.d/; then
@@ -46,16 +42,20 @@ if [ -z "$local_ip" ]; then
 fi
   
 "/usr/share/clearwater/bin/$NAME" \
-  --mgmt-local-ip="${management_local_ip:-$local_ip}" \
-  --sig-local-ip="$local_ip" \
-  --local-site="$local_site_name" \
-  --remote-site="$remote_site_name" \
-  --remote-cassandra-seeds="$remote_cassandra_seeds" \
-  --signaling-namespace="$signaling_namespace" \
-  --uuid="$uuid" \
-  --etcd-key="$etcd_key" \
-  --etcd-cluster-key="$etcd_cluster_key" \
-  --cluster-manager-enabled="$cluster_manager_enabled" \
-  --log-level="$log_level" \
-  --log-directory="$log_directory" \
-  --pidfile="$PIDFILE"
+--mgmt-local-ip="${management_local_ip:-$local_ip}" \
+--sig-local-ip="$local_ip" \
+--local-site="$local_site_name" \
+--remote-site="$remote_site_name" \
+--remote-cassandra-seeds="$remote_cassandra_seeds" \
+--signaling-namespace="$signaling_namespace" \
+--uuid="$uuid" \
+--etcd-key="$etcd_key" \
+--etcd-cluster-key="$etcd_cluster_key" \
+--cluster-manager-enabled="$cluster_manager_enabled" \
+--log-level="$log_level" \
+--log-directory="$log_directory" \
+--pidfile="$PIDFILE"
+
+# Wait for PID file to be written so that systemd doesn't emit the (harmless) warning:
+# "Supervising process which is not our child"
+sleep 2

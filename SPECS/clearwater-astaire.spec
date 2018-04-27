@@ -41,7 +41,7 @@ memcached clustering
 memcached proxy
 
 %prep
-%setup
+%setup -q
 
 %build
 make MAKE="make --jobs=$(nproc)"

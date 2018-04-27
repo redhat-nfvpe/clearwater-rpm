@@ -338,12 +338,12 @@ else
 fi
 
 "/usr/share/clearwater/$NAME/$etcd_version/etcd" \
-  --listen-client-urls http://0.0.0.0:4000 \
-  --advertise-client-urls "http://$advertisement_ip:4000" \
-  --data-dir "$DATA_DIR/$advertisement_ip" \
-  --name "$ETCD_NAME" \
-  --debug \
-  $CLUSTER_ARGS &
+--listen-client-urls http://0.0.0.0:4000 \
+--advertise-client-urls "http://$advertisement_ip:4000" \
+--data-dir "$DATA_DIR/$advertisement_ip" \
+--name "$ETCD_NAME" \
+--debug \
+$CLUSTER_ARGS &
 
 echo $! > "$PIDFILE"
 

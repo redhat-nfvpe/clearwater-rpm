@@ -35,7 +35,7 @@ AutoReq:       no
 
 %package libs
 Summary:       Clearwater - Sprout Libraries
-Requires:      libevent ncurses zeromq net-snmp-libs
+Requires:      libevent ncurses zeromq net-snmp-libs net-snmp-agent-libs
 AutoReq:       no
 
 %package -n clearwater-bono
@@ -165,7 +165,7 @@ Clearwater Sprout node
 Clearwater Bono node
 
 %prep
-%setup
+%setup -q
 
 %build
 # Disable concurrent builds for some modules

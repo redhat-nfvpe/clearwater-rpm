@@ -19,8 +19,8 @@ fi
 
 $namespace_prefix \
 /usr/share/clearwater/crest/env/bin/python \
-  -m metaswitch.crest.main \
-  --worker-processes $(nproc) \
-  $signaling_opt \
-  --log-level $log_level \
-  --background
+-m metaswitch.crest.main \
+--worker-processes $(nproc) \
+$signaling_opt \
+--log-level $log_level \
+--background

@@ -36,7 +36,7 @@ distributed timer service
 Clearwater Chronos node
 
 %prep
-%setup
+%setup -q
 
 %build
 make MAKE="make --jobs=$(nproc)"

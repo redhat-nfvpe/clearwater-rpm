@@ -1,8 +1,9 @@
+# We are unfortunately running as root because we need write access to anywhere under /etc/
+
 [Unit]
 Description=Clearwater Config Manager
 
 [Service]
-User=clearwater-config-manager
 RuntimeDirectory=clearwater-config-manager
 PIDFile=/var/run/clearwater-config-manager/clearwater-config-manager.pid
 WorkingDirectory=/usr/share/clearwater/clearwater-config-manager

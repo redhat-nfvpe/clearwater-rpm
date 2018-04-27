@@ -1,8 +1,9 @@
+# We are unfortunately running as root because we need write access to anywhere under /etc/
+
 [Unit]
 Description=Clearwater Queue Manager
 
 [Service]
-User=clearwater-queue-manager
 RuntimeDirectory=clearwater-queue-manager
 PIDFile=/var/run/clearwater-queue-manager/clearwater-queue-manager.pid
 WorkingDirectory=/usr/share/clearwater/clearwater-queue-manager

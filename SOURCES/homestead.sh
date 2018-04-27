@@ -47,11 +47,7 @@ sprout_http_name="$(/usr/share/clearwater/bin/bracket-ipv6-address "$sprout_host
 
 has_content ()
 {
- if [ -d "$1" ]; then
-   find "$1" -mindepth 1 -print -quit | grep -q .
-   return $?
- fi
- return 1
+  test "$(find "$1" -mindepth 1 -maxdepth 1 2> /dev/null)"
 }
 
 # Work out which features are enabled
@@ -89,43 +85,43 @@ EXTRA_ARGS=
 
 $namespace_prefix \
 "/usr/share/clearwater/bin/$NAME" \
-  --localhost="$local_ip" \
-  --home-domain="$home_domain" \
-  --diameter-conf="/var/lib/$NAME/$NAME.conf" \
-  --dns-server="$signaling_dns_server" \
-  --http="$local_ip" \
-  --http-threads="$num_http_threads" \
-  --cache-threads="$homestead_cache_threads" \
-  "$cassandra_arg" \
-  "$dest_realm" \
-  --dest-host="$hss_hostname" \
-  --hss-peer="$force_hss_peer" \
-  --max-peers="$max_peers" \
-  --server-name="$server_name" \
-  --impu-cache-ttl="$impu_cache_ttl" \
-  --hss-reregistration-time="$hss_reregistration_time" \
-  --reg-max-expires="$reg_max_expires" \
-  --sprout-http-name="$sprout_http_name" \
-  --scheme-unknown="$hss_mar_scheme_unknown" \
-  --scheme-digest="$hss_mar_scheme_digest" \
-  --scheme-akav1="$hss_mar_scheme_akav1" \
-  --scheme-akav2="$hss_mar_scheme_akav2" \
-  "$diameter_timeout_ms_arg" \
-  "$target_latency_us_arg" \
-  "$max_tokens_arg" \
-  "$init_token_rate_arg" \
-  "$min_token_rate_arg" \
-  "$max_token_rate_arg" \
-  "$exception_max_ttl_arg" \
-  "$sas_signaling_if_arg" \
-  "$request_shared_ifcs_arg" \
-  "$impu_store_arg" \
-  "$local_site_name_arg" \
-  --access-log="$log_directory" \
-  --log-file="$log_directory" \
-  --log-level="$log_level" \
-  --sas="$sas_server,$NAME@$public_hostname" \
-   $EXTRA_ARGS \
-  --pidfile="$PIDFILE"
+--localhost="$local_ip" \
+--home-domain="$home_domain" \
+--diameter-conf="/var/lib/$NAME/$NAME.conf" \
+--dns-server="$signaling_dns_server" \
+--http="$local_ip" \
+--http-threads="$num_http_threads" \
+--cache-threads="$homestead_cache_threads" \
+"$cassandra_arg" \
+"$dest_realm" \
+--dest-host="$hss_hostname" \
+--hss-peer="$force_hss_peer" \
+--max-peers="$max_peers" \
+--server-name="$server_name" \
+--impu-cache-ttl="$impu_cache_ttl" \
+--hss-reregistration-time="$hss_reregistration_time" \
+--reg-max-expires="$reg_max_expires" \
+--sprout-http-name="$sprout_http_name" \
+--scheme-unknown="$hss_mar_scheme_unknown" \
+--scheme-digest="$hss_mar_scheme_digest" \
+--scheme-akav1="$hss_mar_scheme_akav1" \
+--scheme-akav2="$hss_mar_scheme_akav2" \
+"$diameter_timeout_ms_arg" \
+"$target_latency_us_arg" \
+"$max_tokens_arg" \
+"$init_token_rate_arg" \
+"$min_token_rate_arg" \
+"$max_token_rate_arg" \
+"$exception_max_ttl_arg" \
+"$sas_signaling_if_arg" \
+"$request_shared_ifcs_arg" \
+"$impu_store_arg" \
+"$local_site_name_arg" \
+--access-log="$log_directory" \
+--log-file="$log_directory" \
+--log-level="$log_level" \
+--sas="$sas_server,$NAME@$public_hostname" \
+ $EXTRA_ARGS \
+--pidfile="$PIDFILE"
 
 # Note: --daemon is supported but not needed here

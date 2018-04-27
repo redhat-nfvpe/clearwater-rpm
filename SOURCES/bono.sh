@@ -39,11 +39,7 @@ IBCF_ENABLED=Y
 
 has_content ()
 {
- if [ -d "$1" ]; then
-   find "$1" -mindepth 1 -print -quit | grep -q .
-   return $?
- fi
- return 1
+  test "$(find "$1" -mindepth 1 -maxdepth 1 2> /dev/null)"
 }
 
 # Work out which features are enabled
@@ -81,27 +77,31 @@ EXTRA_ARGS=
 #/usr/share/clearwater/bin/run-in-signaling-namespace \
 
 "/usr/share/clearwater/bin/$NAME" \
-  --domain="$home_domain" \
-  --localhost="$local_ip,$public_hostname" \
-  --alias="$public_ip,$public_hostname,$bono_alias_list" \
-  --pcscf=5060,5058 \
-  --webrtc-port=5062 \
-  --routing-proxy="$upstream_hostname,$upstream_port,$upstream_connections,$upstream_recycle_connections" \
-  "$ralf_arg" \
-  --sas="$sas_server,$NAME@$public_hostname" \
-  --dns-server="$signaling_dns_server" \
-  --worker-threads="$num_worker_threads" \
-  --analytics="$log_directory" \
-  --log-file="$log_directory" \
-  --log-level="$log_level" \
-  "$target_latency_us_arg" \
-  "$max_tokens_arg" \
-  "$init_token_rate_arg" \
-  "$min_token_rate_arg" \
-  "$ibcf_arg" \
-  "$billing_cdf_arg" \
-  "$exception_max_ttl_arg" \
-  $EXTRA_ARGS \
-  --pidfile="$PIDFILE"
+--domain="$home_domain" \
+--localhost="$local_ip,$public_hostname" \
+--alias="$public_ip,$public_hostname,$bono_alias_list" \
+--pcscf=5060,5058 \
+--webrtc-port=5062 \
+--routing-proxy="$upstream_hostname,$upstream_port,$upstream_connections,$upstream_recycle_connections" \
+"$ralf_arg" \
+--sas="$sas_server,$NAME@$public_hostname" \
+--dns-server="$signaling_dns_server" \
+--worker-threads="$num_worker_threads" \
+--analytics="$log_directory" \
+--log-file="$log_directory" \
+--log-level="$log_level" \
+"$target_latency_us_arg" \
+"$max_tokens_arg" \
+"$init_token_rate_arg" \
+"$min_token_rate_arg" \
+"$ibcf_arg" \
+"$billing_cdf_arg" \
+"$exception_max_ttl_arg" \
+$EXTRA_ARGS \
+--pidfile="$PIDFILE" &
 
-# Note: --daemon is supported but not needed here
+# Note: we will use "&" instead of "--daemon" here because systemd expects a fork
+
+# Wait for PID file to be written so that systemd doesn't emit the (harmless) warning:
+# "Supervising process which is not our child"
+sleep 2

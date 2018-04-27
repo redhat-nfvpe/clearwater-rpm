@@ -22,7 +22,7 @@ AutoReq:       no
 utility for managing and monitoring processes, files, directories, and filesystems
 
 %prep
-%setup
+%setup -q
 
 %build
 ./bootstrap

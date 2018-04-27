@@ -1,4 +1,4 @@
-Name:          clearwater-util
+Name:          clearwater-utils
 Version:       129
 Release:       1%{?dist}
 License:       GPLv3+
@@ -12,8 +12,8 @@ AutoReq:       no
 Debian support
 
 %install
-mkdir --parents %{buildroot}/usr/share/clearwater/util/
-cp %{SOURCE0} %{buildroot}/usr/share/clearwater/util/service.sh
+mkdir --parents %{buildroot}/usr/share/clearwater/utils/
+cp %{SOURCE0} %{buildroot}/usr/share/clearwater/utils/service.sh
 
 %files
-/usr/share/clearwater/util/service.sh
+/usr/share/clearwater/utils/service.sh

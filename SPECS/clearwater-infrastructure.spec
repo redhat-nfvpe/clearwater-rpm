@@ -146,7 +146,7 @@ Clearwater Vellum node
 Clearwater Dime node
 
 %prep
-%setup
+%setup -q
 
 %build
 # CentOS's virtualenv has an old and broken version of easy_install (setuptools)
@@ -180,9 +180,10 @@ sed --in-place 's/\/wheelhouse\//\/.wheelhouse\//g' %{buildroot}/usr/share/clear
 mkdir --parents %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
 cp debian/clearwater-memcached.init.d %{buildroot}%{_initrddir}/clearwater-memcached
 cp --recursive clearwater-memcached/* %{buildroot}/
-sed --in-place 's/invoke-rc.d/service/g' %{buildroot}/usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst # patch
 cp modules/clearwater-etcd-plugins/clearwater_memcached/memcached_plugin.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
 cp modules/clearwater-etcd-plugins/clearwater_memcached/memcached_utils.py %{buildroot}/usr/share/clearwater/clearwater-cluster-manager/plugins/
+
+sed --in-place 's/invoke-rc.d/service/g' %{buildroot}/usr/share/clearwater/infrastructure/install/clearwater-memcached.postinst # patch
 touch %{buildroot}/etc/memcached.conf # missing!
 
 # See: debian/clearwater-tcp-scalability.install
@@ -206,6 +207,7 @@ cp clearwater-socket-factory/clearwater-socket-factory-common %{buildroot}/usr/s
 cp clearwater-socket-factory/clearwater-socket-factory-mgmt-wrapper %{buildroot}/usr/share/clearwater/bin/
 cp clearwater-socket-factory/clearwater-socket-factory-sig-wrapper %{buildroot}/usr/share/clearwater/bin/
 
+# systemd
 mkdir --parents %{buildroot}%{_unitdir}/
 cp debian/clearwater-socket-factory-mgmt.service %{buildroot}%{_unitdir}/
 cp debian/clearwater-socket-factory-sig.service %{buildroot}%{_unitdir}/

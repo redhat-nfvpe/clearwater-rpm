@@ -77,7 +77,7 @@ Commission Cassandra for Homestead Provisioning API
 Clearwater Homer node
 
 %prep
-%setup
+%setup -q
 
 %build
 make env MAKE="make --jobs=$(nproc)"

@@ -18,7 +18,7 @@ AutoReq:       no
 Nginx configured for Clearwater
 
 %prep
-%setup
+%setup -q
 
 %install
 # See: debian/clearwater-nginx.install
@@ -64,9 +64,11 @@ openssl req -nodes -sha256 -newkey rsa:2048 -keyout nginx.key -out nginx.csr -co
 openssl x509 -sha256 -req -in nginx.csr -signkey nginx.key -out nginx.crt
 
 cw_activate clearwater-nginx
+cw_activate nginx
 
 %preun -p /bin/bash
 %include %{SOURCE1}
 # See: debian/clearwater-nginx.prerm
 nginx_dissite ping
+cw_deactivate nginx
 cw_deactivate clearwater-nginx

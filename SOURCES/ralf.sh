@@ -19,11 +19,7 @@ log_level=2
 
 has_content ()
 {
- if [ -d "$1" ]; then
-   find "$1" -mindepth 1 -print -quit | grep -q .
-   return $?
- fi
- return 1
+  test "$(find "$1" -mindepth 1 -maxdepth 1 2> /dev/null)"
 }
 
 # Work out which features are enabled
@@ -65,31 +61,31 @@ EXTRA_ARGS=
 
 $namespace_prefix \
 "/usr/share/clearwater/bin/$NAME" \
-  --localhost="$local_ip" \
-  "$local_site_name_arg" \
-  --http="$local_ip" \
-  --http-threads="$num_http_threads" \
-  --session-stores="$ralf_session_store" \
-  --access-log="$log_directory" \
-  --dns-servers="$signaling_dns_server" \
-  --log-file="$log_directory" \
-  --log-level="$log_level" \
-  "$chronos_hostname_arg" \
-  "$ralf_chronos_callback_uri_arg" \
-  "$ralf_hostname_arg" \
-  "$http_acr_logging_arg" \
-  "$billing_realm_arg" \
-  "$billing_peer_arg" \
-  "$diameter_timeout_ms_arg" \
-  "$target_latency_us_arg" \
-  "$max_tokens_arg" \
-  "$init_token_rate_arg" \
-  "$min_token_rate_arg" \
-  "$max_token_rate_arg" \
-  "$exception_max_ttl_arg" \
-  "$sas_signaling_if_arg" \
-  --sas="$sas_server,$NAME@$public_hostname" \
-  $EXTRA_ARGS \
-  --pidfile="$PIDFILE"
+--localhost="$local_ip" \
+"$local_site_name_arg" \
+--http="$local_ip" \
+--http-threads="$num_http_threads" \
+--session-stores="$ralf_session_store" \
+--access-log="$log_directory" \
+--dns-servers="$signaling_dns_server" \
+--log-file="$log_directory" \
+--log-level="$log_level" \
+"$chronos_hostname_arg" \
+"$ralf_chronos_callback_uri_arg" \
+"$ralf_hostname_arg" \
+"$http_acr_logging_arg" \
+"$billing_realm_arg" \
+"$billing_peer_arg" \
+"$diameter_timeout_ms_arg" \
+"$target_latency_us_arg" \
+"$max_tokens_arg" \
+"$init_token_rate_arg" \
+"$min_token_rate_arg" \
+"$max_token_rate_arg" \
+"$exception_max_ttl_arg" \
+"$sas_signaling_if_arg" \
+--sas="$sas_server,$NAME@$public_hostname" \
+$EXTRA_ARGS \
+--pidfile="$PIDFILE"
 
 # Note: --daemon is supported but not needed here

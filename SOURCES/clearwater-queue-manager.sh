@@ -16,8 +16,7 @@ wait_plugin_complete=Y
 
 has_content ()
 {
- find "$1" -mindepth 1 -print -quit | grep -q .
- return $?
+  test "$(find "$1" -mindepth 1 -maxdepth 1 2> /dev/null)"
 }
 
 if has_content /usr/share/clearwater/node_type.d/; then
@@ -32,11 +31,15 @@ if [ -z "$local_ip" ]; then
 fi
   
 "/usr/share/clearwater/bin/$NAME" \
-  --local-ip="${management_local_ip:-$local_ip}" \
-  --local-site="$local_site_name" \
-  --log-level="$log_level" \
-  --log-directory="$log_directory" \
-  --etcd-key="$etcd_key" \
-  --node-type="$etcd_cluster_key" \
-  --wait-plugin-complete="$wait_plugin_complete" \
-  --pidfile="$PIDFILE"
+--local-ip="${management_local_ip:-$local_ip}" \
+--local-site="$local_site_name" \
+--log-level="$log_level" \
+--log-directory="$log_directory" \
+--etcd-key="$etcd_key" \
+--node-type="$etcd_cluster_key" \
+--wait-plugin-complete="$wait_plugin_complete" \
+--pidfile="$PIDFILE"
+
+# Wait for PID file to be written so that systemd doesn't emit the (harmless) warning:
+# "Supervising process which is not our child"
+sleep 2

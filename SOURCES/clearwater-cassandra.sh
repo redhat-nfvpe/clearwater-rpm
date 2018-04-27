@@ -21,6 +21,6 @@ error_log_f="$cassandra_home/hs_err_$date.log"
 
 $namespace_prefix \
 "/usr/sbin/$NAME"
-  -p "$PIDFILE" \
-  -H "$heap_dump_f" \
-  -E "$error_log_f"
+-p "$PIDFILE" \
+-H "$heap_dump_f" \
+-E "$error_log_f"

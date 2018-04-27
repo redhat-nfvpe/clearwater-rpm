@@ -1,8 +1,9 @@
+# We are unfortunately running as root because we need write access to anywhere under /etc/
+
 [Unit]
 Description=Clearwater Cluster Manager
 
 [Service]
-User=clearwater-cluster-manager
 RuntimeDirectory=clearwater-cluster-manager
 PIDFile=/var/run/clearwater-cluster-manager/clearwater-cluster-manager.pid
 WorkingDirectory=/usr/share/clearwater/clearwater-cluster-manager

@@ -47,7 +47,7 @@ Commission Cassandra for Homestead
 Clearwater Homestead node
 
 %prep
-%setup
+%setup -q
 
 %build
 make MAKE="make --jobs=$(nproc)"

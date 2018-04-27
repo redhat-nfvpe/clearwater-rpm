@@ -21,10 +21,10 @@ service_action ()
 
   local SERVICE="$NAME.service"
 
-  if ! has_service "$SERVICE"; then
+  if [ "$ACTION" != enable ] && [ "$ACTION" != disable ] && ! has_service "$NAME"; then
     return
   fi
-  
+
   if has_monit; then
     if [ "$ACTION" = start ]; then
       # It is expected that monit will start it
@@ -43,3 +43,5 @@ service_action ()
     systemctl "$ACTION" "$SERVICE" || /bin/true
   fi
 }
+
+service_action "$1" "$2"

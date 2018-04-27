@@ -26,11 +26,7 @@ log_level=2
 
 has_content ()
 {
- if [ -d "$1" ]; then
-   find "$1" -mindepth 1 -print -quit | grep -q .
-   return $?
- fi
- return 1
+  test "$(find "$1" -mindepth 1 -maxdepth 1 2> /dev/null)"
 }
 
 # Work out which features are enabled
@@ -57,26 +53,26 @@ EXTRA_ARGS=
 
 $namespace_prefix \
 "/usr/share/clearwater/bin/$NAME" \
-  --localhost "$local_ip" \
-  --http "$local_ip" \
-  --http-threads "$num_http_threads" \
-  --http-worker-threads "$num_http_worker_threads" \
-  --homestead-http-name "$homestead_http_name" \
-  --home-domain "$home_domain" \
-  --access-log "$log_directory" \
-  "$cassandra_arg" \
-  "$astaire_arg" \
-  "$target_latency_us_arg" \
-  "$max_tokens_arg" \
-  "$init_token_rate_arg" \
-  "$min_token_rate_arg" \
-  "$max_token_rate_arg" \
-  "$exception_max_ttl_arg" \
-  --log-file "$log_directory" \
-  --log-level "$log_level" \
-  --sas "$sas_server,$NAME@$public_hostname" \
-  "$api_key_arg" \
-  $EXTRA_ARGS \
-  --pidfile="$PIDFILE"
+--localhost "$local_ip" \
+--http "$local_ip" \
+--http-threads "$num_http_threads" \
+--http-worker-threads "$num_http_worker_threads" \
+--homestead-http-name "$homestead_http_name" \
+--home-domain "$home_domain" \
+--access-log "$log_directory" \
+"$cassandra_arg" \
+"$astaire_arg" \
+"$target_latency_us_arg" \
+"$max_tokens_arg" \
+"$init_token_rate_arg" \
+"$min_token_rate_arg" \
+"$max_token_rate_arg" \
+"$exception_max_ttl_arg" \
+--log-file "$log_directory" \
+--log-level "$log_level" \
+--sas "$sas_server,$NAME@$public_hostname" \
+"$api_key_arg" \
+$EXTRA_ARGS \
+--pidfile="$PIDFILE"
 
 # Note: --daemon is supported but not needed here

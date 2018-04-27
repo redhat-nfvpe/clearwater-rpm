@@ -24,9 +24,13 @@ if [ -z "$local_ip" ]; then
 fi
   
 "/usr/share/clearwater/bin/$NAME" \
-  --local-ip="${management_local_ip:-$local_ip}" \
-  --local-site="$local_site_name" \
-  --log-level="$log_level" \
-  --log-directory="$log_directory" \
-  --etcd-key="$etcd_key" \
-  --pidfile="$PIDFILE"
+--local-ip="${management_local_ip:-$local_ip}" \
+--local-site="$local_site_name" \
+--log-level="$log_level" \
+--log-directory="$log_directory" \
+--etcd-key="$etcd_key" \
+--pidfile="$PIDFILE"
+
+# Wait for PID file to be written so that systemd doesn't emit the (harmless) warning:
+# "Supervising process which is not our child"
+sleep 2

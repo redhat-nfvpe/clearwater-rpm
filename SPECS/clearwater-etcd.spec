@@ -10,10 +10,13 @@ Source2:       clearwater-etcd.service
 Source3:       clearwater-etcd.sh
 Source4:       clearwater-cluster-manager.service
 Source5:       clearwater-cluster-manager.sh
-Source6:       clearwater-queue-manager.service
-Source7:       clearwater-queue-manager.sh
-Source8:       clearwater-config-manager.service
-Source9:       clearwater-config-manager.sh
+Source6:       clearwater-cluster-manager.rules
+Source7:       clearwater-queue-manager.service
+Source8:       clearwater-queue-manager.sh
+Source9:       clearwater-queue-manager.rules
+Source10:      clearwater-config-manager.service
+Source11:      clearwater-config-manager.sh
+Source12:      clearwater-config-manager.rules
 
 BuildRequires: make python-virtualenv gcc-c++ ccache
 BuildRequires: libffi-devel
@@ -71,7 +74,7 @@ config manager
 clustering
 
 %prep
-%setup
+%setup -q
 
 %build
 make env MAKE="make --jobs=$(nproc)"
@@ -116,10 +119,10 @@ cp %{SOURCE2} %{buildroot}%{_unitdir}/clearwater-etcd.service
 cp %{SOURCE3} %{buildroot}/lib/systemd/scripts/clearwater-etcd.sh
 cp %{SOURCE4} %{buildroot}%{_unitdir}/clearwater-cluster-manager.service
 cp %{SOURCE5} %{buildroot}/lib/systemd/scripts/clearwater-cluster-manager.sh
-cp %{SOURCE6} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
-cp %{SOURCE7} %{buildroot}/lib/systemd/scripts/clearwater-queue-manager.sh
-cp %{SOURCE8} %{buildroot}%{_unitdir}/clearwater-config-manager.service
-cp %{SOURCE9} %{buildroot}/lib/systemd/scripts/clearwater-config-manager.sh
+cp %{SOURCE7} %{buildroot}%{_unitdir}/clearwater-queue-manager.service
+cp %{SOURCE8} %{buildroot}/lib/systemd/scripts/clearwater-queue-manager.sh
+cp %{SOURCE10} %{buildroot}%{_unitdir}/clearwater-config-manager.service
+cp %{SOURCE11} %{buildroot}/lib/systemd/scripts/clearwater-config-manager.sh
 
 sed --in-place 's/\/etc\/init.d\/clearwater-etcd/service clearwater-etcd/g' %{buildroot}/usr/share/clearwater/conf/clearwater-etcd.monit
 sed --in-place 's/\/etc\/init.d\/clearwater-cluster-manager/service clearwater-cluster-manager/g' %{buildroot}/usr/share/clearwater/conf/clearwater-cluster-manager.monit
@@ -136,10 +139,16 @@ sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' 
 #cp debian/clearwater-queue-manager.init.d %{buildroot}%{_initrddir}/clearwater-queue-manager
 #cp debian/clearwater-config-manager.init.d %{buildroot}%{_initrddir}/clearwater-config-manager
 
+# polkit
+mkdir --parents %{buildroot}/etc/polkit-1/rules.d/
+cp %{SOURCE6} %{buildroot}/etc/polkit-1/rules.d/99-clearwater-cluster-manager.rules
+cp %{SOURCE9} %{buildroot}/etc/polkit-1/rules.d/99-clearwater-queue-manager.rules
+cp %{SOURCE12} %{buildroot}/etc/polkit-1/rules.d/99-clearwater-config-manager.rules
+
 %files
 %attr(644,-,-) %{_unitdir}/clearwater-etcd.service
 %attr(755,-,-) /lib/systemd/scripts/clearwater-etcd.sh
-/usr/bin/clearwater-etcdctl
+%attr(755,-,-) /usr/bin/clearwater-etcdctl
 %attr(755,-,-) /usr/share/clearwater/bin/poll_etcd.sh
 %attr(755,-,-) /usr/share/clearwater/bin/get_etcd_initial_cluster.py
 %attr(755,-,-) /usr/share/clearwater/bin/poll_etcd_cluster.sh
@@ -170,6 +179,7 @@ sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' 
 
 %files -n clearwater-cluster-manager
 %attr(644,-,-) %{_unitdir}/clearwater-cluster-manager.service
+%attr(644,-,-) /etc/polkit-1/rules.d/99-clearwater-cluster-manager.rules
 %attr(755,-,-) /lib/systemd/scripts/clearwater-cluster-manager.sh
 /usr/share/clearwater/clearwater-cluster-manager/.wheelhouse/
 %attr(755,-,-) /usr/share/clearwater/bin/clearwater-cluster-manager
@@ -202,6 +212,7 @@ sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' 
 %files -n clearwater-queue-manager
 %attr(644,-,-) %{_unitdir}/clearwater-queue-manager.service
 %attr(755,-,-) /lib/systemd/scripts/clearwater-queue-manager.sh
+%attr(644,-,-) /etc/polkit-1/rules.d/99-clearwater-queue-manager.rules
 /usr/share/clearwater/clearwater-queue-manager/.wheelhouse/
 /usr/share/clearwater/clearwater-queue-manager/plugins/apply_config_plugin.py*
 %attr(755,-,-) /usr/share/clearwater/bin/clearwater-queue-manager
@@ -223,6 +234,7 @@ sed --in-place 's/\/etc\/init.d\/chronos/\/lib\/systemd\/scripts\/chronos.sh/g' 
 %files -n clearwater-config-manager
 %attr(644,-,-) %{_unitdir}/clearwater-config-manager.service
 %attr(755,-,-) /lib/systemd/scripts/clearwater-config-manager.sh
+%attr(644,-,-) /etc/polkit-1/rules.d/99-clearwater-config-manager.rules
 /usr/share/clearwater/clearwater-config-manager/.wheelhouse/
 /usr/share/clearwater/clearwater-config-manager/plugins/shared_config_plugin.py*
 /usr/share/clearwater/clearwater-config-manager/plugins/dns_json_plugin.py*

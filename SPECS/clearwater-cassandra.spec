@@ -33,7 +33,7 @@ Cassandra configured for Clearwater
 Clearwater Cassandra node
 
 %prep
-%setup
+%setup -q
 
 %install
 # See: debian/clearwater-cassandra.install

@@ -25,6 +25,7 @@ Note that the services themselves are named without the `clearwater-` prefix. e.
 
 Provides [memcached](https://memcached.org/) clustering with SNMP support. Written in C++.
 
+TODO: fails to start at first
 
 `clearwater-bono`
 -----------------
@@ -36,9 +37,14 @@ different configuration.
 `clearwater-cassandra`
 ----------------------
 
+Used for Homer and Homestead Provisioning.
+
 This requires [Cassandra](http://cassandra.apache.org/), which is not included in the CentOS
 repositories. You must thus add the Cassandra repository for this package to install.
 
+This service *will not* start unless at lease one Cassandra database needs to be commissioned.
+Scripts to commission Cassandra must be placed in `/usr/share/clearwater/cassandra/users/`.
+This is handled by the `cassandra\_cluster\_manager` script for `clearwater-infrastructure`.
 
 `clearwater-chronos`
 --------------------
@@ -56,12 +62,16 @@ be running these services. The cluster information is stored in etcd.
  
 Each service that needs to make use clustering must install plugins, written in Python, under
 the appropriate directories. These plugins are in charge of reconfiguring and restarting the local
-services accordingly.
+services accordingly. To restart services we need special permissions implemented as 
+[polkit rules](https://www.freedesktop.org/software/polkit/docs/latest/). 
 
 All of these services are written in Python 2. Python code accesses cpp-common via CFFI.
 
 TODO:
 
+* Unfortunately there is no easy way to enable arbitrary user to write to `/etc/`. We can use ACLs,
+  but would have to configure those per plugin and its directory under `/etc/`. So, we have no
+  choice but run these services as root.
 * Many of the plugins are still not fixed for systemd: they try to run non-LSB service commands
 
 ### `clearwater-cluster-manager`
@@ -138,7 +148,8 @@ An HTTP API allows Ellis access to Homestead data. Based on Crest (see helper pa
 ---------------------------
 
 Poorly named. Handles running scripts for deployment-wide installation and upgrading. Such scripts
-should all be in `/usr/share/clearwater/infrastructure/scripts/`.
+should all be in `/usr/share/clearwater/infrastructure/scripts/`. This service and its scripts all
+run as root.
 
 Note that unlike the other services it is *not* a long-running daemon: it must be restarted in order
 to do its work.

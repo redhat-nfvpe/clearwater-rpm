@@ -76,11 +76,7 @@ MMTEL_SERVICES_ENABLED=Y
 
 has_content ()
 {
- if [ -d "$1" ]; then
-   find "$1" -mindepth 1 -print -quit | grep -q .
-   return $?
- fi
- return 1
+  test "$(find "$1" -mindepth 1 -maxdepth 1 2> /dev/null)"
 }
 
 # Work out which features are enabled
@@ -214,58 +210,62 @@ done
 #/usr/share/clearwater/bin/run-in-signaling-namespace \
 
 "/usr/share/clearwater/bin/$NAME" \
-  --domain="$home_domain" \
-  --localhost="$local_ip" \
-  --realm="$home_domain" \
-  "$local_site_name_arg" \
-  --registration-stores="$sprout_registration_store" \
-  "$impi_store_arg" \
-  --hss="$hs_hostname" \
-  --sprout-hostname="$sprout_hostname" \
-  --scscf-node-uri="$scscf_node_uri" \
-  "$chronos_hostname_arg" \
-  "$sprout_chronos_callback_uri_arg" \
-  "$xdms_hostname_arg" \
-  "$ralf_arg" \
-  "$enum_server_arg" \
-  "$enum_suffix_arg" \
-  "$enum_file_arg" \
-  "$default_tel_uri_translation_arg" \
-  --sas="$sas_server,$NAME@$public_hostname" \
-  --dns-server="$signaling_dns_server" \
-  --worker-threads="$num_worker_threads" \
-  --http-threads="$num_http_threads" \
-  --record-routing-model="$sprout_rr_level" \
-  --default-session-expires="$default_session_expires" \
-  "$max_session_expires_arg" \
-  "$target_latency_us_arg" \
-  "$cass_target_latency_us_arg" \
-  "$max_tokens_arg" \
-  "$init_token_rate_arg" \
-  "$min_token_rate_arg" \
-  "$max_token_rate_arg" \
-  "$authentication_arg" \
-  "$user_phone_arg" \
-  "$sas_signaling_if_arg" \
-  "$disable_tcp_switch_arg" \
-  "$apply_fallback_ifcs_arg" \
-  "$reject_if_no_matching_ifcs_arg" \
-  "$dummy_app_server_arg" \
-  "$http_acr_logging_arg" \
-  "$global_only_lookups_arg" \
-  "$override_npdi_arg" \
-  "$exception_max_ttl_arg" \
-  "$force_3pr_body_arg" \
-  "$enable_orig_sip_to_tel_coerce_arg" \
-  "$request_on_queue_timeout_arg" \
-  --http-address="$local_ip" \
-  --http-port=9888 \
-  --analytics="$log_directory" \
-  --log-file="$log_directory" \
-  --log-level="$log_level" \
-  --alias="$public_ip,$public_hostname,$alias_list" \
-  --homestead-timeout="$sprout_homestead_timeout_ms" \
-  $EXTRA_ARGS \
-  --pidfile="$PIDFILE"
+--domain="$home_domain" \
+--localhost="$local_ip" \
+--realm="$home_domain" \
+"$local_site_name_arg" \
+--registration-stores="$sprout_registration_store" \
+"$impi_store_arg" \
+--hss="$hs_hostname" \
+--sprout-hostname="$sprout_hostname" \
+--scscf-node-uri="$scscf_node_uri" \
+"$chronos_hostname_arg" \
+"$sprout_chronos_callback_uri_arg" \
+"$xdms_hostname_arg" \
+"$ralf_arg" \
+"$enum_server_arg" \
+"$enum_suffix_arg" \
+"$enum_file_arg" \
+"$default_tel_uri_translation_arg" \
+--sas="$sas_server,$NAME@$public_hostname" \
+--dns-server="$signaling_dns_server" \
+--worker-threads="$num_worker_threads" \
+--http-threads="$num_http_threads" \
+--record-routing-model="$sprout_rr_level" \
+--default-session-expires="$default_session_expires" \
+"$max_session_expires_arg" \
+"$target_latency_us_arg" \
+"$cass_target_latency_us_arg" \
+"$max_tokens_arg" \
+"$init_token_rate_arg" \
+"$min_token_rate_arg" \
+"$max_token_rate_arg" \
+"$authentication_arg" \
+"$user_phone_arg" \
+"$sas_signaling_if_arg" \
+"$disable_tcp_switch_arg" \
+"$apply_fallback_ifcs_arg" \
+"$reject_if_no_matching_ifcs_arg" \
+"$dummy_app_server_arg" \
+"$http_acr_logging_arg" \
+"$global_only_lookups_arg" \
+"$override_npdi_arg" \
+"$exception_max_ttl_arg" \
+"$force_3pr_body_arg" \
+"$enable_orig_sip_to_tel_coerce_arg" \
+"$request_on_queue_timeout_arg" \
+--http-address="$local_ip" \
+--http-port=9888 \
+--analytics="$log_directory" \
+--log-file="$log_directory" \
+--log-level="$log_level" \
+--alias="$public_ip,$public_hostname,$alias_list" \
+--homestead-timeout="$sprout_homestead_timeout_ms" \
+$EXTRA_ARGS \
+--pidfile="$PIDFILE" &
 
-# Note: --daemon is supported but not needed here
+# Note: we will use "&" instead of "--daemon" here because systemd expects a fork
+
+# Wait for PID file to be written so that systemd doesn't emit the (harmless) warning:
+# "Supervising process which is not our child"
+sleep 2

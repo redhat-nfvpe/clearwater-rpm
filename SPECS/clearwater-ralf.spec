@@ -37,7 +37,7 @@ CTF
 Clearwater Ralf node
 
 %prep
-%setup
+%setup -q
 
 %build
 make MAKE="make --jobs=$(nproc)"

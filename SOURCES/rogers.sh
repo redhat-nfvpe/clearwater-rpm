@@ -18,9 +18,13 @@ fi
 
 $namespace_prefix \
 "/usr/share/clearwater/bin/$NAME" \
-  --cluster-settings-file=/etc/clearwater/cluster_settings \
-  --log-file="/var/log/$NAME" \
-  --log-level="$log_level" \
-  --pidfile="$PIDFILE"
+--cluster-settings-file=/etc/clearwater/cluster_settings \
+--log-file="/var/log/$NAME" \
+--log-level="$log_level" \
+--pidfile="$PIDFILE" &
 
-# Note: --daemon is supported but not needed here
+# Note: we will use "&" instead of "--daemon" here because systemd expects a fork
+
+# Wait for PID file to be written so that systemd doesn't emit the (harmless) warning:
+# "Supervising process which is not our child"
+sleep 2

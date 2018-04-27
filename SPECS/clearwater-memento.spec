@@ -57,7 +57,7 @@ Commission Cassandra for Memento
 Clearwater Memento node
 
 %prep
-%setup
+%setup -q
 
 %build
 # Disable concurrent builds for non-supporting modules

@@ -43,7 +43,7 @@ provisioning tools
 Clearwater Ellis node
 
 %prep
-%setup
+%setup -q
 
 %build
 make env MAKE="make --jobs=$(nproc)"

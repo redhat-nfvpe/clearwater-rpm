@@ -18,7 +18,7 @@ AutoReq:       no
 Common logging infrastructure
 
 %prep
-%setup
+%setup -q
 
 %install
 # See: debian/clearwater-logging.install
